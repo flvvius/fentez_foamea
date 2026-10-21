@@ -5,41 +5,28 @@ import type { PlacedOffer } from "./explore";
 type Props = {
   offer: PlacedOffer;
   now: Date;
-  highlighted: boolean;
   onShowVenue: (venueId: string) => void;
 };
 
-export function OfferCard({ offer, now, highlighted, onShowVenue }: Readonly<Props>) {
+export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
   const closesIn = offer.pickupEnd ? minutesUntil(offer.pickupEnd, now) : null;
   const pickupStarted = offer.pickupStart ? new Date(offer.pickupStart) <= now : true;
+  const closingSoon = closesIn !== null && closesIn <= 60 && pickupStarted;
   const notToday = offer.daysOfWeek?.length ? !offer.daysOfWeek.includes(bucharestWeekday(now)) : false;
+  const when = schedule(offer);
+  const place = placeNote(offer);
 
   return (
-    <article className={`card ${highlighted ? "card-highlighted" : ""} ${notToday ? "card-off-day" : ""}`}>
-      <div className="tag" data-kind={offer.kind}>
-        {offer.price !== null ? (
-          <>
-            <span className="tag-price">
-              {formatPrice(offer.price)}
-              <small> lei</small>
-            </span>
-            {offer.originalPrice !== null && offer.originalPrice > offer.price && (
-              <s className="tag-was">{formatPrice(offer.originalPrice)} lei</s>
-            )}
-          </>
-        ) : (
-          <span className="tag-price tag-price-text">{OFFER_KIND_LABELS[offer.kind]}</span>
-        )}
-        {offer.discountPct !== null && <span className="tag-off">−{offer.discountPct}%</span>}
-      </div>
+    <article className={`offer ${notToday ? "offer-off-day" : ""}`}>
+      <PriceFigure offer={offer} />
 
-      <div className="min-w-0 flex-1">
-        <p className="eyebrow">
+      <div className="min-w-0">
+        <p className="offer-kind">
           {OFFER_KIND_LABELS[offer.kind]}
-          {offer.deliveryOnly && <span className="chip-mini">doar livrare</span>}
+          {offer.deliveryOnly && " · doar livrare"}
         </p>
-        <h3 className="card-title">{offer.title}</h3>
-        <p className="card-venue">
+        <h3 className="offer-title">{offer.title}</h3>
+        <p className="offer-venue">
           {offer.venueId && offer.venueName ? (
             <button type="button" className="link-quiet" onClick={() => onShowVenue(offer.venueId!)}>
               {offer.venueName}
@@ -47,36 +34,65 @@ export function OfferCard({ offer, now, highlighted, onShowVenue }: Readonly<Pro
           ) : (
             <span>{offer.chain ?? "În toate locațiile"}</span>
           )}
-          {offer.distance !== null && <span className="muted"> · {formatDistance(offer.distance)}</span>}
-          {offer.otherLocations ? <span className="muted"> · și în alte {offer.otherLocations} locații</span> : null}
         </p>
+        {place && <p className="offer-detail muted">{place}</p>}
 
-        {schedule(offer) && (
-          <p className="card-when">
-            {schedule(offer)}
-            {notToday && <span className="off-day"> · nu azi</span>}
+        {when && (
+          <p className="offer-detail">
+            {when}
+            {notToday && <span className="muted"> · nu azi</span>}
           </p>
         )}
-        {offer.conditions && <p className="card-conditions">{offer.conditions}</p>}
-
         {offer.pickupStart && offer.pickupEnd && (
-          <p className={`card-when ${closesIn !== null && closesIn <= 60 && pickupStarted ? "urgent" : ""}`}>
+          <p className="offer-detail">
             Ridici {formatPickup(offer.pickupStart, offer.pickupEnd, now)}
-            {closesIn !== null && closesIn <= 60 && pickupStarted && <> · mai ai {closesIn} min</>}
+            {closingSoon && <span className="urgent"> · mai ai {closesIn} min</span>}
           </p>
         )}
+        {offer.conditions && <p className="offer-detail offer-conditions">{offer.conditions}</p>}
 
-        <div className="card-foot">
+        <div className="offer-foot">
           {offer.available !== null && offer.available <= 5 && (
             <span className="muted">{offer.available === 1 ? "ultimul" : `mai sunt ${offer.available}`}</span>
           )}
-          <a className="card-link" href={offer.url} target="_blank" rel="noopener noreferrer">
+          <a className="offer-link" href={offer.url} target="_blank" rel="noopener noreferrer">
             Vezi pe {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>
           </a>
         </div>
       </div>
     </article>
   );
+}
+
+function PriceFigure({ offer }: Readonly<{ offer: PlacedOffer }>) {
+  const wasHigher = offer.originalPrice !== null && offer.price !== null && offer.originalPrice > offer.price;
+  return (
+    <p className="figure">
+      {offer.price === null ? (
+        <span className="figure-kind">{OFFER_KIND_LABELS[offer.kind]}</span>
+      ) : (
+        <span className="figure-price">
+          {formatPrice(offer.price)}
+          <span className="figure-unit">lei</span>
+        </span>
+      )}
+      {wasHigher && (
+        <s className="figure-was">
+          <span className="sr-only">înainte </span>
+          {formatPrice(offer.originalPrice!)} lei
+        </s>
+      )}
+      {offer.discountPct !== null && <span className="figure-off">−{offer.discountPct}%</span>}
+    </p>
+  );
+}
+
+function placeNote(offer: PlacedOffer): string | null {
+  const parts = [
+    offer.distance === null ? null : formatDistance(offer.distance),
+    offer.otherLocations ? `și în alte ${offer.otherLocations} locații` : null,
+  ];
+  return parts.filter(Boolean).join(" · ") || null;
 }
 
 function schedule(offer: PlacedOffer): string | null {

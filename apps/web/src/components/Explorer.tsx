@@ -90,7 +90,7 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
         <header className="masthead">
           <p className="brand">fentez foamea</p>
           <h1 className="headline">
-            Mâncare ieftină în București, <em>acum</em>.
+            Mâncare ieftină în București, acum.
           </h1>
           <p className="lede">
             {placed.length} oferte de la restaurante, fast-food-uri și cofetării: pachete salvate de la aruncat, meniuri
@@ -123,7 +123,7 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
           </div>
           <div className="filter-line">
             <label>
-              <span className="sr-only">Distanță</span>
+              <span className="filter-label">Distanță</span>
               <select value={radiusKm ?? ""} onChange={(e) => setRadiusKm(e.target.value ? Number(e.target.value) : null)}>
                 {RADII.map((r) => (
                   <option key={r.label} value={r.km ?? ""}>
@@ -133,7 +133,7 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
               </select>
             </label>
             <label>
-              <span className="sr-only">Sortare</span>
+              <span className="filter-label">Ordine</span>
               <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
                 {SORTS.map((s) => (
                   <option key={s.key} value={s.key}>
@@ -173,7 +173,6 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
                 key={offer.id}
                 offer={offer}
                 now={now}
-                highlighted={offer.venueId === venueId}
                 onShowVenue={showVenue}
               />
             ))
