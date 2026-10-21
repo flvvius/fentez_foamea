@@ -1,5 +1,4 @@
-import "@fontsource-variable/bricolage-grotesque/wdth.css";
-import "@fontsource-variable/figtree";
+import "@fontsource-variable/inter";
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import appCss from "../styles/app.css?url";
 
@@ -14,8 +13,8 @@ export const Route = createRootRoute({
         content:
           "Pachete anti-risipă, meniuri de prânz și reduceri de la restaurante și fast-food-uri din București, pe o singură hartă.",
       },
-      { name: "theme-color", content: "#f2f4f1", media: "(prefers-color-scheme: light)" },
-      { name: "theme-color", content: "#121614", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#fcfcfb", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#0f1015", media: "(prefers-color-scheme: dark)" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

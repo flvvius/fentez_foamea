@@ -1,32 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --font-display: "Bricolage Grotesque Variable", "Arial Narrow", sans-serif;
-  --font-body: "Figtree Variable", system-ui, sans-serif;
-  --paper: #f2f4f1;
-  --surface: #ffffff;
-  --ink: #18201c;
-  --muted: #5f6b64;
-  --line: #d9dfda;
-  --label: #ffd23f;
-  --label-ink: #1b1600;
-  --pepper: #d7262e;
-  --dill: #2f7a3a;
-  --focus: #2457d6;
+  color-scheme: light;
+  --background: oklch(0.99 0.002 80);
+  --foreground: oklch(0.15 0.01 60);
+  --card: oklch(1 0 0);
+  --primary: oklch(0.29 0.015 65);
+  --primary-foreground: oklch(0.98 0.004 80);
+  --muted: oklch(0.955 0.004 80);
+  --muted-foreground: oklch(0.5 0.01 60);
+  --border: oklch(0.91 0.004 80);
+  --input: oklch(0.62 0.008 80);
+  --ring: oklch(0.45 0.015 65);
+  --success: oklch(0.52 0.13 155);
+  --warning-text: oklch(0.46 0.09 75);
+  --destructive: oklch(0.577 0.245 27.325);
+  --deal: oklch(0.55 0.19 32);
+  --origin: oklch(0.55 0.17 255);
+
+  --radius-control: 8px;
+  --radius-media: 10px;
+  --motion-press: 140ms;
+  --motion-swap: 150ms;
+  --motion-pressScale: 0.97;
+  --type-bodyWeb: 1rem;
+  --type-rowTitle: 1.125rem;
+  --type-pageTitle: 2rem;
+  --type-small: 0.875rem;
+  --type-lineHeight: 1.625;
+  --type-descriptionMeasure: 55ch;
+
+  --font-body: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-body);
+  --paper: var(--background);
+  --surface: var(--card);
+  --ink: var(--foreground);
+  --line: var(--border);
+  --label: var(--muted);
+  --label-ink: var(--foreground);
+  --pepper: var(--deal);
+  --dill: var(--success);
+  --focus: var(--ring);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #121614;
-    --surface: #1a201d;
-    --ink: #eef2ef;
-    --muted: #9aa69f;
-    --line: #2b332f;
-    --label: #ffd23f;
-    --label-ink: #1b1600;
-    --pepper: #ff5a5f;
-    --dill: #6fc27a;
-    --focus: #8fb0ff;
+    color-scheme: dark;
+    --background: oklch(0.14 0.008 270);
+    --foreground: oklch(0.93 0.005 80);
+    --card: oklch(0.19 0.008 270);
+    --primary: oklch(0.92 0.005 80);
+    --primary-foreground: oklch(0.16 0.008 270);
+    --muted: oklch(0.24 0.008 270);
+    --muted-foreground: oklch(0.65 0.01 80);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(0.56 0.008 270);
+    --ring: oklch(0.6 0.02 65);
+    --success: oklch(0.65 0.16 155);
+    --warning-text: oklch(0.78 0.14 75);
+    --destructive: oklch(0.704 0.191 22.216);
+    --deal: oklch(0.72 0.17 35);
+    --origin: oklch(0.7 0.14 255);
   }
 }
 
@@ -43,8 +77,9 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: var(--type-bodyWeb);
+  line-height: var(--type-lineHeight);
+  font-feature-settings: "cv11", "ss01";
 }
 
 :focus-visible {
@@ -109,7 +144,7 @@ body {
 }
 
 .lede {
-  color: var(--muted);
+  color: var(--muted-foreground);
   margin-top: 10px;
   max-width: 40ch;
 }
@@ -199,7 +234,7 @@ body {
   gap: 6px;
   align-items: center;
   margin-left: auto;
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 
 .list {
@@ -298,7 +333,7 @@ body {
 .eyebrow {
   font-size: 12px;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--muted-foreground);
   display: flex;
   gap: 6px;
   align-items: center;
@@ -339,14 +374,14 @@ body {
 }
 
 .off-day {
-  color: var(--muted);
+  color: var(--muted-foreground);
   font-weight: 500;
 }
 
 .card-conditions {
   margin-top: 4px;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 
 .card-foot {
@@ -367,7 +402,7 @@ body {
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 
 .link-quiet {
@@ -384,7 +419,7 @@ body {
 .empty {
   padding: 40px 8px;
   text-align: center;
-  color: var(--muted);
+  color: var(--muted-foreground);
   display: grid;
   gap: 8px;
   justify-items: center;
@@ -404,7 +439,7 @@ body {
   margin-top: 28px;
   padding: 0 8px;
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 
 .pin {
