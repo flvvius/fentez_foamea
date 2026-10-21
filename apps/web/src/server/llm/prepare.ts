@@ -12,7 +12,7 @@ export const MAX_TEXT_CHARS = 12_000;
 export function prepareContentText(text: string): string {
   const cleaned = text
     .normalize("NFKC")
-    .replace(INVISIBLE_CHARS, "")
+    .replace(new RegExp(INVISIBLE_CHARS, "g"), "")
     .replace(/[<>]{3,}/g, "[removed]")
     .normalize("NFKC");
   if (cleaned.length <= MAX_TEXT_CHARS) return cleaned;

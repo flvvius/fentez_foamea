@@ -628,3 +628,39 @@ describe("expiry clamp with a future start", () => {
     expect(Date.parse(result.draft.validUntil!)).toBeGreaterThan(Date.parse(result.draft.validFrom!));
   });
 });
+
+describe("deal and regular price must be paired by the text", () => {
+  it.each([
+    ["a cue that belongs to another item", "Supa 12 lei, Ciorba 15 lei in loc de 20 lei", 12, 15],
+    ["inainte about time", "Pizza 29 lei. Meniu 45 lei inainte de ora 12.", 29, 45],
+    ["inainte about time, other order", "Meniu 45 lei inainte de ora 12. Pizza 29 lei", 29, 45],
+    ["regular as a size", "Shaorma regular 25 lei, mare 30 lei", 25, 30],
+    ["regular as a coffee size", "Cafea regular 9 lei, large 12 lei", 9, 12],
+    ["was in a sentence", "This was our best seller: 39 lei. Today burger 29 lei", 29, 39],
+    ["a pair across items", "In loc de 39 lei, pizza 29 lei. Bere 10 lei", 10, 39],
+  ])("drops the regular price for %s", (_name, source, deal, regular) => {
+    const result = text(raw({ evidence_snippet: source, deal_price: deal, regular_price: regular }), source);
+    expect(result.draft.regularPrice).toBeNull();
+    expect(result.draft.percentOff).toBeNull();
+    expect(result.warnings).toContain("regular_price_unanchored");
+  });
+
+  it.each([
+    ["Ciorba 15 lei in loc de 20 lei", 15, 20],
+    ["Burger redus de la 39 lei la 25 lei", 25, 39],
+    ["Inainte 39 lei, acum 25 lei", 25, 39],
+    ["Burger 39 lei -> 25 lei", 25, 39],
+    ["Burger 25 lei, 39 lei inainte.", 25, 39],
+    ["Burger 25 lei (pret vechi 39 lei)", 25, 39],
+  ])("keeps the pair in %s", (source, deal, regular) => {
+    const result = text(raw({ evidence_snippet: source, deal_price: deal, regular_price: regular }), source);
+    expect(result.draft.regularPrice).toBe(regular);
+    expect(result.warnings).not.toContain("regular_price_unanchored");
+  });
+
+  it("reads a price with only a currency before it", () => {
+    const source = "Meniul zilei RON 19.10";
+    const result = text(raw({ evidence_snippet: source, deal_price: 19.1, regular_price: null }), source);
+    expect(result.draft.dealPrice).toBe(19.1);
+  });
+});

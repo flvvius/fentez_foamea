@@ -242,7 +242,7 @@ const DOUBLE_QUOTES = /[\u201C\u201D\u201E\u201F\u2033\u00AB\u00BB]/g;
 const DASHES = /[\u2010-\u2015\u2212]/g;
 // Zero-width, bidi and formatting characters: they can hide a delimiter, reorder text or
 // split a word so a snippet stops matching. Shared with the web app's prompt preparation.
-export const INVISIBLE_CHARS = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0]/g;
+export const INVISIBLE_CHARS = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0]/;
 
 /**
  * Canonical form for checking that a snippet occurs in a source text. It applies NFKC (folds
@@ -255,7 +255,7 @@ export function normalizeForEvidence(input: string): string {
   return input
     .normalize("NFKC")
     .toLowerCase()
-    .replace(INVISIBLE_CHARS, "")
+    .replace(new RegExp(INVISIBLE_CHARS, "g"), "")
     .replace(QUOTES, "'")
     .replace(DOUBLE_QUOTES, '"')
     .replace(DASHES, "-")
@@ -289,7 +289,6 @@ const MARKER_AFTER = /^\s*(?:[.,]-|-)?\s*(?:de\s+)?(lei|leu|ron|euro|eur|usd|€
 // the previous price ("49 lei 1 bere").
 const MARKER_BEFORE = /(?:(?<![a-z])(ron|euro|eur|usd)|(€|\$))\s*$/;
 
-const DD_MM = /^(?:0?[1-9]|[12]\d|3[01])\.(?:0?[1-9]|1[0-2])$/;
 
 /**
  * The prices a snippet states. A number counts only when it sits next to a currency marker,
@@ -312,9 +311,8 @@ function pricesIn(snippet: string): SnippetPrice[] {
 
     const markerMatch = MARKER_AFTER.exec(after);
     const markerAfter = markerMatch?.[1];
-    // "19.10" alone reads as a date, "19.10 lei" as a price.
-    if (DD_MM.test(token) && !markerAfter) continue;
     if (token.includes(" ") && !markerAfter) continue;
+    // "19.10" alone reads as a date, "19.10 lei" or "RON 19.10" as a price.
     const marker = markerAfter ?? MARKER_BEFORE.exec(before)?.slice(1).find(Boolean);
     if (!marker) continue;
 
@@ -331,21 +329,59 @@ function pricesIn(snippet: string): SnippetPrice[] {
   return prices;
 }
 
-// Words that mark a price as the old or regular one: "în loc de 39 lei", "39 lei înainte",
-// "redus de la 39 lei", "preț normal 39 lei". Matched on normalized text (no diacritics).
-const REGULAR_PRICE_CUE =
-  /(?:^|[^a-z])(?:in loc de|inainte|pret(?:ul)? (?:vechi|normal|intreg|initial|de lista)|redus[a]? de la|reducere de la|instead of|was|regular(?: price)?|normally|originally)(?![a-z])/;
-const CUE_WINDOW = 30;
+// What may stand between a deal price and the regular price after it: "25 lei în loc de 39 lei",
+// "25 lei (preț normal 39 lei)". Compared after `betweenWords`, on normalized text.
+const DEAL_THEN_REGULAR = new Set([
+  "in loc de",
+  "fata de",
+  "instead of",
+  "pret vechi",
+  "pretul vechi",
+  "pret normal",
+  "pretul normal",
+  "pret intreg",
+  "pret initial",
+  "pret de lista",
+  "pret regular",
+  "inainte",
+  "inainte era",
+  "was",
+  "normally",
+  "originally",
+  "regular price",
+]);
+// What may stand between a regular price and the deal price after it, when the regular one is
+// introduced by REGULAR_OPENER: "redus de la 39 lei la 25 lei", "înainte 39 lei, acum 25 lei".
+const REGULAR_THEN_DEAL = new Set(["la", "acum", "acum doar", "acum la", "doar", "now", "now only", "only"]);
+const REGULAR_OPENER =
+  /(?:^|[^a-z])(?:redus[a]? de la|reducere de la|inainte|pret(?:ul)? (?:vechi|normal|intreg|initial)|was|before)\s*:?\s*$/;
+// "25 lei, 39 lei înainte": a closing tag right after the regular price, then punctuation or the end.
+const REGULAR_CLOSER = /^\s*\(?\s*(?:inainte|pret(?:ul)? (?:vechi|normal|intreg|initial))\s*\)?\s*(?:[.,;!]|$)/;
+const ARROW = /^\s*(?:->|=>|>|→)\s*$/;
+
+function betweenWords(text: string): string {
+  return text.replace(/[.,;:!()[\]"']/g, " ").replace(/\s+/g, " ").trim();
+}
 
 /**
- * Two prices in one snippet are not a deal and its regular price unless the text says so:
- * "Supa 12 lei, Burger 39 lei" must not become a 69% discount. The regular price counts only
- * with a cue right before or after it; otherwise the user types it in the form.
+ * Two prices are a deal and its regular price only when the text pairs them: they sit next to
+ * each other with nothing between but a contrast phrase. Judging each price on its own let
+ * "Supa 12 lei, Ciorba 15 lei în loc de 20 lei" or "Meniu 45 lei înainte de ora 12" pass as
+ * discounts. Anything looser is dropped and the user types the regular price in the form.
  */
-function isAnchoredRegularPrice(snippet: string, price: SnippetPrice): boolean {
-  const before = snippet.slice(Math.max(0, price.start - CUE_WINDOW), price.start);
-  const after = snippet.slice(price.end, price.end + CUE_WINDOW);
-  return REGULAR_PRICE_CUE.test(before) || REGULAR_PRICE_CUE.test(after);
+function isPricePair(snippet: string, deal: SnippetPrice, regular: SnippetPrice): boolean {
+  if (deal.end <= regular.start) {
+    const gap = betweenWords(snippet.slice(deal.end, regular.start));
+    if (DEAL_THEN_REGULAR.has(gap)) return true;
+    return gap === "" && REGULAR_CLOSER.test(snippet.slice(regular.end));
+  }
+  if (regular.end <= deal.start) {
+    const between = snippet.slice(regular.end, deal.start);
+    if (ARROW.test(between)) return true;
+    const opened = REGULAR_OPENER.test(snippet.slice(Math.max(0, regular.start - 30), regular.start));
+    return opened && REGULAR_THEN_DEAL.has(betweenWords(between));
+  }
+  return false;
 }
 
 // Only a number written with a percent sign may vouch for a percentage.
@@ -658,9 +694,10 @@ export function validateExtraction(raw: unknown, ctx: ExtractionContext): Extrac
           priceDiscarded = true;
           warn("price_not_in_evidence");
         } else if (draft.regularPrice !== null) {
-          const regular = draft.regularPrice;
-          const candidates = prices.filter((p) => Math.abs(p.value - regular) < 0.005);
-          if (!candidates.some((p) => isAnchoredRegularPrice(snippet, p))) {
+          const at = (value: number | null) => prices.filter((p) => value !== null && Math.abs(p.value - value) < 0.005);
+          const deals = at(draft.dealPrice);
+          const regulars = at(draft.regularPrice);
+          if (!deals.some((d) => regulars.some((r) => r !== d && isPricePair(snippet, d, r)))) {
             draft.regularPrice = null;
             priceDiscarded = true;
             warn("regular_price_unanchored");
