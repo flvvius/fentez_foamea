@@ -5,3 +5,4 @@ export * from "./text.ts";
 export * from "./labels.ts";
 export * from "./time.ts";
 export * from "./deal.ts";
+export * from "./extraction.ts";
