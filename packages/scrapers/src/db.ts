@@ -66,11 +66,13 @@ export async function upsertOffer(
   await sql`
     insert into offers (
       source, source_offer_id, venue_id, kind, title, description, price_ron, original_price_ron,
-      starts_at, ends_at, pickup_start, pickup_end, available_count, image_url, url, delivery_only, raw
+      starts_at, ends_at, pickup_start, pickup_end, days_of_week, time_start, time_end, conditions,
+      available_count, image_url, url, delivery_only, raw
     ) values (
       ${source}, ${offer.sourceOfferId}, ${venueId}, ${offer.kind}, ${offer.title}, ${offer.description ?? null},
       ${offer.priceRon ?? null}, ${offer.originalPriceRon ?? null}, ${offer.startsAt ?? null}, ${offer.endsAt ?? null},
-      ${offer.pickupStart ?? null}, ${offer.pickupEnd ?? null}, ${offer.availableCount ?? null},
+      ${offer.pickupStart ?? null}, ${offer.pickupEnd ?? null}, ${offer.daysOfWeek ?? null},
+      ${offer.timeStart ?? null}, ${offer.timeEnd ?? null}, ${offer.conditions ?? null}, ${offer.availableCount ?? null},
       ${offer.imageUrl ?? null}, ${offer.url}, ${offer.deliveryOnly}, ${offer.raw === undefined ? null : sql.json(offer.raw as postgres.JSONValue)}
     )
     on conflict (source, source_offer_id) do update set
@@ -84,6 +86,10 @@ export async function upsertOffer(
       ends_at = excluded.ends_at,
       pickup_start = excluded.pickup_start,
       pickup_end = excluded.pickup_end,
+      days_of_week = excluded.days_of_week,
+      time_start = excluded.time_start,
+      time_end = excluded.time_end,
+      conditions = excluded.conditions,
       available_count = excluded.available_count,
       image_url = excluded.image_url,
       url = excluded.url,

@@ -14,15 +14,19 @@ export type OfferKind = (typeof OFFER_KINDS)[number];
 export const SOURCE_IDS = [
   "bonapp",
   "wolt",
-  "bolt",
   "glovo",
-  "chains",
-  "daily",
+  "kfc",
+  "pizzahut",
+  "tacobell",
+  "dominos",
+  "paul",
+  "citygrill",
 ] as const;
 
 export type SourceId = (typeof SOURCE_IDS)[number];
 
 const isoDateTime = z.iso.datetime({ offset: true });
+const localTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
 export const scrapedVenueSchema = z.object({
   sourceVenueId: z.string().min(1),
@@ -47,6 +51,10 @@ export const scrapedOfferSchema = z.object({
   endsAt: isoDateTime.optional(),
   pickupStart: isoDateTime.optional(),
   pickupEnd: isoDateTime.optional(),
+  daysOfWeek: z.array(z.number().int().min(1).max(7)).min(1).max(7).optional(),
+  timeStart: localTime.optional(),
+  timeEnd: localTime.optional(),
+  conditions: z.string().max(300).optional(),
   availableCount: z.number().int().nonnegative().optional(),
   imageUrl: z.url().optional(),
   url: z.url(),
@@ -71,6 +79,10 @@ export type OfferRow = {
   ends_at: string | null;
   pickup_start: string | null;
   pickup_end: string | null;
+  days_of_week: number[] | null;
+  time_start: string | null;
+  time_end: string | null;
+  conditions: string | null;
   available_count: number | null;
   image_url: string | null;
   url: string;

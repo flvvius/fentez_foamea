@@ -12,8 +12,13 @@ export const OFFER_KIND_LABELS: Record<OfferKind, string> = {
 export const SOURCE_LABELS: Record<SourceId, string> = {
   bonapp: "Bonapp",
   wolt: "Wolt",
-  bolt: "Bolt Food",
   glovo: "Glovo",
-  chains: "Site-ul lanțului",
-  daily: "Meniul zilei",
+  kfc: "KFC",
+  pizzahut: "Pizza Hut",
+  tacobell: "Taco Bell",
+  dominos: "Domino's",
+  paul: "Paul",
+  citygrill: "City Grill",
 };
+
+export const WEEKDAY_SHORT = ["L", "Ma", "Mi", "J", "V", "S", "D"] as const;

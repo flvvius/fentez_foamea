@@ -1,5 +1,4 @@
 import { parseArgs } from "node:util";
-import { LazyBrowser } from "./browser.ts";
 import { connect, purgeOld, type Sql } from "./db.ts";
 import { GeminiExtractor } from "./gemini.ts";
 import { Geocoder } from "./geocode.ts";
@@ -32,13 +31,12 @@ if (unknown.length) {
 const log = createLogger("cli");
 const sql: Sql | null = values["dry-run"] ? null : connect();
 const http = new PoliteHttp(log);
-const browser = new LazyBrowser();
 const sink = values["dry-run"] ? { write: async (offer: unknown) => void process.stdout.write(`${JSON.stringify(offer)}\n`) } : undefined;
 
 const summaries: RunSummary[] = [];
 try {
   for (const id of requested) {
-    const source = SOURCES[id as keyof typeof SOURCES]!;
+    const source = SOURCES[id as keyof typeof SOURCES];
     const sourceLog = createLogger(source.id);
     const summary = await runSource(
       source,
@@ -47,7 +45,6 @@ try {
         log: sourceLog,
         geocoder: new Geocoder(sql, http),
         gemini: GeminiExtractor.fromEnv(sql, sourceLog),
-        browser,
         limit: values.limit ? Number(values.limit) : undefined,
       },
       sql,
@@ -58,7 +55,6 @@ try {
   }
   if (sql) await purgeOld(sql);
 } finally {
-  await browser.close();
   await sql?.end();
 }
 
