@@ -6,4 +6,3 @@ dist
 .vercel
 .env*
 !.env.example
-src/routeTree.gen.ts
