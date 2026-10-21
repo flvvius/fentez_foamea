@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fentezfoamea
+    ports:
+      - "54329:5432"
+    volumes:
+      - ./supabase/local-bootstrap.sql:/docker-entrypoint-initdb.d/00-bootstrap.sql:ro
+      - ./supabase/migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./supabase/local-migrate.sh:/docker-entrypoint-initdb.d/10-migrate.sh:ro
