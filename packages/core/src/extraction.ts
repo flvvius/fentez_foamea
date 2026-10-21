@@ -313,7 +313,8 @@ function pricesIn(snippet: string): SnippetPrice[] {
     const markerAfter = markerMatch?.[1];
     if (token.includes(" ") && !markerAfter) continue;
     // "19.10" alone reads as a date, "19.10 lei" or "RON 19.10" as a price.
-    const marker = markerAfter ?? MARKER_BEFORE.exec(before)?.slice(1).find(Boolean);
+    const markerBefore = markerAfter ? null : MARKER_BEFORE.exec(before);
+    const marker = markerAfter ?? markerBefore?.slice(1).find(Boolean);
     if (!marker) continue;
 
     const parts = token.match(/^(.*?)(?:[.,](\d{1,2}))?$/);
@@ -322,7 +323,9 @@ function pricesIn(snippet: string): SnippetPrice[] {
     prices.push({
       value: Number(parts[2] ? `${whole}.${parts[2]}` : whole),
       currency: CURRENCY_CODES[marker] ?? null,
-      start,
+      // The span covers the currency marker on either side, so "în loc de RON 39" leaves only
+      // the cue in the gap.
+      start: start - (markerBefore?.[0].length ?? 0),
       end: start + token.length + (markerMatch?.[0].length ?? 0),
     });
   }
@@ -343,7 +346,7 @@ const DEAL_THEN_REGULAR = new Set([
   "pret initial",
   "pret de lista",
   "pret regular",
-  "inainte",
+  // Not bare "inainte": "25 lei înainte, 39 lei la livrare" means paying in advance.
   "inainte era",
   "was",
   "normally",
@@ -354,13 +357,16 @@ const DEAL_THEN_REGULAR = new Set([
 // introduced by REGULAR_OPENER: "redus de la 39 lei la 25 lei", "înainte 39 lei, acum 25 lei".
 const REGULAR_THEN_DEAL = new Set(["la", "acum", "acum doar", "acum la", "doar", "now", "now only", "only"]);
 const REGULAR_OPENER =
-  /(?:^|[^a-z])(?:redus[a]? de la|reducere de la|inainte|pret(?:ul)? (?:vechi|normal|intreg|initial)|was|before)\s*:?\s*$/;
+  /(?:^|[^a-z])(?:redus[a]? de la|reducere de la|in loc de|instead of|inainte|pret(?:ul)? (?:vechi|normal|intreg|initial)|was|price before)\s*:?\s*$/;
 // "25 lei, 39 lei înainte": a closing tag right after the regular price, then punctuation or the end.
 const REGULAR_CLOSER = /^\s*\(?\s*(?:inainte|pret(?:ul)? (?:vechi|normal|intreg|initial))\s*\)?\s*(?:[.,;!]|$)/;
-const ARROW = /^\s*(?:->|=>|>|→)\s*$/;
+// Not a lone ">": "Pizza mare 39 lei > 25 lei pizza mica" is a separator.
+const ARROW = /^\s*(?:->|=>|→)\s*$/;
+// A pair never spans a sentence: "Burger 25 lei! Preț normal: 39 lei pentru meniul XXL".
+const SENTENCE_BREAK = /[.!?;]/;
 
 function betweenWords(text: string): string {
-  return text.replace(/[.,;:!()[\]"']/g, " ").replace(/\s+/g, " ").trim();
+  return text.replace(/[,:()[\]"']/g, " ").replace(/\s+/g, " ").trim();
 }
 
 /**
@@ -368,17 +374,27 @@ function betweenWords(text: string): string {
  * each other with nothing between but a contrast phrase. Judging each price on its own let
  * "Supa 12 lei, Ciorba 15 lei în loc de 20 lei" or "Meniu 45 lei înainte de ora 12" pass as
  * discounts. Anything looser is dropped and the user types the regular price in the form.
+ *
+ * `text` is the normalized source with price spans located in it, not the snippet: the model
+ * picks the snippet's edges, so an opener or closer read from the snippet could be a cut-off
+ * "inainte de 1 noiembrie".
  */
-function isPricePair(snippet: string, deal: SnippetPrice, regular: SnippetPrice): boolean {
+function isPricePair(text: string, deal: SnippetPrice, regular: SnippetPrice): boolean {
+  if (deal.currency !== null && regular.currency !== null && deal.currency !== regular.currency) return false;
   if (deal.end <= regular.start) {
-    const gap = betweenWords(snippet.slice(deal.end, regular.start));
+    const between = text.slice(deal.end, regular.start);
+    if (SENTENCE_BREAK.test(between)) return false;
+    const gap = betweenWords(between);
     if (DEAL_THEN_REGULAR.has(gap)) return true;
-    return gap === "" && REGULAR_CLOSER.test(snippet.slice(regular.end));
+    // "acum 25 lei, înainte 39 lei": "înainte" right before the regular price, not before the comma.
+    if (/^\s*,?\s*inainte\s*:?\s*$/.test(between)) return true;
+    return gap === "" && REGULAR_CLOSER.test(text.slice(regular.end));
   }
   if (regular.end <= deal.start) {
-    const between = snippet.slice(regular.end, deal.start);
+    const between = text.slice(regular.end, deal.start);
+    if (SENTENCE_BREAK.test(between)) return false;
     if (ARROW.test(between)) return true;
-    const opened = REGULAR_OPENER.test(snippet.slice(Math.max(0, regular.start - 30), regular.start));
+    const opened = REGULAR_OPENER.test(text.slice(Math.max(0, regular.start - 30), regular.start));
     return opened && REGULAR_THEN_DEAL.has(betweenWords(between));
   }
   return false;
@@ -694,10 +710,15 @@ export function validateExtraction(raw: unknown, ctx: ExtractionContext): Extrac
           priceDiscarded = true;
           warn("price_not_in_evidence");
         } else if (draft.regularPrice !== null) {
-          const at = (value: number | null) => prices.filter((p) => value !== null && Math.abs(p.value - value) < 0.005);
+          // Locate the snippet's prices in the source so the pair check sees the real context.
+          const offset = source.indexOf(snippet);
+          const at = (value: number | null) =>
+            prices
+              .filter((p) => value !== null && Math.abs(p.value - value) < 0.005)
+              .map((p) => ({ ...p, start: p.start + offset, end: p.end + offset }));
           const deals = at(draft.dealPrice);
           const regulars = at(draft.regularPrice);
-          if (!deals.some((d) => regulars.some((r) => r !== d && isPricePair(snippet, d, r)))) {
+          if (!deals.some((d) => regulars.some((r) => r.start !== d.start && isPricePair(source, d, r)))) {
             draft.regularPrice = null;
             priceDiscarded = true;
             warn("regular_price_unanchored");

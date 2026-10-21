@@ -664,3 +664,26 @@ describe("deal and regular price must be paired by the text", () => {
     expect(result.draft.dealPrice).toBe(19.1);
   });
 });
+
+describe("pairing loopholes", () => {
+  it.each([
+    ["a sentence break", "Burger 25 lei! Pret normal: 39 lei pentru meniul XXL", "Burger 25 lei! Pret normal: 39 lei pentru meniul XXL", 25, 39],
+    ["a sentence break before the opener", "Cafea 9 lei. Inainte, 39 lei costa meniul", "Cafea 9 lei. Inainte, 39 lei costa meniul", 9, 39],
+    ["a snippet cut before 'de 1 noiembrie'", "Meniu 25 lei, 39 lei inainte de 1 noiembrie", "Meniu 25 lei, 39 lei inainte", 25, 39],
+    ["different currencies", "Pizza 10 € in loc de 49 lei", "Pizza 10 € in loc de 49 lei", 10, 49],
+    ["a lone > separator", "Pizza mare 39 lei > 25 lei pizza mica", "Pizza mare 39 lei > 25 lei pizza mica", 25, 39],
+    ["inainte meaning in advance", "Comanda 25 lei inainte, 39 lei la livrare", "Comanda 25 lei inainte, 39 lei la livrare", 25, 39],
+  ])("drops the regular price across %s", (_name, source, snippet, deal, regular) => {
+    const result = text(raw({ evidence_snippet: snippet, deal_price: deal, regular_price: regular }), source);
+    expect(result.draft.regularPrice).toBeNull();
+    expect(result.draft.percentOff).toBeNull();
+  });
+
+  it.each([
+    ["In loc de 78 lei, acum 49 lei", 49, 78],
+    ["Burger 25 lei in loc de RON 39", 25, 39],
+  ])("keeps the pair in %s", (source, deal, regular) => {
+    const result = text(raw({ evidence_snippet: source, deal_price: deal, regular_price: regular }), source);
+    expect(result.draft.regularPrice).toBe(regular);
+  });
+});
