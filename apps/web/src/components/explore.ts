@@ -11,7 +11,7 @@ export type Filters = {
   venueId: string | null;
 };
 
-export type PlacedOffer = Offer & { distance: number | null };
+export type PlacedOffer = Offer & { distance: number | null; otherLocations?: number };
 
 export type VenuePin = {
   venueId: string;
@@ -75,4 +75,25 @@ export function venuePins(offers: PlacedOffer[]): VenuePin[] {
     pins.set(offer.venueId, pin);
   }
   return [...pins.values()];
+}
+
+export function collapseChainCopies(sorted: PlacedOffer[]): PlacedOffer[] {
+  const firstByKey = new Map<string, PlacedOffer>();
+  const result: PlacedOffer[] = [];
+  for (const offer of sorted) {
+    if (!offer.chain) {
+      result.push(offer);
+      continue;
+    }
+    const key = `${offer.source}|${offer.chain}|${offer.title}|${offer.price ?? ""}`;
+    const first = firstByKey.get(key);
+    if (first) {
+      first.otherLocations = (first.otherLocations ?? 0) + 1;
+      continue;
+    }
+    const copy = { ...offer, otherLocations: 0 };
+    firstByKey.set(key, copy);
+    result.push(copy);
+  }
+  return result;
 }

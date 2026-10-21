@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { applyFilters, placeOffers, sortOffers, venuePins } from "./explore";
+import { applyFilters, collapseChainCopies, placeOffers, sortOffers, venuePins } from "./explore";
 
 const base: Offer = {
   id: "1",
@@ -21,6 +21,10 @@ const base: Offer = {
   venueId: "v1",
   venueName: "Bistro",
   venueAddress: null,
+  daysOfWeek: null,
+  timeStart: null,
+  timeEnd: null,
+  conditions: null,
   chain: null,
   lat: 44.4355,
   lon: 26.1025,
@@ -50,5 +54,19 @@ describe("explore", () => {
     expect(venuePins(placed)).toEqual([
       expect.objectContaining({ venueId: "v1", count: 2, minPrice: 9, bestDiscount: 70 }),
     ]);
+  });
+
+  it("keeps only the nearest copy of a chain deal", () => {
+    const deal = { ...base, source: "kfc" as const, kind: "combo" as const, chain: "KFC", title: "Bucket" };
+    const placed = placeOffers(
+      [
+        { ...deal, id: "far", venueId: "a", lat: 44.47, lon: 26.1 },
+        { ...deal, id: "near", venueId: "b" },
+      ],
+      origin,
+      now,
+    );
+    const collapsed = collapseChainCopies(sortOffers(placed, "distance"));
+    expect(collapsed.map((o) => [o.id, o.otherLocations])).toEqual([["near", 1]]);
   });
 });

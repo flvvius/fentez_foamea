@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  --font-display: "Bricolage Grotesque Variable", "Arial Narrow", sans-serif;
+  --font-body: "Figtree Variable", system-ui, sans-serif;
   --paper: #f2f4f1;
   --surface: #ffffff;
   --ink: #18201c;
@@ -29,9 +31,6 @@
 }
 
 @theme inline {
-  --color-paper: var(--paper);
-  --color-ink: var(--ink);
-  --font-display: var(--font-display);
   --font-sans: var(--font-body);
 }
 
@@ -43,7 +42,7 @@ body {
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.45;
 }
@@ -334,6 +333,12 @@ body {
   color: var(--pepper);
 }
 
+.card-conditions {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .card-foot {
   margin-top: 8px;
   display: flex;
@@ -486,7 +491,7 @@ body {
 }
 
 .leaflet-container {
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-body);
   background: var(--surface);
 }
 

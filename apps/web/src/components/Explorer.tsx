@@ -1,17 +1,13 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
 import { formatRelative } from "@/lib/format";
 import type { OfferSnapshot } from "@/lib/offers";
 import { OfferCard } from "./OfferCard";
-import { applyFilters, placeOffers, sortOffers, venuePins, type SortKey } from "./explore";
+import { applyFilters, collapseChainCopies, placeOffers, sortOffers, venuePins, type SortKey } from "./explore";
 
-const OfferMap = dynamic(() => import("./OfferMap"), {
-  ssr: false,
-  loading: () => <div className="map-placeholder" aria-hidden />,
-});
+const OfferMap = lazy(() => import("./OfferMap"));
 
 const RADII: { label: string; km: number | null }[] = [
   { label: "1 km", km: 1 },
@@ -31,8 +27,9 @@ const PAGE = 60;
 type Origin = LatLon & { mine: boolean };
 type LocateState = "idle" | "locating" | "denied";
 
-export function Explorer({ snapshot, renderedAt }: Readonly<{ snapshot: OfferSnapshot; renderedAt: string }>) {
-  const [now, setNow] = useState(() => new Date(renderedAt));
+export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
+  const [now, setNow] = useState(() => new Date(snapshot.generatedAt));
+  const [mounted, setMounted] = useState(false);
   const [origin, setOrigin] = useState<Origin>({ ...BUCHAREST_CENTER, mine: false });
   const [locate, setLocate] = useState<LocateState>("idle");
   const [kinds, setKinds] = useState<OfferKind[]>([]);
@@ -43,6 +40,7 @@ export function Explorer({ snapshot, renderedAt }: Readonly<{ snapshot: OfferSna
   const [visible, setVisible] = useState(PAGE);
 
   useEffect(() => {
+    setMounted(true);
     setNow(new Date());
     const timer = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(timer);
@@ -56,7 +54,7 @@ export function Explorer({ snapshot, renderedAt }: Readonly<{ snapshot: OfferSna
   const pins = useMemo(() => venuePins(filtered), [filtered]);
   const listed = useMemo(() => {
     const scoped = venueId ? filtered.filter((offer) => offer.venueId === venueId) : filtered;
-    return sortOffers(scoped, sort);
+    return collapseChainCopies(sortOffers(scoped, sort));
   }, [filtered, venueId, sort]);
   const kindCounts = useMemo(() => countKinds(placed), [placed]);
   const selectedVenue = venueId ? pins.find((pin) => pin.venueId === venueId) : undefined;
@@ -171,7 +169,13 @@ export function Explorer({ snapshot, renderedAt }: Readonly<{ snapshot: OfferSna
             </div>
           ) : (
             listed.slice(0, visible).map((offer) => (
-              <OfferCard key={offer.id} offer={offer} now={now} highlighted={offer.venueId === venueId} onShowVenue={showVenue} />
+              <OfferCard
+                key={offer.id}
+                offer={offer}
+                now={now}
+                highlighted={offer.venueId === venueId}
+                onShowVenue={showVenue}
+              />
             ))
           )}
           {listed.length > visible && (
@@ -187,7 +191,13 @@ export function Explorer({ snapshot, renderedAt }: Readonly<{ snapshot: OfferSna
       </section>
 
       <section className="map" aria-label="Hartă">
-        <OfferMap pins={pins} origin={origin} selectedVenueId={venueId} onSelectVenue={showVenue} />
+        {mounted ? (
+          <Suspense fallback={<div className="map-placeholder" aria-hidden />}>
+            <OfferMap pins={pins} origin={origin} selectedVenueId={venueId} onSelectVenue={showVenue} />
+          </Suspense>
+        ) : (
+          <div className="map-placeholder" aria-hidden />
+        )}
       </section>
     </div>
   );

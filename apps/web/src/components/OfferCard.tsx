@@ -1,4 +1,4 @@
-import { OFFER_KIND_LABELS, SOURCE_LABELS } from "@fentezfoamea/core";
+import { OFFER_KIND_LABELS, SOURCE_LABELS, WEEKDAY_SHORT } from "@fentezfoamea/core";
 import { formatDistance, formatPickup, formatPrice, minutesUntil } from "@/lib/format";
 import type { PlacedOffer } from "./explore";
 
@@ -47,7 +47,11 @@ export function OfferCard({ offer, now, highlighted, onShowVenue }: Readonly<Pro
             <span>{offer.chain ?? "În toate locațiile"}</span>
           )}
           {offer.distance !== null && <span className="muted"> · {formatDistance(offer.distance)}</span>}
+          {offer.otherLocations ? <span className="muted"> · și în alte {offer.otherLocations} locații</span> : null}
         </p>
+
+        {schedule(offer) && <p className="card-when">{schedule(offer)}</p>}
+        {offer.conditions && <p className="card-conditions">{offer.conditions}</p>}
 
         {offer.pickupStart && offer.pickupEnd && (
           <p className={`card-when ${closesIn !== null && closesIn <= 60 && pickupStarted ? "urgent" : ""}`}>
@@ -67,4 +71,18 @@ export function OfferCard({ offer, now, highlighted, onShowVenue }: Readonly<Pro
       </div>
     </article>
   );
+}
+
+function schedule(offer: PlacedOffer): string | null {
+  const days = offer.daysOfWeek?.length && offer.daysOfWeek.length < 7 ? formatDays(offer.daysOfWeek) : null;
+  const hours = offer.timeStart && offer.timeEnd ? `${offer.timeStart}–${offer.timeEnd}` : null;
+  if (!days && !hours) return null;
+  return [days, hours].filter(Boolean).join(", ");
+}
+
+function formatDays(days: number[]): string {
+  const sorted = [...days].sort((a, b) => a - b);
+  const contiguous = sorted.every((day, index) => index === 0 || day === sorted[index - 1]! + 1);
+  if (contiguous && sorted.length > 2) return `${WEEKDAY_SHORT[sorted[0]! - 1]}–${WEEKDAY_SHORT[sorted.at(-1)! - 1]}`;
+  return sorted.map((day) => WEEKDAY_SHORT[day - 1]).join(", ");
 }
