@@ -28,6 +28,11 @@ export function formatRelative(iso: string, now: Date): string {
   return hours < 24 ? `acum ${hours} h` : `acum ${Math.round(hours / 24)} zile`;
 }
 
+export function bucharestWeekday(now: Date): number {
+  const name = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short" }).format(now);
+  return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(name) + 1;
+}
+
 export function minutesUntil(iso: string, now: Date): number {
   return Math.round((new Date(iso).getTime() - now.getTime()) / 60_000);
 }

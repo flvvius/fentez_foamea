@@ -97,3 +97,8 @@ export function collapseChainCopies(sorted: PlacedOffer[]): PlacedOffer[] {
   }
   return result;
 }
+
+export function validTodayFirst(offers: PlacedOffer[], weekday: number): PlacedOffer[] {
+  const appliesToday = (offer: PlacedOffer) => !offer.daysOfWeek?.length || offer.daysOfWeek.includes(weekday);
+  return [...offers.filter(appliesToday), ...offers.filter((offer) => !appliesToday(offer))];
+}

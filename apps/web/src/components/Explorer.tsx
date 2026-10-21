@@ -2,10 +2,10 @@
 
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
-import { formatRelative } from "@/lib/format";
+import { bucharestWeekday, formatRelative } from "@/lib/format";
 import type { OfferSnapshot } from "@/lib/offers";
 import { OfferCard } from "./OfferCard";
-import { applyFilters, collapseChainCopies, placeOffers, sortOffers, venuePins, type SortKey } from "./explore";
+import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, venuePins, type SortKey } from "./explore";
 
 const OfferMap = lazy(() => import("./OfferMap"));
 
@@ -54,8 +54,8 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
   const pins = useMemo(() => venuePins(filtered), [filtered]);
   const listed = useMemo(() => {
     const scoped = venueId ? filtered.filter((offer) => offer.venueId === venueId) : filtered;
-    return collapseChainCopies(sortOffers(scoped, sort));
-  }, [filtered, venueId, sort]);
+    return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), bucharestWeekday(now));
+  }, [filtered, venueId, sort, now]);
   const kindCounts = useMemo(() => countKinds(placed), [placed]);
   const selectedVenue = venueId ? pins.find((pin) => pin.venueId === venueId) : undefined;
 

@@ -1,5 +1,5 @@
 import { OFFER_KIND_LABELS, SOURCE_LABELS, WEEKDAY_SHORT } from "@fentezfoamea/core";
-import { formatDistance, formatPickup, formatPrice, minutesUntil } from "@/lib/format";
+import { bucharestWeekday, formatDistance, formatPickup, formatPrice, minutesUntil } from "@/lib/format";
 import type { PlacedOffer } from "./explore";
 
 type Props = {
@@ -12,9 +12,10 @@ type Props = {
 export function OfferCard({ offer, now, highlighted, onShowVenue }: Readonly<Props>) {
   const closesIn = offer.pickupEnd ? minutesUntil(offer.pickupEnd, now) : null;
   const pickupStarted = offer.pickupStart ? new Date(offer.pickupStart) <= now : true;
+  const notToday = offer.daysOfWeek?.length ? !offer.daysOfWeek.includes(bucharestWeekday(now)) : false;
 
   return (
-    <article className={`card ${highlighted ? "card-highlighted" : ""}`}>
+    <article className={`card ${highlighted ? "card-highlighted" : ""} ${notToday ? "card-off-day" : ""}`}>
       <div className="tag" data-kind={offer.kind}>
         {offer.price !== null ? (
           <>
@@ -50,7 +51,12 @@ export function OfferCard({ offer, now, highlighted, onShowVenue }: Readonly<Pro
           {offer.otherLocations ? <span className="muted"> · și în alte {offer.otherLocations} locații</span> : null}
         </p>
 
-        {schedule(offer) && <p className="card-when">{schedule(offer)}</p>}
+        {schedule(offer) && (
+          <p className="card-when">
+            {schedule(offer)}
+            {notToday && <span className="off-day"> · nu azi</span>}
+          </p>
+        )}
         {offer.conditions && <p className="card-conditions">{offer.conditions}</p>}
 
         {offer.pickupStart && offer.pickupEnd && (

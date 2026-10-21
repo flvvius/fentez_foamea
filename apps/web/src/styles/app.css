@@ -333,6 +333,16 @@ body {
   color: var(--pepper);
 }
 
+.card-off-day .tag {
+  filter: grayscale(0.8);
+  opacity: 0.6;
+}
+
+.off-day {
+  color: var(--muted);
+  font-weight: 500;
+}
+
 .card-conditions {
   margin-top: 4px;
   font-size: 13px;

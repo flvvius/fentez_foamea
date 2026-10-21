@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { applyFilters, collapseChainCopies, placeOffers, sortOffers, venuePins } from "./explore";
+import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const base: Offer = {
   id: "1",
@@ -68,5 +68,18 @@ describe("explore", () => {
     );
     const collapsed = collapseChainCopies(sortOffers(placed, "distance"));
     expect(collapsed.map((o) => [o.id, o.otherLocations])).toEqual([["near", 1]]);
+  });
+
+  it("moves offers that do not apply today below the rest", () => {
+    const placed = placeOffers(
+      [
+        { ...base, id: "monday", daysOfWeek: [1] },
+        { ...base, id: "always" },
+        { ...base, id: "wednesday", daysOfWeek: [3] },
+      ],
+      origin,
+      now,
+    );
+    expect(validTodayFirst(placed, 3).map((o) => o.id)).toEqual(["always", "wednesday", "monday"]);
   });
 });
