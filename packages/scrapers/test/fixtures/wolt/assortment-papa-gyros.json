@@ -1,0 +1,101 @@
+{
+ "categories": [
+  {
+   "id": "8d10462af9a37f60e8592132",
+   "item_ids": []
+  },
+  {
+   "id": "6d77f8e374089985338b9479",
+   "item_ids": [
+    "1e7ded47788f30b1232ac584",
+    "c35cc1515b72e0f2f5f249c0",
+    "ad55cba185bbec9fa20cab11",
+    "89282e8203d9cc88e605077a"
+   ]
+  },
+  {
+   "id": "f39bc974c68d035e3c09174c",
+   "item_ids": []
+  },
+  {
+   "id": "ca2695df2bcdce1afa3a7785",
+   "item_ids": []
+  },
+  {
+   "id": "fb3b60718bf393f00183647b",
+   "item_ids": [
+    "17bfd15f04a03a29f3735db1"
+   ]
+  },
+  {
+   "id": "c698923a27ab06fd29dd0a5b",
+   "item_ids": [
+    "0237bae7ed596b4e12429900",
+    "1675e3aa6a4726418a254ead",
+    "09616857761fb539c4c0a5b0"
+   ]
+  },
+  {
+   "id": "c0d9789e34c708a22905fcdd",
+   "item_ids": []
+  }
+ ],
+ "items": [
+  {
+   "id": "1e7ded47788f30b1232ac584",
+   "name": "Gyros pui",
+   "price": 5100,
+   "disabled_info": null,
+   "is_wolt_plus_only": false
+  },
+  {
+   "id": "89282e8203d9cc88e605077a",
+   "name": "Pita Gyros vita",
+   "price": 4900,
+   "disabled_info": null,
+   "is_wolt_plus_only": false
+  },
+  {
+   "id": "ad55cba185bbec9fa20cab11",
+   "name": "Pita Gyros pui",
+   "price": 4750,
+   "disabled_info": null,
+   "is_wolt_plus_only": false
+  },
+  {
+   "id": "c35cc1515b72e0f2f5f249c0",
+   "name": "Gyros vita",
+   "price": 5500,
+   "disabled_info": null,
+   "is_wolt_plus_only": false
+  },
+  {
+   "id": "0237bae7ed596b4e12429900",
+   "name": "APA PLATA AQUA CARPATICA 0.5l*",
+   "price": 900,
+   "disabled_info": null,
+   "is_wolt_plus_only": false
+  },
+  {
+   "id": "09616857761fb539c4c0a5b0",
+   "name": "SEVEN UP SUGAR FREE 0.33l*",
+   "price": 1100,
+   "disabled_info": null,
+   "is_wolt_plus_only": false
+  },
+  {
+   "id": "1675e3aa6a4726418a254ead",
+   "name": "PRIGAT PIERSICI 0.5l*",
+   "price": 1200,
+   "disabled_info": null,
+   "is_wolt_plus_only": false
+  },
+  {
+   "id": "17bfd15f04a03a29f3735db1",
+   "name": "INGHETATA CIOCOLATA BROWNIE",
+   "price": 3000,
+   "disabled_info": null,
+   "is_wolt_plus_only": false
+  }
+ ]
+}

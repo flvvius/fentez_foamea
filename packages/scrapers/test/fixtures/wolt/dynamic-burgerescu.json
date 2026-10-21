@@ -1,0 +1,235 @@
+{
+ "venue_raw": {
+  "discounts": [
+   {
+    "id": "venue_campaign:69a6a4fae6eee4db138951af",
+    "effects": {
+     "basket_discount": null,
+     "delivery_discount": {
+      "amount": 0,
+      "fraction": 1.0,
+      "min_amount": null,
+      "max_amount": null
+     },
+     "free_items": null,
+     "item_discount": null
+    },
+    "conditions": {
+     "basket_contains": [],
+     "delivery_methods": null,
+     "max_distance": null,
+     "weekly_time_restrictions": null,
+     "has_wolt_plus": null
+    },
+    "description": {
+     "title": "0 lei taxă de livrare",
+     "points": [
+      "Pentru utilizatorii noi care au un număr de telefon local.",
+      "Oferta este valabilă de la 27 Feb 2026 până la 16 Nov 2026 sau până la atingerea limitei maxime de promoții, oricare dintre situații survine prima"
+     ]
+    },
+    "end_date": "2026-11-16T21:59:59+00:00"
+   },
+   {
+    "id": "venue_campaign:69b43aaf3876e8e1e7858502",
+    "effects": {
+     "basket_discount": {
+      "amount": 4000,
+      "fraction": null,
+      "min_amount": null,
+      "max_amount": null,
+      "include": null,
+      "exclude": null
+     },
+     "delivery_discount": null,
+     "free_items": null,
+     "item_discount": null
+    },
+    "conditions": {
+     "basket_contains": [
+      {
+       "min_amount": 8500,
+       "max_amount": null,
+       "any_of_items": null,
+       "items_from_categories": null,
+       "min_quantity": null,
+       "max_quantity": null,
+       "any_of_option_values": null,
+       "including_restricted_items": false
+      }
+     ],
+     "delivery_methods": [
+      "homedelivery"
+     ],
+     "max_distance": null,
+     "weekly_time_restrictions": null,
+     "has_wolt_plus": null
+    },
+    "description": {
+     "title": "40 lei la primele 2 comenzi",
+     "points": [
+      "85 RON comandă minimă",
+      "Numai pentru comenzile cu livrare la domiciliu",
+      "Pentru utilizatorii noi care au un număr de telefon local.",
+      "Această promoție nu se aplică articolelor restricționate și anumitor taxe legate de servicii.",
+      "Nu poate fi combinat cu alte promoții",
+      "Oferta este valabilă de la 17 Mar 2026 până la 16 Nov 2026 sau până la atingerea limitei maxime de promoții, oricare dintre situații survine prima"
+     ]
+    },
+    "end_date": "2026-11-16T21:59:59.999000+00:00"
+   },
+   {
+    "id": "venue_campaign:6a829ee73479caf4691dee09",
+    "effects": {
+     "basket_discount": {
+      "amount": 1,
+      "fraction": null,
+      "min_amount": null,
+      "max_amount": null,
+      "include": null,
+      "exclude": null
+     },
+     "delivery_discount": null,
+     "free_items": null,
+     "item_discount": null
+    },
+    "conditions": {
+     "basket_contains": [
+      {
+       "min_amount": 2,
+       "max_amount": 3,
+       "any_of_items": null,
+       "items_from_categories": null,
+       "min_quantity": null,
+       "max_quantity": null,
+       "any_of_option_values": null,
+       "including_restricted_items": false
+      },
+      {
+       "min_amount": null,
+       "max_amount": null,
+       "any_of_items": [
+        "69084dd928ad5f69bbbb56fb",
+        "69084dd928ad5f69bbbb56fd",
+        "69084dd928ad5f69bbbb5703"
+       ],
+       "items_from_categories": null,
+       "min_quantity": 1,
+       "max_quantity": null,
+       "any_of_option_values": null,
+       "including_restricted_items": false
+      }
+     ],
+     "delivery_methods": null,
+     "max_distance": 3000,
+     "weekly_time_restrictions": [
+      {
+       "start": 600,
+       "end": 960
+      },
+      {
+       "start": 2040,
+       "end": 2400
+      },
+      {
+       "start": 3480,
+       "end": 3840
+      },
+      {
+       "start": 4920,
+       "end": 5280
+      },
+      {
+       "start": 6360,
+       "end": 6720
+      },
+      {
+       "start": 7800,
+       "end": 8160
+      },
+      {
+       "start": 9240,
+       "end": 9600
+      }
+     ],
+     "has_wolt_plus": null
+    },
+    "description": {
+     "title": "Prânzul sub 40 lei",
+     "points": [
+      "Oferte de prânz disponibile la produsele selectate, între 10:00 și 16:00",
+      "Valabil pentru comenzi în raza de 3 km",
+      "Disponibilitatea poate varia în funcție de restaurant"
+     ]
+    },
+    "end_date": "2050-01-01T00:00:00+00:00"
+   },
+   {
+    "id": "venue_campaign:6a992a87c27ad0d453f310e1",
+    "effects": {
+     "basket_discount": null,
+     "delivery_discount": null,
+     "free_items": null,
+     "item_discount": {
+      "fraction": 0.35,
+      "max_amount": null,
+      "min_amount": null,
+      "max_amount_per_item": null,
+      "min_amount_per_item": null,
+      "amount_per_item": null,
+      "include": {
+       "categories": null,
+       "items": [
+        "690864f7b07482298167c0bc",
+        "690864f7b07482298167c0ba",
+        "690864f7b07482298167c0b6",
+        "690864f7b07482298167c0c6",
+        "690864f7b07482298167c0be",
+        "690864f7b07482298167c0c2"
+       ],
+       "cheapest_items": null
+      },
+      "exclude": null,
+      "exclude_options": false
+     }
+    },
+    "conditions": {
+     "basket_contains": [
+      {
+       "min_amount": null,
+       "max_amount": null,
+       "any_of_items": [
+        "690864f7b07482298167c0bc",
+        "690864f7b07482298167c0ba",
+        "690864f7b07482298167c0b6",
+        "690864f7b07482298167c0c6",
+        "690864f7b07482298167c0be",
+        "690864f7b07482298167c0c2"
+       ],
+       "items_from_categories": null,
+       "min_quantity": null,
+       "max_quantity": null,
+       "any_of_option_values": null,
+       "including_restricted_items": false
+      }
+     ],
+     "delivery_methods": [
+      "homedelivery",
+      "takeaway",
+      "eatin"
+     ],
+     "max_distance": null,
+     "weekly_time_restrictions": null,
+     "has_wolt_plus": null
+    },
+    "description": {
+     "title": "35% reducere pentru articolele selectate",
+     "points": [
+      "Oferta este valabilă de la 3 Sept 2026 până la 1 Jan 2050 sau până la atingerea limitei maxime de promoții, oricare dintre situații survine prima"
+     ]
+    },
+    "end_date": "2050-01-01T00:00:00+00:00"
+   }
+  ]
+ }
+}

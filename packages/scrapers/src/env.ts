@@ -15,5 +15,5 @@ export const env = {
   geminiModel: () => optional("GEMINI_MODEL") ?? "gemini-2.5-flash-lite",
   geminiRequestsPerMinute: () => Number(optional("GEMINI_RPM") ?? 10),
   geminiDailyBudget: () => Number(optional("GEMINI_DAILY_BUDGET") ?? 200),
-  contact: () => optional("SCRAPER_CONTACT") ?? "https://github.com/fentezfoamea",
+  contact: () => optional("SCRAPER_CONTACT") ?? "https://github.com/flvvius/fentez_foamea",
 };

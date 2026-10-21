@@ -1,0 +1,142 @@
+{
+ "venue_raw": {
+  "discounts": [
+   {
+    "id": "venue_campaign:6abcfcd9386f4eb657d26bf5",
+    "effects": {
+     "basket_discount": null,
+     "delivery_discount": null,
+     "free_items": null,
+     "item_discount": {
+      "fraction": 0.3,
+      "max_amount": null,
+      "min_amount": null,
+      "max_amount_per_item": null,
+      "min_amount_per_item": null,
+      "amount_per_item": null,
+      "include": {
+       "categories": null,
+       "items": [
+        "1e7ded47788f30b1232ac584",
+        "ad55cba185bbec9fa20cab11",
+        "c35cc1515b72e0f2f5f249c0",
+        "89282e8203d9cc88e605077a"
+       ],
+       "cheapest_items": null
+      },
+      "exclude": null,
+      "exclude_options": true
+     }
+    },
+    "conditions": {
+     "basket_contains": [
+      {
+       "min_amount": null,
+       "max_amount": null,
+       "any_of_items": [
+        "1e7ded47788f30b1232ac584",
+        "ad55cba185bbec9fa20cab11",
+        "c35cc1515b72e0f2f5f249c0",
+        "89282e8203d9cc88e605077a"
+       ],
+       "items_from_categories": null,
+       "min_quantity": null,
+       "max_quantity": null,
+       "any_of_option_values": null,
+       "including_restricted_items": false
+      }
+     ],
+     "delivery_methods": null,
+     "max_distance": null,
+     "weekly_time_restrictions": null,
+     "has_wolt_plus": false
+    },
+    "description": {
+     "title": "30% off selected items | 45% with Wolt+",
+     "points": [
+      "Offer is valid from 1 Oct 2026 until 31 Oct 2026 or until the maximum limit for promotions is reached whichever is earlier",
+      "Add-ons to the main item are not included in this offer"
+     ]
+    },
+    "end_date": "2026-10-31T21:59:59.999000+00:00"
+   },
+   {
+    "id": "venue_campaign:69a6a4fae6eee4db138951af",
+    "effects": {
+     "basket_discount": null,
+     "delivery_discount": {
+      "amount": 0,
+      "fraction": 1.0,
+      "min_amount": null,
+      "max_amount": null
+     },
+     "free_items": null,
+     "item_discount": null
+    },
+    "conditions": {
+     "basket_contains": [],
+     "delivery_methods": null,
+     "max_distance": null,
+     "weekly_time_restrictions": null,
+     "has_wolt_plus": null
+    },
+    "description": {
+     "title": "0 lei delivery for 14 days",
+     "points": [
+      "For new users with a local phone number.",
+      "Offer is valid from 27 Feb 2026 until 16 Nov 2026 or until the maximum limit for promotions is reached whichever is earlier"
+     ]
+    },
+    "end_date": "2026-11-16T21:59:59+00:00"
+   },
+   {
+    "id": "venue_campaign:69b43aaf3876e8e1e7858502",
+    "effects": {
+     "basket_discount": {
+      "amount": 4000,
+      "fraction": null,
+      "min_amount": null,
+      "max_amount": null,
+      "include": null,
+      "exclude": null
+     },
+     "delivery_discount": null,
+     "free_items": null,
+     "item_discount": null
+    },
+    "conditions": {
+     "basket_contains": [
+      {
+       "min_amount": 8500,
+       "max_amount": null,
+       "any_of_items": null,
+       "items_from_categories": null,
+       "min_quantity": null,
+       "max_quantity": null,
+       "any_of_option_values": null,
+       "including_restricted_items": false
+      }
+     ],
+     "delivery_methods": [
+      "homedelivery"
+     ],
+     "max_distance": null,
+     "weekly_time_restrictions": null,
+     "has_wolt_plus": null
+    },
+    "description": {
+     "title": "40 lei on first 2 orders",
+     "points": [
+      "85 RON minimum order",
+      "For home delivery orders only",
+      "For new users with a local phone number.",
+      "This promotion does not apply on Service fee, delivery fee, personal adjustments and age-restricted items. The basket discount is excluded from the calculation of the service fee",
+      "Cannot be combined with other promotions",
+      "Offer is valid from 17 Mar 2026 until 16 Nov 2026 or until the maximum limit for promotions is reached whichever is earlier"
+     ]
+    },
+    "end_date": "2026-11-16T21:59:59.999000+00:00"
+   }
+  ]
+ }
+}

@@ -1,0 +1,113 @@
+{
+ "sections": [
+  {
+   "items": []
+  },
+  {
+   "items": [
+    {
+     "venue": {
+      "id": "67ed2703c86a467a0cecf40a",
+      "slug": "mcdonalds-unirea-67ed2703c86a467a0cecf40a",
+      "name": "McDonald's Unirea",
+      "address": "This is a virtual venue",
+      "location": [
+       26.104825,
+       44.428477
+      ],
+      "rating": {
+       "rating": 3,
+       "score": 7.8,
+       "volume": 873
+      }
+     }
+    },
+    {
+     "venue": {
+      "id": "67ee912b0231e210864243f3",
+      "slug": "kfc-unirea-67ee912b0231e210864243f3",
+      "name": "KFC Unirea",
+      "address": "This is a virtual venue",
+      "location": [
+       26.104776,
+       44.428822
+      ],
+      "rating": {
+       "rating": 3,
+       "score": 8.0,
+       "volume": 291
+      }
+     }
+    },
+    {
+     "venue": {
+      "id": "6810bbd025b1784447619b44",
+      "slug": "dristor-kebap-delivery-franceza-6810bbd025b1784447619b44",
+      "name": "Dristor Kebap Delivery - Franceza",
+      "address": "Bucuresti Sector 3, Str Franceza nr 17 ,parter si subsol",
+      "location": [
+       26.10035066,
+       44.4300423
+      ],
+      "rating": {
+       "rating": 3,
+       "score": 8.6,
+       "volume": 1291
+      }
+     }
+    },
+    {
+     "venue": {
+      "id": "67db029bfab7624d77771528",
+      "slug": "suta-de-grame-67db029bfab7624d77771528",
+      "name": "Suta de Grame",
+      "address": "Strada Negustori 21",
+      "location": [
+       26.11177193637323,
+       44.43517041165876
+      ],
+      "rating": {
+       "rating": 4,
+       "score": 9.4,
+       "volume": 492
+      }
+     }
+    },
+    {
+     "venue": {
+      "id": "67e175d60bd3fc375bb3a452",
+      "slug": "chopstix-unirii-67e175d60bd3fc375bb3a452",
+      "name": "Chopstix - Unirii",
+      "address": "Bulevardul Unirii, nr. 1",
+      "location": [
+       26.10432029,
+       44.42804235
+      ],
+      "rating": {
+       "rating": 3,
+       "score": 8.2,
+       "volume": 176
+      }
+     }
+    },
+    {
+     "venue": {
+      "id": "67dac58d5416f96b8fd40669",
+      "slug": "genin-67dac58d5416f96b8fd40669",
+      "name": "Genin",
+      "address": "Calea Floreasca 19",
+      "location": [
+       26.10058542,
+       44.45486581
+      ],
+      "rating": {
+       "rating": 3,
+       "score": 8.6,
+       "volume": 4201
+      }
+     }
+    }
+   ]
+  }
+ ]
+}
