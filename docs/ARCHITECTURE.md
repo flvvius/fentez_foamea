@@ -109,7 +109,7 @@ type Source = {
 4. If the venue has an address but no coordinates, geocode it through Nominatim, bounded to Bucharest and cached in `geocode_cache`.
 5. Drop venues outside the Bucharest bounding box (44.33 to 44.55 N, 25.96 to 26.26 E).
 6. Upsert the venue (cached per run), then upsert the offer, setting `active = true` and `last_seen_at = now()`.
-7. On a successful full run, mark this source's offers not seen since the run started as inactive. Runs with `--limit` or a failure never deactivate anything, so a partial run cannot wipe the map.
+7. On a successful full run, mark this source's offers not seen since the run started as inactive. Runs with `--limit` or a failure never deactivate anything, so a partial run cannot wipe the map. Sources that visit only part of their venues per run (Wolt, Glovo items) declare a `rotating` rule, and offers matching it stay active for 36 to 48 hours after they were last seen.
 8. Close the run row. After all sources finish, delete inactive offers and run rows older than 30 days.
 
 The CLI (`bun run scrape [sources...] [--dry-run] [--limit N] [--list]`) runs sources in sequence and exits non-zero if any failed. Dry runs skip the database and print validated offers as JSON lines.
@@ -126,14 +126,16 @@ The CLI (`bun run scrape [sources...] [--dry-run] [--limit N] [--list]`) runs so
 | Source | Data path | Emits | State |
 |---|---|---|---|
 | bonapp | `GET api.service.munch.eco/v1/products`, 20 km around the centre, 100 per page | One `surplus` offer per bag, with pickup window, stock and coordinates | Live |
-| wolt | Venue lists on a 7 km grid, then a per-venue campaign endpoint, then the menu for item discounts | Campaign offers plus up to 5 discounted items per venue | In progress |
-| glovo | Store wall from several points, store details for addresses, store menus for item prices | Store promos plus up to 5 discounted items per store | In progress |
-| kfc | SvelteKit `__data.json` for offers and restaurants | One offer per deal per Bucharest restaurant | In progress |
-| tacobell | SvelteKit `__data.json` for offers and restaurants | One offer per deal per Bucharest restaurant | In progress |
-| pizzahut | Open JSON for the offers category and locations | One offer per deal per Bucharest restaurant | In progress |
-| dominos | Static HTML deals and store list, geocoded | One offer per deal per store | In progress |
-| paul | Static HTML offers pages | Offers per bakery, or national if no store list | In progress |
-| citygrill | Promo pages per brand, monthly lunch-menu PDFs | `daily_menu`, `combo` and `discount` offers per restaurant | In progress |
+| wolt | Venue lists on a 7 km grid, then `/dynamic` per venue for campaigns, then the assortment for item prices. 600 venues per run, rotating every 4 hours | Campaign offers plus up to 5 discounted items per venue, `deliveryOnly` | Live |
+| glovo | Store wall POSTs from 5 points, `/v3/stores/{id}` for address and minimum basket, the Promoții deep link for item prices. Addresses and items rotate by day | Store promos plus up to 5 discounted items for 150 stores per run, `deliveryOnly` | Live |
+| kfc | SvelteKit `__data.json` for offers and restaurants (devalue format) | One offer per deal per Bucharest restaurant, or per participating restaurant | Live |
+| tacobell | SvelteKit `__data.json`, plus the `?/loadMore` form action for paged lists. Coordinates from Google Maps URLs | One offer per deal per Bucharest restaurant | Live |
+| pizzahut | Open JSON: `getProductsAndCategoryByCategoryId?categoryId=2` and `getLocations` | One offer per deal per Bucharest restaurant | Live |
+| dominos | Static HTML deals and store list, store addresses geocoded | One offer per deal per store | Live |
+| paul | Offer listing and detail pages, store locator XML with coordinates | Offers per bakery; deals naming one bakery go to that bakery only | Live |
+| citygrill | Promo pages on citygrill.ro, carucubere.ro and hanuberarilor.ro, lunch-menu PDFs through Gemini when a key is set | `daily_menu`, `combo`, `discount` and `happy_hour` offers at 7 restaurants | Live |
+
+Shared parsing lives in `src/romanian.ts`: weekday lists and ranges ("de luni până joi", "marțea"), the price next to "lei", Romanian date ranges and "până la" end dates, daily time windows, and conditions such as "nu se aplică la livrare" or click and collect.
 
 Notes on the bigger sources:
 
@@ -185,7 +187,9 @@ National chain deals appear once per store in the data. The list keeps the neare
 
 - Glovo's required headers and app version can change without notice and break that source until the constants are updated.
 - Neither Glovo nor Wolt publish in-store prices, so the site cannot prove a delivery discount is real versus walking in.
-- Glovo addresses are geocoded through Nominatim, which can miss or misplace some.
+- Glovo and Domino's addresses are geocoded through Nominatim, which misses some. 6 of 21 Domino's stores have no coordinates and show in the list without a distance.
+- Pizza Hut picks the restaurant through a session cookie, so store-specific deals (like a 1+1 at one mall) are missed and every store gets the generic list.
+- The City Grill group restaurants are a fixed list in code. Openings and closures need a code change.
 - The same restaurant on Bonapp, Wolt and Glovo shows as separate venues. `match_key` is stored but not used yet.
 - Blocking from GitHub Actions datacenter IPs has not been tested for any source.
 - Most small restaurants post daily menus only on Instagram or Facebook, which this project does not scrape.
@@ -193,7 +197,7 @@ National chain deals appear once per store in the data. The list keeps the neare
 
 ## Next steps
 
-- Scheduled workflow in `.github/workflows/scrape.yml`, with Bonapp running hourly in the daytime and the delivery platforms once or twice a day.
-- Finish the in-progress sources and add a seasonal Bucharest Food Week source for May 2027.
+- Run one scrape from GitHub Actions to confirm none of the sites block its IPs.
+- Add a seasonal Bucharest Food Week source for May 2027.
 - Merge duplicate venues across sources using `match_key`.
 - Alerts ("bags near me in the next 2 hours") using `offers_near`.
