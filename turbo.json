@@ -13,7 +13,8 @@
     "test": {},
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["DATABASE_URL"]
     }
   },
   "globalEnv": ["CI", "NODE_ENV", "VERCEL", "VERCEL_ENV", "VERCEL_URL"]
