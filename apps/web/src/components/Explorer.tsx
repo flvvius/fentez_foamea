@@ -2,7 +2,7 @@
 
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
-import { bucharestWeekday, formatRelative } from "@/lib/format";
+import { bucharestWeekday, countOffers, formatRelative } from "@/lib/format";
 import type { OfferSnapshot } from "@/lib/offers";
 import { OfferCard } from "./OfferCard";
 import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, venuePins, type SortKey } from "./explore";
@@ -93,7 +93,7 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
             Mâncare ieftină în București, acum.
           </h1>
           <p className="lede">
-            {placed.length} oferte de la restaurante, fast-food-uri și cofetării: pachete salvate de la aruncat, meniuri
+            {countOffers(placed.length)} de la restaurante, fast-food-uri și cofetării: pachete salvate de la aruncat, meniuri
             de prânz, reduceri.
             {snapshot.updatedAt && <> Actualizat {formatRelative(snapshot.updatedAt, now)}.</>}
           </p>
@@ -153,7 +153,7 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
           {selectedVenue && (
             <div className="venue-scope">
               <span>
-                <strong>{selectedVenue.name}</strong> · {listed.length} {listed.length === 1 ? "ofertă" : "oferte"}
+                <strong>{selectedVenue.name}</strong> · {countOffers(listed.length)}
               </span>
               <button type="button" className="link-quiet" onClick={() => showVenue(null)}>
                 Toate ofertele
@@ -179,7 +179,8 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
           )}
           {listed.length > visible && (
             <button type="button" className="more" onClick={() => setVisible((v) => v + PAGE)}>
-              Încă {Math.min(PAGE, listed.length - visible)} din {listed.length - visible}
+              Arată încă {Math.min(PAGE, listed.length - visible)}{" "}
+              <span className="muted">din {listed.length - visible}</span>
             </button>
           )}
           <footer className="colophon">

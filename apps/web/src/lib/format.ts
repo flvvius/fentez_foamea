@@ -8,6 +8,12 @@ export function formatPrice(value: number): string {
   return priceFormat.format(value);
 }
 
+export function countOffers(count: number): string {
+  if (count === 1) return "1 ofertă";
+  const lastTwo = count % 100;
+  return lastTwo === 0 || lastTwo >= 20 ? `${count} de oferte` : `${count} oferte`;
+}
+
 export function formatDistance(meters: number): string {
   if (meters < 1000) return `${Math.round(meters / 10) * 10} m`;
   return `${(meters / 1000).toFixed(meters < 10_000 ? 1 : 0).replace(".", ",")} km`;
