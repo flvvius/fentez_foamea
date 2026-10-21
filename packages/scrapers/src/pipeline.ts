@@ -42,7 +42,7 @@ export async function runSource(source: Source, ctx: SourceContext, sql: Sql | n
       if (ctx.limit && seenIds.size >= ctx.limit) break;
     }
 
-    const deactivated = sql && run && !ctx.limit ? await deactivateUnseen(sql, source.id, run.startedAt) : 0;
+    const deactivated = sql && run && !ctx.limit ? await deactivateUnseen(sql, source.id, run.startedAt, source.rotating) : 0;
     if (sql && run) await finishRun(sql, run.id, { status: "ok", seen: seenIds.size, rejected });
     return { source: source.id, seen: seenIds.size, rejected, deactivated, status: "ok" };
   } catch (error) {

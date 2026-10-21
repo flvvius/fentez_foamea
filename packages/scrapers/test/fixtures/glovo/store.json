@@ -1,0 +1,36 @@
+{
+ "id": 256136,
+ "name": "FRYDAY",
+ "slug": "fryday-buc",
+ "addressId": 413873,
+ "address": "Calea Vitan 55-59\n31282 Bucharest\nRomania",
+ "location": null,
+ "promotions": [
+  {
+   "id": 2007494158,
+   "title": "-40%",
+   "type": "PERCENTAGE_DISCOUNT",
+   "description": "la unele articole",
+   "origin": null,
+   "minimumBasketSizeCents": 0,
+   "amountCents": null,
+   "promoId": "2007494158",
+   "percentage": 40.0,
+   "prime": false,
+   "isPrime": false
+  },
+  {
+   "id": -1,
+   "title": "Prima comandă: livrare gratis",
+   "type": "FREE_DELIVERY",
+   "description": "",
+   "origin": null,
+   "minimumBasketSizeCents": 0,
+   "amountCents": 0,
+   "promoId": "-1",
+   "percentage": null,
+   "prime": false,
+   "isPrime": false
+  }
+ ]
+}

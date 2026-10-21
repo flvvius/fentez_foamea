@@ -1,0 +1,385 @@
+{
+ "type": "LIST_VIEW_LAYOUT",
+ "data": {
+  "title": "Promoții",
+  "activeElementSlug": "promotii-pr",
+  "body": [
+   {
+    "id": "promotii-pr",
+    "type": "LIST",
+    "data": {
+     "title": "Promoții",
+     "slug": "promotii-pr",
+     "elements": [
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 42370150889,
+        "name": "DUBLU RED PEPPER SMASHED",
+        "price": 54.550000000000004,
+        "promotion": {
+         "productId": 42370150889,
+         "promotionId": 1790373940,
+         "title": "-30%",
+         "type": "PERCENTAGE_DISCOUNT",
+         "percentage": 30.0,
+         "price": 38.48,
+         "priceInfo": {
+          "amount": 38.48,
+          "currencyCode": "RON",
+          "displayText": "38,48 RON"
+         },
+         "isPrime": false,
+         "promoId": "1790373940"
+        },
+        "promotions": [
+         {
+          "productId": 42370150889,
+          "promotionId": 1790373940,
+          "title": "-30%",
+          "type": "PERCENTAGE_DISCOUNT",
+          "percentage": 30.0,
+          "price": 38.48,
+          "priceInfo": {
+           "amount": 38.48,
+           "currencyCode": "RON",
+           "displayText": "38,48 RON"
+          },
+          "isPrime": false,
+          "promoId": "1790373940"
+         }
+        ],
+        "outOfStock": false
+       }
+      },
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 42370150902,
+        "name": "COUNTRY WINGS 9",
+        "price": 53.85,
+        "promotion": {
+         "productId": 42370150902,
+         "promotionId": 1790373940,
+         "title": "-30%",
+         "type": "PERCENTAGE_DISCOUNT",
+         "percentage": 30.0,
+         "price": 37.99,
+         "priceInfo": {
+          "amount": 37.99,
+          "currencyCode": "RON",
+          "displayText": "37,99 RON"
+         },
+         "isPrime": false,
+         "promoId": "1790373940"
+        },
+        "promotions": [
+         {
+          "productId": 42370150902,
+          "promotionId": 1790373940,
+          "title": "-30%",
+          "type": "PERCENTAGE_DISCOUNT",
+          "percentage": 30.0,
+          "price": 37.99,
+          "priceInfo": {
+           "amount": 37.99,
+           "currencyCode": "RON",
+           "displayText": "37,99 RON"
+          },
+          "isPrime": false,
+          "promoId": "1790373940"
+         }
+        ],
+        "outOfStock": false
+       }
+      },
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 42370150906,
+        "name": "COUNTRY WINGS HOT 9",
+        "price": 53.85,
+        "promotion": {
+         "productId": 42370150906,
+         "promotionId": 1790373940,
+         "title": "-30%",
+         "type": "PERCENTAGE_DISCOUNT",
+         "percentage": 30.0,
+         "price": 37.99,
+         "priceInfo": {
+          "amount": 37.99,
+          "currencyCode": "RON",
+          "displayText": "37,99 RON"
+         },
+         "isPrime": false,
+         "promoId": "1790373940"
+        },
+        "promotions": [
+         {
+          "productId": 42370150906,
+          "promotionId": 1790373940,
+          "title": "-30%",
+          "type": "PERCENTAGE_DISCOUNT",
+          "percentage": 30.0,
+          "price": 37.99,
+          "priceInfo": {
+           "amount": 37.99,
+           "currencyCode": "RON",
+           "displayText": "37,99 RON"
+          },
+          "isPrime": false,
+          "promoId": "1790373940"
+         }
+        ],
+        "outOfStock": false
+       }
+      },
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 42370150909,
+        "name": "HOMESTYLE CRISPY 5 ",
+        "price": 59.32,
+        "promotion": {
+         "productId": 42370150909,
+         "promotionId": 2007494158,
+         "title": "-40%",
+         "type": "PERCENTAGE_DISCOUNT",
+         "percentage": 40.0,
+         "price": 35.99,
+         "priceInfo": {
+          "amount": 35.99,
+          "currencyCode": "RON",
+          "displayText": "35,99 RON"
+         },
+         "isPrime": false,
+         "promoId": "2007494158"
+        },
+        "promotions": [
+         {
+          "productId": 42370150909,
+          "promotionId": 2007494158,
+          "title": "-40%",
+          "type": "PERCENTAGE_DISCOUNT",
+          "percentage": 40.0,
+          "price": 35.99,
+          "priceInfo": {
+           "amount": 35.99,
+           "currencyCode": "RON",
+           "displayText": "35,99 RON"
+          },
+          "isPrime": false,
+          "promoId": "2007494158"
+         }
+        ],
+        "outOfStock": false
+       }
+      },
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 42370150887,
+        "name": "DUBLU BLACK TRUFFLE SMASHED",
+        "price": 48.830000000000005,
+        "promotion": {
+         "productId": 42370150887,
+         "promotionId": 1790373940,
+         "title": "-30%",
+         "type": "PERCENTAGE_DISCOUNT",
+         "percentage": 30.0,
+         "price": 34.48,
+         "priceInfo": {
+          "amount": 34.48,
+          "currencyCode": "RON",
+          "displayText": "34,48 RON"
+         },
+         "isPrime": false,
+         "promoId": "1790373940"
+        },
+        "promotions": [
+         {
+          "productId": 42370150887,
+          "promotionId": 1790373940,
+          "title": "-30%",
+          "type": "PERCENTAGE_DISCOUNT",
+          "percentage": 30.0,
+          "price": 34.48,
+          "priceInfo": {
+           "amount": 34.48,
+           "currencyCode": "RON",
+           "displayText": "34,48 RON"
+          },
+          "isPrime": false,
+          "promoId": "1790373940"
+         }
+        ],
+        "outOfStock": false
+       }
+      },
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 42372444367,
+        "name": "DUBLU SMASHED BURGER  (RETETA NOUA)",
+        "price": 55.97,
+        "promotion": {
+         "productId": 42372444367,
+         "promotionId": 2007494158,
+         "title": "-40%",
+         "type": "PERCENTAGE_DISCOUNT",
+         "percentage": 40.0,
+         "price": 33.98,
+         "priceInfo": {
+          "amount": 33.98,
+          "currencyCode": "RON",
+          "displayText": "33,98 RON"
+         },
+         "isPrime": false,
+         "promoId": "2007494158"
+        },
+        "promotions": [
+         {
+          "productId": 42372444367,
+          "promotionId": 2007494158,
+          "title": "-40%",
+          "type": "PERCENTAGE_DISCOUNT",
+          "percentage": 40.0,
+          "price": 33.98,
+          "priceInfo": {
+           "amount": 33.98,
+           "currencyCode": "RON",
+           "displayText": "33,98 RON"
+          },
+          "isPrime": false,
+          "promoId": "2007494158"
+         }
+        ],
+        "outOfStock": false
+       }
+      },
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 42370150901,
+        "name": "COUNTRY WINGS 7",
+        "price": 45.99,
+        "promotion": {
+         "productId": 42370150901,
+         "promotionId": 1790373940,
+         "title": "-30%",
+         "type": "PERCENTAGE_DISCOUNT",
+         "percentage": 30.0,
+         "price": 32.49,
+         "priceInfo": {
+          "amount": 32.49,
+          "currencyCode": "RON",
+          "displayText": "32,49 RON"
+         },
+         "isPrime": false,
+         "promoId": "1790373940"
+        },
+        "promotions": [
+         {
+          "productId": 42370150901,
+          "promotionId": 1790373940,
+          "title": "-30%",
+          "type": "PERCENTAGE_DISCOUNT",
+          "percentage": 30.0,
+          "price": 32.49,
+          "priceInfo": {
+           "amount": 32.49,
+           "currencyCode": "RON",
+           "displayText": "32,49 RON"
+          },
+          "isPrime": false,
+          "promoId": "1790373940"
+         }
+        ],
+        "outOfStock": false
+       }
+      },
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 42370150905,
+        "name": "COUNTRY WINGS HOT 7.",
+        "price": 45.99,
+        "promotion": {
+         "productId": 42370150905,
+         "promotionId": 1798449205,
+         "title": "-30%",
+         "type": "PERCENTAGE_DISCOUNT",
+         "percentage": 30.0,
+         "price": 32.49,
+         "priceInfo": {
+          "amount": 32.49,
+          "currencyCode": "RON",
+          "displayText": "32,49 RON"
+         },
+         "isPrime": false,
+         "promoId": "1798449205"
+        },
+        "promotions": [
+         {
+          "productId": 42370150905,
+          "promotionId": 1798449205,
+          "title": "-30%",
+          "type": "PERCENTAGE_DISCOUNT",
+          "percentage": 30.0,
+          "price": 32.49,
+          "priceInfo": {
+           "amount": 32.49,
+           "currencyCode": "RON",
+           "displayText": "32,49 RON"
+          },
+          "isPrime": false,
+          "promoId": "1798449205"
+         }
+        ],
+        "outOfStock": false
+       }
+      },
+      {
+       "type": "PRODUCT_ROW",
+       "data": {
+        "id": 41747140863,
+        "name": "Pepsi 0.33L.",
+        "price": 14.25,
+        "promotion": {
+         "productId": 41747140863,
+         "promotionId": 2004538203,
+         "title": "1+1",
+         "type": "TWO_FOR_ONE",
+         "isPrime": false,
+         "promoId": "2004538203"
+        },
+        "promotions": [
+         {
+          "productId": 41747140863,
+          "promotionId": 2004538203,
+          "title": "1+1",
+          "type": "TWO_FOR_ONE",
+          "isPrime": false,
+          "promoId": "2004538203"
+         }
+        ],
+        "outOfStock": false
+       }
+      }
+     ]
+    }
+   },
+   {
+    "type": "LABEL",
+    "data": {
+     "icon": {
+      "lightImageId": "dh:customer-assets-glovo/StoreWall/InfoLight.png",
+      "darkImageId": "dh:customer-assets-glovo/StoreWall/InfoDark.png"
+     },
+     "label": "Valori nutritionale - Alergeni"
+    }
+   }
+  ],
+  "otcLabelsNavigationLinks": {}
+ }
+}

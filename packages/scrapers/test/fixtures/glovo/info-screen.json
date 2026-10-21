@@ -1,0 +1,363 @@
+{
+ "sections": [
+  {
+   "type": "LABEL_V2",
+   "data": {
+    "text": "FRYDAY",
+    "styles": {
+     "type": "HEADER_LARGE",
+     "alignment": "LEFT",
+     "textAlignment": "LEFT"
+    }
+   }
+  },
+  {
+   "type": "SEPARATOR",
+   "data": {
+    "styles": {
+     "type": "XXS"
+    }
+   }
+  },
+  {
+   "type": "LIST",
+   "data": {
+    "title": "Adresă",
+    "elements": [
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Calea Vitan 55-59\n31282 Bucharest\nRomania",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SEPARATOR",
+   "data": {
+    "styles": {
+     "type": "XXS"
+    }
+   }
+  },
+  {
+   "type": "LIST",
+   "data": {
+    "title": "Program de lucru",
+    "elements": [
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Luni: 00:00 - 04:00 și 10:00 - 00:00",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Marți: 00:00 - 04:00 și 10:00 - 00:00",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Miercuri: 00:00 - 04:00 și 10:00 - 00:00",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Joi: 00:00 - 04:00 și 10:00 - 00:00",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Vineri: 00:00 - 04:00 și 10:00 - 00:00",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Sâmbătă: 00:00 - 04:00 și 10:00 - 00:00",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Duminică: 00:00 - 04:00 și 10:00 - 00:00",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SEPARATOR",
+   "data": {
+    "styles": {
+     "type": "XXS"
+    }
+   }
+  },
+  {
+   "type": "LIST",
+   "data": {
+    "title": "Contact",
+    "elements": [
+     {
+      "type": "CONTACT_INFO",
+      "data": {
+       "label": {
+        "type": "LABEL_V2",
+        "data": {
+         "text": "+40744222293",
+         "styles": {
+          "type": "DESCRIPTION",
+          "alignment": "LEFT",
+          "textAlignment": "LEFT"
+         }
+        }
+       },
+       "icon": {
+        "lightImageId": "dh:customer-assets-glovo/checkout/store-view/light/store-info-contact-phone.png",
+        "darkImageId": "dh:customer-assets-glovo/checkout/store-view/dark/store-info-contact-phone.png"
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "type": "SEPARATOR",
+   "data": {
+    "styles": {
+     "type": "XXS"
+    }
+   }
+  },
+  {
+   "type": "LIST",
+   "data": {
+    "title": "Termenii și condiții Glovo",
+    "elements": [
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Vă rugăm să consultați Termenii și condițiile legale pentru Glovo din țara dvs.",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Mai multe informații aici",
+       "styles": {
+        "type": "LINK",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      },
+      "actions": [
+       {
+        "trigger": "onInteraction",
+        "type": "EXTERNAL_LINK",
+        "data": {
+         "link": "https://glovoapp.com/docs/ro/legal/terms/?country=ro"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "type": "SEPARATOR",
+   "data": {
+    "styles": {
+     "type": "XXS"
+    }
+   }
+  },
+  {
+   "type": "LIST",
+   "data": {
+    "title": "Informații despre partener",
+    "elements": [
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "ALBINA RESTAURANTE S.R.L.",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Denumire juridică",
+       "styles": {
+        "type": "HEADER_SMALLEST",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "727475 SUCEAVA SUCEAVA\nRomania",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Adresa sediului central",
+       "styles": {
+        "type": "HEADER_SMALLEST",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "RO40147443",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Cod de identificare fiscală",
+       "styles": {
+        "type": "HEADER_SMALLEST",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "J2018001766331",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Număr de înregistrare",
+       "styles": {
+        "type": "HEADER_SMALLEST",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Nr. VA 34898/01.08.2022",
+       "styles": {
+        "type": "DESCRIPTION",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     },
+     {
+      "type": "LABEL_V2",
+      "data": {
+       "text": "Număr de autorizație",
+       "styles": {
+        "type": "HEADER_SMALLEST",
+        "alignment": "LEFT",
+        "textAlignment": "LEFT"
+       }
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "actions": [
+  {
+   "trigger": "onDisplay",
+   "type": "SCREEN",
+   "data": {
+    "events": [
+     {
+      "name": "Store Info Screen",
+      "data": {
+       "storeId": "256136",
+       "storeAddressId": "413873",
+       "storeInfoDisplayed": "store_name,store_address,schedule,contact_info,terms_and_conditions,company_details"
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "type": "STORE_INFO_SCREEN"
+}

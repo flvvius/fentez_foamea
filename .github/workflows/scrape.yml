@@ -1,0 +1,55 @@
+name: scrape
+
+on:
+  schedule:
+    - cron: "*/30 4-19 * * *"
+    - cron: "20 6,10,15 * * *"
+    - cron: "40 4 * * *"
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: "Space-separated source ids, or 'all'"
+        required: true
+        default: "all"
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: scrape-${{ github.event.schedule || inputs.sources }}
+      cancel-in-progress: false
+    steps:
+      - name: Pick sources
+        id: pick
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          MANUAL: ${{ inputs.sources }}
+        run: |
+          case "$SCHEDULE" in
+            "*/30 4-19 * * *") sources="bonapp" ;;
+            "20 6,10,15 * * *") sources="wolt glovo" ;;
+            "40 4 * * *") sources="kfc pizzahut tacobell dominos paul citygrill" ;;
+            *) sources="${MANUAL:-all}" ;;
+          esac
+          echo "sources=$sources" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - run: bun install --frozen-lockfile
+
+      - name: Scrape ${{ steps.pick.outputs.sources }}
+        working-directory: packages/scrapers
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          SCRAPER_CONTACT: ${{ secrets.SCRAPER_CONTACT }}
+        run: bun run src/cli.ts ${{ steps.pick.outputs.sources }}

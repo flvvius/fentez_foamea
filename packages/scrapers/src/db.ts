@@ -100,12 +100,27 @@ export async function upsertOffer(
   `;
 }
 
-export async function deactivateUnseen(sql: Sql, source: SourceId, since: Date): Promise<number> {
+export async function deactivateUnseen(
+  sql: Sql,
+  source: SourceId,
+  since: Date,
+  rotating?: { idPattern: string; keepHours: number },
+): Promise<number> {
+  const keepRotating = rotating
+    ? sql`and not (source_offer_id like ${rotating.idPattern} and last_seen_at > now() - make_interval(hours => ${rotating.keepHours}))`
+    : sql``;
   const result = await sql`
     update offers set active = false
-    where source = ${source} and active and last_seen_at < ${since}
+    where source = ${source} and active and last_seen_at < ${since} ${keepRotating}
   `;
   return result.count;
+}
+
+export async function locatedVenueIds(sql: Sql, source: SourceId): Promise<Set<string>> {
+  const rows = await sql<{ source_venue_id: string }[]>`
+    select source_venue_id from venues where source = ${source} and location is not null
+  `;
+  return new Set(rows.map((row) => row.source_venue_id));
 }
 
 export async function purgeOld(sql: Sql, olderThanDays = 30): Promise<void> {

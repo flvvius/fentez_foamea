@@ -9,11 +9,18 @@ export type SourceContext = {
   log: Logger;
   geocoder: Geocoder;
   gemini: GeminiExtractor | null;
+  locatedVenueIds: ReadonlySet<string>;
   limit?: number;
+};
+
+export type RotatingOffers = {
+  idPattern: string;
+  keepHours: number;
 };
 
 export type Source = {
   id: SourceId;
   description: string;
+  rotating?: RotatingOffers;
   scrape: (ctx: SourceContext) => AsyncIterable<ScrapedOffer>;
 };

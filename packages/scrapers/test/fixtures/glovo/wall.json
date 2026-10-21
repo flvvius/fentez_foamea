@@ -1,0 +1,150 @@
+{
+ "data": {
+  "stores": {
+   "pagination": {
+    "limit": 50,
+    "offset": 0,
+    "totalEntries": 1608
+   },
+   "entries": [
+    {
+     "id": "173705",
+     "slug": "zestpizza",
+     "title": "Zest Pizza",
+     "promotions": [
+      {
+       "type": "PERCENTAGE_DISCOUNT",
+       "benefit": "-50%",
+       "description": "la unele articole",
+       "isPrime": false
+      }
+     ],
+     "availability": {
+      "status": "OPEN"
+     },
+     "metadata": {
+      "promoIds": [
+       "2076043744",
+       "-1"
+      ],
+      "storeAddressId": 521583,
+      "shopRankPosition": 0,
+      "rankingType": "GlobalRanking",
+      "shopSponsoringPlacement": "shop_list:list",
+      "isSurgeActivated": false,
+      "deliveryFee": 1.99,
+      "deliveryFeeCurrency": "RON"
+     }
+    },
+    {
+     "id": "600574",
+     "slug": "alma-buc",
+     "title": "ALMA",
+     "promotions": [
+      {
+       "type": "BASKET_PERCENTAGE",
+       "benefit": "-30%",
+       "description": "întregul meniu",
+       "isPrime": false
+      }
+     ],
+     "availability": {
+      "status": "OPEN"
+     },
+     "metadata": {
+      "promoIds": [
+       "1754058320",
+       "-1"
+      ],
+      "storeAddressId": 961540,
+      "shopRankPosition": 3,
+      "rankingType": "Hyperlocal",
+      "shopSponsoringPlacement": "shop_list:list",
+      "isSurgeActivated": false,
+      "deliveryFee": 0.99,
+      "deliveryFeeCurrency": "RON"
+     }
+    },
+    {
+     "id": "264271",
+     "slug": "domino-s-pizza-buc",
+     "title": "Domino's Pizza",
+     "promotions": [
+      {
+       "type": "TWO_FOR_ONE",
+       "benefit": "1+1",
+       "description": "la unele articole",
+       "isPrime": false
+      }
+     ],
+     "availability": {
+      "status": "OPEN"
+     },
+     "metadata": {
+      "promoIds": [
+       "2011576722",
+       "-1"
+      ],
+      "storeAddressId": 554152,
+      "shopRankPosition": 9,
+      "rankingType": "GlobalRanking",
+      "shopSponsoringPlacement": "shop_list:list",
+      "isSurgeActivated": false,
+      "deliveryFee": 2.99,
+      "deliveryFeeCurrency": "RON"
+     }
+    },
+    {
+     "id": "129241",
+     "slug": "pizzamania-buc",
+     "title": "PizzaMania Victoriei",
+     "promotions": [
+      {
+       "type": "PERCENTAGE_DISCOUNT",
+       "benefit": "-20%",
+       "description": "cu Prime",
+       "isPrime": true
+      }
+     ],
+     "availability": {
+      "status": "OPEN"
+     },
+     "metadata": {
+      "promoIds": [
+       "2076771805",
+       "-1"
+      ],
+      "storeAddressId": 233184,
+      "shopRankPosition": 38,
+      "rankingType": "Hyperlocal",
+      "shopSponsoringPlacement": "shop_list:list",
+      "isSurgeActivated": false,
+      "deliveryFee": 4.99,
+      "deliveryFeeCurrency": "RON"
+     }
+    },
+    {
+     "id": "264278",
+     "slug": "fendi-kebap-buc",
+     "title": "Fendi Kebap",
+     "promotions": [],
+     "availability": {
+      "status": "OPEN"
+     },
+     "metadata": {
+      "promoIds": [
+       "-1"
+      ],
+      "storeAddressId": 742013,
+      "shopRankPosition": 7,
+      "rankingType": "GlobalRanking",
+      "shopSponsoringPlacement": "shop_list:list",
+      "isSurgeActivated": false,
+      "deliveryFee": 9.99,
+      "deliveryFeeCurrency": "RON"
+     }
+    }
+   ]
+  }
+ }
+}

@@ -5,15 +5,25 @@ import type { PoliteHttp } from "./http.ts";
 type NominatimResult = { lat: string; lon: string; display_name: string };
 
 export class Geocoder {
+  private readonly memo = new Map<string, Promise<LatLon | undefined>>();
+
   constructor(
     private readonly sql: Sql | null,
     private readonly http: PoliteHttp,
   ) {}
 
-  async locate(address: string): Promise<LatLon | undefined> {
+  locate(address: string): Promise<LatLon | undefined> {
     const query = address.trim().toLowerCase();
-    if (!query) return undefined;
+    if (!query) return Promise.resolve(undefined);
+    let pending = this.memo.get(query);
+    if (!pending) {
+      pending = this.lookup(address, query);
+      this.memo.set(query, pending);
+    }
+    return pending;
+  }
 
+  private async lookup(address: string, query: string): Promise<LatLon | undefined> {
     const cached = await this.fromCache(query);
     if (cached !== undefined) return cached ?? undefined;
 

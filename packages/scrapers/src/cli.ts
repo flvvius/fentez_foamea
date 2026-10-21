@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { connect, purgeOld, type Sql } from "./db.ts";
+import { connect, locatedVenueIds, purgeOld, type Sql } from "./db.ts";
 import { GeminiExtractor } from "./gemini.ts";
 import { Geocoder } from "./geocode.ts";
 import { PoliteHttp } from "./http.ts";
@@ -31,6 +31,7 @@ if (unknown.length) {
 const log = createLogger("cli");
 const sql: Sql | null = values["dry-run"] ? null : connect();
 const http = new PoliteHttp(log);
+const geocoder = new Geocoder(sql, http);
 const sink = values["dry-run"] ? { write: async (offer: unknown) => void process.stdout.write(`${JSON.stringify(offer)}\n`) } : undefined;
 
 const summaries: RunSummary[] = [];
@@ -43,8 +44,9 @@ try {
       {
         http,
         log: sourceLog,
-        geocoder: new Geocoder(sql, http),
+        geocoder,
         gemini: GeminiExtractor.fromEnv(sql, sourceLog),
+        locatedVenueIds: sql ? await locatedVenueIds(sql, source.id) : new Set(),
         limit: values.limit ? Number(values.limit) : undefined,
       },
       sql,
