@@ -17,7 +17,7 @@ type MunchProduct = {
   longitude: string;
   pickup_intervals?: string;
   pickup_date?: string;
-  permalink: string;
+  slug: string;
   description?: string;
   type?: string;
   audience?: string;
@@ -78,7 +78,7 @@ export function toOffer(product: MunchProduct): ScrapedOffer | undefined {
     pickupStart,
     pickupEnd,
     availableCount: product.stock_quantity,
-    url: `${SHOP}${product.permalink}`,
+    url: `${SHOP}/product/${product.slug}`,
     deliveryOnly: false,
     venue: {
       sourceVenueId: product.vendor.id,
