@@ -12,6 +12,7 @@
     "@fentezfoamea/core": "workspace:*",
     "@google/genai": "^2.30.0",
     "cheerio": "^1.2.0",
+    "devalue": "^6.0.3",
     "p-limit": "^7.3.3",
     "postgres": "^3.4.9",
     "zod": "catalog:"

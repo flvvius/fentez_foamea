@@ -1,0 +1,266 @@
+{
+ "data": [
+  {
+   "id": 112,
+   "attributes": {
+    "slug": "fa-afacere-cu-top-menu",
+    "title": "Fă afacere cu Top Menu",
+    "shortText": "Top Menu e din nou aici cu un preț și mai mic. Ai un meniu complet cu pui, cartofi și răcoritoare la doar 19,90 lei. Chiar e afacere.",
+    "startDate": "2026-09-02T21:00:00.000Z",
+    "endDate": "2026-11-11T22:00:00.000Z",
+    "openInApp": false,
+    "showInOffersPage": true,
+    "description": null,
+    "disclaimer": null,
+    "restaurante": {
+     "data": []
+    }
+   }
+  },
+  {
+   "id": 108,
+   "attributes": {
+    "slug": "poftaladublu",
+    "title": "FĂ-ȚI POFTA LA DUBLU",
+    "shortText": "Oferta este disponibilă în perioada 19 octombrie – 15 noiembrie 2026",
+    "startDate": "2026-07-08T21:00:00.000Z",
+    "endDate": "2026-11-15T22:00:00.000Z",
+    "openInApp": false,
+    "showInOffersPage": true,
+    "description": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "FĂ-ȚI POFTA LA DUBLU",
+        "bold": true
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Cumpără un Dublu Booster/Dublu Hot Booster și mai primești încă unul din partea casei sau un Twister Picant/Nepicant și mai primești încă unul din partea casei."
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Oferta este disponibilă în perioada 19 octombrie – 15 noiembrie 2026, în limita stocului disponibil, doar în locațiile selectate. Oferta NU este disponibilă la livrare. Verifică lista restaurantelor participante mai jos. "
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": ""
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": ""
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": ""
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": ""
+       }
+      ]
+     }
+    ],
+    "disclaimer": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Oferta este disponibilă în perioada 19 octombrie – 15 noiembrie 2026, în limita stocului disponibil, doar în locațiile selectate. Oferta NU este disponibilă la livrare. Verifică lista restaurantelor participante mai jos. "
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": ""
+       }
+      ]
+     }
+    ],
+    "restaurante": {
+     "data": [
+      {
+       "id": 35,
+       "attributes": {
+        "title": "KFC Promenada",
+        "slug": "kfc-promenada",
+        "address": "București, Floreasca, Nr. 246B, sector 1",
+        "coordX": "44.47881",
+        "coordY": "26.103661",
+        "public": true
+       }
+      },
+      {
+       "id": 115,
+       "attributes": {
+        "title": "KFC Energomontaj Drive-Thru",
+        "slug": "kfc-energomontaj-drive-thru",
+        "address": "M Park Titan, Bucuresti, Sector3, Str Ilioara, Nr54F",
+        "coordX": "44.4061685",
+        "coordY": "26.1624292",
+        "public": true
+       }
+      },
+      {
+       "id": 9,
+       "attributes": {
+        "title": "KFC Alba Iulia Carolina Mall",
+        "slug": "kfc-alba-iulia-carolina-mall",
+        "address": "Str. Alexandru Ioan Cuza, nr. 2, în incinta Carolina Mall, Mun Alba Iulia, jud. Alba",
+        "coordX": "46.0850853",
+        "coordY": "23.5912779",
+        "public": true
+       }
+      },
+      {
+       "id": 10,
+       "attributes": {
+        "title": "KFC Alba Iulia Drive-Thru",
+        "slug": "kfc-alba-iulia-drive-thru",
+        "address": "str. TUDOR VLADIMIRESCU, Nr. 50A, unitatea G1.1, Municipiul Alba-Iulia, jud. Alba",
+        "coordX": "46.080182",
+        "coordY": "23.583817",
+        "public": true
+       }
+      },
+      {
+       "id": 44,
+       "attributes": {
+        "title": "KFC Baia Mare Value Center",
+        "slug": "kfc-baia-mare-value-center",
+        "address": "Baia Mare, Blvd. București, Nr. 53, incinta mall Baia Mare Value Center",
+        "coordX": "47.64524",
+        "coordY": "23.53864",
+        "public": true
+       }
+      },
+      {
+       "id": 8,
+       "attributes": {
+        "title": "KFC Braşov Afi ",
+        "slug": "kfc-brasov-afi",
+        "address": "Brașov, B-dul 15 Noiembrie nr. 78, Județul Brașov",
+        "coordX": "45.65084",
+        "coordY": "25.61008",
+        "public": true
+       }
+      },
+      {
+       "id": 50,
+       "attributes": {
+        "title": "KFC Brăila Promenada",
+        "slug": "kfc-braila-promenada",
+        "address": "Brăila, Str. Principală, Nr. 4B, Com. Chiscani, Sat Vărsătura, Brăila Mall",
+        "coordX": "45.229071",
+        "coordY": "27.93781",
+        "public": true
+       }
+      },
+      {
+       "id": 60,
+       "attributes": {
+        "title": "KFC Constanța Tom",
+        "slug": "kfc-constanta-tom",
+        "address": "Constanța, Blvd. Tomis, Nr. 391, Centrul Comercial Tom",
+        "coordX": "44.212707",
+        "coordY": "28.603684",
+        "public": true
+       }
+      },
+      {
+       "id": 68,
+       "attributes": {
+        "title": "KFC Iași Iulius",
+        "slug": "kfc-iasi-iulius",
+        "address": "Iaşi, Blvd. Tudor Vladimirescu, Nr. 2, Iulius Mall, etaj 2",
+        "coordX": "47.155325",
+        "coordY": "27.605229",
+        "public": true
+       }
+      },
+      {
+       "id": 76,
+       "attributes": {
+        "title": "KFC Piatra Neamț Shopping City",
+        "slug": "kfc-piatra-neamt-shopping-city",
+        "address": "Piatra Neamț, Blvd. Decebal, Nr. 79, Etaj 1, zona de food-court, în incinta Shopping City",
+        "coordX": "46.935265",
+        "coordY": "26.348574",
+        "public": true
+       }
+      },
+      {
+       "id": 91,
+       "attributes": {
+        "title": "KFC Slatina Drive-Thru",
+        "slug": "kfc-slatina-drive-thru",
+        "address": "Slatina, Str. Tunari, Nr. 1D",
+        "coordX": "44.425513762",
+        "coordY": "24.3817655508",
+        "public": true
+       }
+      },
+      {
+       "id": 93,
+       "attributes": {
+        "title": "KFC Suceava Iulius",
+        "slug": "kfc-suceava-iulius",
+        "address": "Suceava, Iulius Mall Suceava, etaj 1, Calea Unirii, Nr. 22 (în zona de food court)",
+        "coordX": "47.664888",
+        "coordY": "26.26633",
+        "public": true
+       }
+      },
+      {
+       "id": 94,
+       "attributes": {
+        "title": "KFC Suceava Shopping City",
+        "slug": "kfc-suceava-shopping-city",
+        "address": "Suceava, Calea Unirii, Nr. 27, Suceava Shopping City (în zona food court)",
+        "coordX": "47.664287",
+        "coordY": "26.265816",
+        "public": true
+       }
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

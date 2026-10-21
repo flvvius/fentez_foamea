@@ -1,0 +1,125 @@
+{
+ "data": [
+  {
+   "id": 6,
+   "attributes": {
+    "name": "Alba Iulia",
+    "slug": "alba-iulia",
+    "restaurants": {
+     "data": [
+      {
+       "id": 9,
+       "attributes": {
+        "title": "KFC Alba Iulia Carolina Mall",
+        "slug": "kfc-alba-iulia-carolina-mall",
+        "address": "Str. Alexandru Ioan Cuza, nr. 2, în incinta Carolina Mall, Mun Alba Iulia, jud. Alba",
+        "coordX": "46.0850853",
+        "coordY": "23.5912779",
+        "public": true
+       }
+      },
+      {
+       "id": 10,
+       "attributes": {
+        "title": "KFC Alba Iulia Drive-Thru",
+        "slug": "kfc-alba-iulia-drive-thru",
+        "address": "str. TUDOR VLADIMIRESCU, Nr. 50A, unitatea G1.1, Municipiul Alba-Iulia, jud. Alba",
+        "coordX": "46.080182",
+        "coordY": "23.583817",
+        "public": true
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": 1,
+   "attributes": {
+    "name": "București",
+    "slug": "bucuresti",
+    "restaurants": {
+     "data": [
+      {
+       "id": 2,
+       "attributes": {
+        "title": "KFC Băneasa Drive-Thru",
+        "slug": "kfc-baneasa-drive-thru",
+        "address": "București, Șos. București - Ploiești, Nr. 42-44, sector 1, parcare Băneasa Shopping City",
+        "coordX": "44.50754891809156",
+        "coordY": "26.085216097095383",
+        "public": true
+       }
+      },
+      {
+       "id": 4,
+       "attributes": {
+        "title": "KFC Colosseum",
+        "slug": "kfc-colosseum",
+        "address": "București, Șos. Chitilei, Nr. 284, sector 1, în cadrul Centrului Comercial Colosseum Center",
+        "coordX": "44.4936991",
+        "coordY": "26.015378444407",
+        "public": true
+       }
+      },
+      {
+       "id": 1,
+       "attributes": {
+        "title": "KFC Auchan Drumul Taberei",
+        "slug": "kfc-auchan-drumul-taberei",
+        "address": "București, Str. Brașov, Nr. 25, Centrul Comercial Auchan Drumul Taberei, parter (zona food court), sector 6",
+        "coordX": "44.415665",
+        "coordY": "26.035394",
+        "public": true
+       }
+      },
+      {
+       "id": 14,
+       "attributes": {
+        "title": "KFC Auchan Titan",
+        "slug": "kfc-auchan-titan",
+        "address": "București, Blvd. 1 Decembrie 1918, Centrul Comercial Auchan Titan",
+        "coordX": "44.420489",
+        "coordY": "26.179417",
+        "public": true
+       }
+      },
+      {
+       "id": 15,
+       "attributes": {
+        "title": "KFC Băneasa Shopping City",
+        "slug": "kfc-baneasa-shopping-city",
+        "address": "București, Șos. București - Ploiești, Nr. 42D, sector 1, Băneasa Shopping City\n",
+        "coordX": "44.506416",
+        "coordY": "26.088974",
+        "public": true
+       }
+      },
+      {
+       "id": 16,
+       "attributes": {
+        "title": "KFC București Mall",
+        "slug": "kfc-bucuresti-mall",
+        "address": "București, Calea Vitan, Nr. 55-59, București Mall, etaj 2, sector 3",
+        "coordX": "44.420163",
+        "coordY": "26.126214",
+        "public": true
+       }
+      },
+      {
+       "id": 35,
+       "attributes": {
+        "title": "KFC Promenada",
+        "slug": "kfc-promenada",
+        "address": "București, Floreasca, Nr. 246B, sector 1",
+        "coordX": "44.47881",
+        "coordY": "26.103661",
+        "public": true
+       }
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

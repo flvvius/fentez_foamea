@@ -1,0 +1,318 @@
+{
+ "data": [
+  {
+   "id": 7,
+   "attributes": {
+    "label": "#martibucket",
+    "headline": "N-ai cum să mai ratezi Marți Bucket",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Săptămâna asta, Marți Bucket e în meniu de luni până vineri. #pebune."
+       }
+      ]
+     }
+    ],
+    "disclaimer": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Sugestie de prezentare. Marți Bucket la 33.00 lei include 20 Hot Wings®. Oferta este valabilă în limita stocului disponibil, de luni până vineri, în perioada 12-16 octombrie 2026, în toate restaurantele KFC din România, cu excepția serviciului delivery prin agregatori. Hot Bucket nu este disponibil pe perioada campaniei."
+       }
+      ]
+     }
+    ],
+    "startDate": "2026-02-24T06:00:00.000Z",
+    "endDate": "2026-10-16T19:00:00.000Z",
+    "button": {
+     "url": "/marti-bucket/"
+    }
+   }
+  },
+  {
+   "id": 31,
+   "attributes": {
+    "label": "#cheezyCrazy",
+    "headline": "CRAZY, E CHEEZY",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "E noul sos cald cu brânză care îți dă pofta peste cap indiferent ce pui în el. Încearcă-l în cele mai tasty combinații!"
+       }
+      ]
+     }
+    ],
+    "disclaimer": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Campanie valabilă în perioada 8 octombrie - 18 noiembrie 2026, în limita stocului disponibil, în toate restaurantele KFC din România, cu excepția celor din cadrul benzinăriilor partenere și KFC Pitești Retail Park."
+       }
+      ]
+     }
+    ],
+    "startDate": "2025-10-29T22:00:00.000Z",
+    "endDate": "2026-12-30T22:00:00.000Z",
+    "button": {
+     "url": "/meniu/noutati"
+    }
+   }
+  },
+  {
+   "id": 44,
+   "attributes": {
+    "label": "#marti-bucket-teasing",
+    "headline": "N-ai cum să mai ratezi Marți Bucket",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Din 12 octombrie, ai o săptămână cu Marți Bucket de luni până vineri."
+       }
+      ]
+     }
+    ],
+    "disclaimer": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Sugestie de prezentare. Marți Bucket la 33.00 lei include 20 Hot Wings®. Oferta este valabilă în limita stocului disponibil, de luni până vineri, în perioada 12-16 octombrie 2026, în toate restaurantele KFC din România, cu excepția serviciului delivery prin agregatori. Hot Bucket nu este disponibil pe perioada campaniei."
+       }
+      ]
+     }
+    ],
+    "startDate": "2026-10-06T21:00:00.000Z",
+    "endDate": "2026-10-11T21:00:00.000Z",
+    "button": {
+     "url": "/marti-bucket/"
+    }
+   }
+  },
+  {
+   "id": 34,
+   "attributes": {
+    "label": "#topmenu",
+    "headline": "Ți-e poftă de o super afacere?",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Top Menu s-a întors cu un preț și mai mic #pebune."
+       }
+      ]
+     }
+    ],
+    "disclaimer": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Comparativ cu prețul produsului Top Menu de 20.90 lei din perioada 08.01.2026 - 11.03.2026. Sugestie de prezentare. TOP Menu la 19.90 lei include 1 Booster/Hot booster, 2 Crispy Strips, porție mică de cartofi prăjiți, răcoritoare la pahar 0.3L/ 1 Crispy Sandwich, 3 Hot Wings, porție mică de cartofi prajiți, răcoritoare la pahar 0.3L/ 3 Crispy Strips, 2 Hot Wings, porție mică de cartofi prăjiți, răcoritoare la pahar 0.3L/ 3 Strips Nepicanți, 3 Fillet Bites, porție mică de cartofi prajiți, răcoritoare la pahar 0.3L. Ofertă valabilă în perioada 3 septembrie – 11 noiembrie 2026, în limita stocului disponibil, în restaurantele KFC din România, cu excepția celor din cadrul benzinăriilor partenere și a KFC Pitești Retail Park."
+       }
+      ]
+     }
+    ],
+    "startDate": "2026-01-08T08:00:00.000Z",
+    "endDate": "2026-11-11T22:00:00.000Z",
+    "button": {
+     "url": "/meniu/noutati"
+    }
+   }
+  },
+  {
+   "id": 38,
+   "attributes": {
+    "label": "#marti-bucket-trilogia",
+    "headline": "Marți Bucket: Trilogia",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Acum ai nu una, nu două, ci trei variante de Marți Bucket: Mare, Mediu și Mic!"
+       }
+      ]
+     }
+    ],
+    "disclaimer": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Sugestie de prezentare. Marți Bucket Mare la 45 lei include 30 Hot Wings, Marți Bucket Mediu la 33 lei include 20 Hot Wings, Marți Bucket Mic la 20 lei include 10 Hot Wings. Oferta este valabilă în limita stocului disponibil, doar în zilele de marți, în perioada 09 iunie – 07 iulie 2026, în toate restaurantele KFC din România, cu excepția serviciului delivery prin agregatori. Hot Bucket nu este disponibil în zilele de marți."
+       }
+      ]
+     }
+    ],
+    "startDate": "2026-06-09T07:00:00.000Z",
+    "endDate": "2026-07-07T20:59:00.000Z",
+    "button": {
+     "url": "/meniu/noutati"
+    }
+   }
+  },
+  {
+   "id": 37,
+   "attributes": {
+    "label": "#pui-burger",
+    "headline": "Burgeri cu gust, nu cu figuri",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Descoperă colecția PuiBurger: Original, Fresh sau Cheesy, la doar 8,9 lei fiecare!"
+       }
+      ]
+     }
+    ],
+    "disclaimer": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Sugestie de prezentare. Oferta este valabilă în perioada 7 mai - 8 iulie 2026, în limita stocului disponibil, în toate restaurantele KFC din România, cu excepția locațiilor din benzinăriile partenere și KFC Pitești Retail Park."
+       }
+      ]
+     }
+    ],
+    "startDate": "2026-05-06T21:00:00.000Z",
+    "endDate": "2026-07-08T21:00:00.000Z",
+    "button": {
+     "url": "/meniu/noutati"
+    }
+   }
+  },
+  {
+   "id": 24,
+   "attributes": {
+    "label": "#unuplusunu",
+    "headline": "Miercuri și joi ai 1+1 din partea casei",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "În fiecare miercuri și joi te bucuri de 1+1 din partea casei la 5 Strips, Twister sau Dublu Booster. La așa ofertă, oricine îți devine +1. "
+       }
+      ]
+     }
+    ],
+    "disclaimer": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Selecteaza Oferta «1+1 din partea casei» pe kiosk, la casa sau in KFC App, in perioada 29.07.2026 – 27.08.2026, exclusiv miercuri si joi in restaurantele KFC, cu exceptia KFC Nibiru (si pe 2-3 septembrie exclusiv in KFC App). Oferta este disponibila pentru produsele 1+1 5 Crispy Strips/ 1+1 5 Strips Nepicanti/ 1+1 Twister/ 1+1 Twister Nepicant/ 1+1 Dublu Booster/ 1+1 Dublu Hot Booster. Selectia produselor din meniul permanent nu activeaza automat Oferta. Oferta cu 5 Strips Nepicanti nu este disponibilă in restaurantele din benzinariile partenere si in KFC Pitesti Retail Park.  Regulament pe "
+       },
+       {
+        "type": "link",
+        "url": "/documente/regulament-kfc-oferta-1-plus-1-iulie-august-2026.pdf?v=1",
+        "children": [
+         {
+          "type": "text",
+          "text": "www.kfc.ro"
+         }
+        ]
+       },
+       {
+        "type": "text",
+        "text": "."
+       },
+       {
+        "type": "link",
+        "url": "/documente/regulament-kfc-oferta-1-plus-1-iulie-august-2026.pdf",
+        "children": [
+         {
+          "type": "text",
+          "text": ""
+         }
+        ]
+       },
+       {
+        "type": "text",
+        "text": ""
+       }
+      ]
+     }
+    ],
+    "startDate": "2026-04-27T06:00:00.000Z",
+    "endDate": "2026-08-27T20:59:00.000Z",
+    "button": {
+     "url": "/ofertepebune/unuplusunu"
+    }
+   }
+  },
+  {
+   "id": 4,
+   "attributes": {
+    "label": "#haisafimcolegi",
+    "headline": "HAI SĂ FIM COLEGI! APLICĂ ACUM PENTRU UN JOB LA KFC.",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Ia-ți un job la KFC într-o echipă #pebune și ai un meniu de beneficii pe măsura poftei tale. "
+       }
+      ]
+     }
+    ],
+    "disclaimer": null,
+    "startDate": null,
+    "endDate": null,
+    "button": {
+     "url": "/vino-in-echipa-kfc"
+    }
+   }
+  },
+  {
+   "id": 39,
+   "attributes": {
+    "label": "#craveandcollect",
+    "headline": "Cel mai tare card game vine de la KFC",
+    "body": [
+     {
+      "type": "paragraph",
+      "children": [
+       {
+        "type": "text",
+        "text": "Ia-ți un PuiBurger, adună cartonașele cu ingrediente și câștigi burgeri și merch. Intră în joc."
+       }
+      ]
+     }
+    ],
+    "disclaimer": null,
+    "startDate": "2026-06-09T05:00:00.000Z",
+    "endDate": "2026-07-05T20:59:00.000Z",
+    "button": {
+     "url": "https://kfc.ro/craveandcollect"
+    }
+   }
+  }
+ ]
+}
