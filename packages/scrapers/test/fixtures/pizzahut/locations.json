@@ -1,0 +1,37 @@
+{
+ "sc": true,
+ "data": [
+  {
+   "id": "256",
+   "locationId": 256,
+   "name": "Pizza Hut Delivery Militari",
+   "address": "Centrul Comercial Militari Shopping\r\nB-lvd Iuliu Maniu 558-560 si 560A\r\nSector 6",
+   "coordinates": "44.43950880419363,25.982403177927257",
+   "cityId": 1
+  },
+  {
+   "id": "257",
+   "locationId": 257,
+   "name": "Pizza Hut Bucuresti Dorobanți",
+   "address": "Calea Dorobanți nr. 5-7, București",
+   "coordinates": "44.44674829777444,26.09868345502873",
+   "cityId": 1
+  },
+  {
+   "id": "263",
+   "locationId": 263,
+   "name": "Pizza Hut Bacău Arena",
+   "address": "Str. Ștefan cel Mare nr. 28, Bacău",
+   "coordinates": "46.58044580409494,26.9146597232758",
+   "cityId": 21
+  },
+  {
+   "id": "281",
+   "locationId": 281,
+   "name": "Pizza Hut București Vitan",
+   "address": "Calea Vitan nr. 55-59, București",
+   "coordinates": "44.420181304627285,26.12646988020113",
+   "cityId": 1
+  }
+ ]
+}

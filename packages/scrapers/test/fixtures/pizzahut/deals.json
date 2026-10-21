@@ -1,0 +1,173 @@
+{
+ "sc": true,
+ "data": {
+  "url": "https://www.pizzahut.ro/ro/meniu-restaurant/oferte",
+  "cityId": 1,
+  "categories": [
+   {
+    "id": "2",
+    "name": "Oferte",
+    "products": [
+     {
+      "itemId": "26781",
+      "name": "Spooky Bites",
+      "description": "Sos alb cu usturoi, brânză Mozzarella, bacon, ceapă roșie, ciuperci, bucățele de piept de pui, sos de maioneză cu usturoi, sos dulce de roșii, pe blat negru Cheesy Bites cu marginea umplută cu brânză Mozzarella cu usturoi și salam Pepperoni*.\n\n\n\n\n\n",
+      "price": 69,
+      "fullPrice": 69,
+      "standardPrice": 0,
+      "isBogo": false,
+      "slug": "spooky-bites-26a6a00f",
+      "outOfStock": false,
+      "availableOnlyOnDelivery": false,
+      "availableOnlyOnPickup": false,
+      "stamps": [],
+      "removeFromList": false,
+      "type": "simple"
+     },
+     {
+      "itemId": "20650",
+      "name": "Duo Mix",
+      "description": "Oferta este disponibilă pentru două pizze comandate dintr-o selecție de rețete, pe blaturile Pan și Classic de dimensiune medie: Pepperoni, Veggie & Mozzarella, Roma, California, Hawaiiana, Europeană, Carbonara, Millenium. Ofertă valabilă doar la comenzile cu livrare sau cu ridicare din restaurant. Nu se cumulează cu alte reduceri sau promoții aflate în desfășurare.",
+      "price": 65,
+      "fullPrice": 65,
+      "standardPrice": 0,
+      "isBogo": false,
+      "slug": "duo-mix-8d87bd87",
+      "outOfStock": false,
+      "availableOnlyOnDelivery": false,
+      "availableOnlyOnPickup": false,
+      "stamps": [],
+      "removeFromList": false,
+      "type": "combo"
+     },
+     {
+      "itemId": "25969",
+      "name": "Party menu",
+      "description": "Oferta e valabilă pentru pizza pe blat Classic și nu se cumulează cu alte promoții active. Gratuitatea se aplică pentru pizza cu valoarea cea mai mică.",
+      "price": 0,
+      "fullPrice": 0,
+      "standardPrice": 0,
+      "isBogo": true,
+      "slug": "party-menu-e3fc155d",
+      "outOfStock": false,
+      "availableOnlyOnDelivery": false,
+      "availableOnlyOnPickup": false,
+      "stamps": [],
+      "removeFromList": false,
+      "type": "combo"
+     },
+     {
+      "itemId": "24455",
+      "name": "Coca-Cola 500ml cadou",
+      "description": "Ofertă valabilă la pachet, doar cu ridicare din restaurante, pentru pizza de dimensiune medie pe blat Classic, Pan sau Cheesy Bites. Băutura oferită la alegere, din partea casei, poate fi Coca-Cola, Fanta, Sprite, apă plată/minerală Dorna. Nu se cumulează cu alte promoţii sau reduceri active.",
+      "price": 0,
+      "fullPrice": 0,
+      "standardPrice": 0,
+      "isBogo": false,
+      "slug": "coca-cola-500ml-cadou-46394b73",
+      "outOfStock": false,
+      "availableOnlyOnDelivery": false,
+      "availableOnlyOnPickup": true,
+      "stamps": [
+       {
+        "tagId": "40",
+        "name": "Disponibil doar la ridicare",
+        "icon": null
+       }
+      ],
+      "removeFromList": false,
+      "type": "combo"
+     },
+     {
+      "itemId": "26003",
+      "name": "Luni 1+1 cadou",
+      "description": "Oferta este disponibilă doar la cerere, în zilele de luni, în restaurant și la pachet, pentru orice pizza medie din meniul permanent, pe blaturile Pan și Classic, în limita stocului disponibil. Se va plăti pizza cu valoarea cea mai mare. Nu se cumulează cu alte reduceri sau promoții aflate în desfășurare.",
+      "price": 0,
+      "fullPrice": 0,
+      "standardPrice": null,
+      "isBogo": true,
+      "slug": "luni-11-cadou-4a9a12ed",
+      "outOfStock": false,
+      "availableOnlyOnDelivery": false,
+      "availableOnlyOnPickup": false,
+      "stamps": [
+       {
+        "tagId": "40",
+        "name": "Disponibil doar la ridicare",
+        "icon": null
+       }
+      ],
+      "removeFromList": false,
+      "type": "combo"
+     },
+     {
+      "itemId": "24453",
+      "name": "Marți: orice pizza mică 19.5 lei",
+      "description": "Oferta este disponibilă doar la cerere,  în zilele de marți, în restaurant și la pachet, pentru orice pizza mică din meniul permanent, pe blaturile Pan (disponibil doar în anumite restaurante) și Classic, în limita stocului disponibil. Nu se cumulează cu alte reduceri sau promoții aflate în desfășurare.",
+      "price": 19.5,
+      "fullPrice": 19.5,
+      "standardPrice": 19.5,
+      "isBogo": false,
+      "slug": "marti-orice-pizza-mica-195-lei-b3b1a804",
+      "outOfStock": false,
+      "availableOnlyOnDelivery": false,
+      "availableOnlyOnPickup": false,
+      "stamps": [
+       {
+        "tagId": "40",
+        "name": "Disponibil doar la ridicare",
+        "icon": null
+       }
+      ],
+      "removeFromList": false,
+      "type": "combo"
+     },
+     {
+      "itemId": "26408",
+      "name": "Miercuri: Orice portie de paste 24.90 lei",
+      "description": "Oferta este disponibilă doar la cerere, în zilele de lmiercuri, în restaurant și la pachet, pentru orice reţetă de paste din meniul permanent, în limita stocului disponibil. Nu se cumulează cu alte reduceri sau promoţii aflate în desfăşurare.",
+      "price": 24.9,
+      "fullPrice": 24.9,
+      "standardPrice": 0,
+      "isBogo": false,
+      "slug": "miercuri-orice-portie-de-paste-2490-lei-7d6bb3b7",
+      "outOfStock": false,
+      "availableOnlyOnDelivery": false,
+      "availableOnlyOnPickup": true,
+      "stamps": [
+       {
+        "tagId": "40",
+        "name": "Disponibil doar la ridicare",
+        "icon": null
+       }
+      ],
+      "removeFromList": false,
+      "type": "combo"
+     },
+     {
+      "itemId": "26281",
+      "name": "Meniu student",
+      "description": "Meniul de student este accesibil în baza legitimației de student și conține 1 pizza Margherita mică pe blat Classic sau Pan, cu 2 toppinguri la alegere dintre cele disponibile și 1 Coca-Cola Regular la pahar 300ml. Nu se cumulează cu alte oferte sau promoții aflate în derulare.",
+      "price": 17,
+      "fullPrice": 17,
+      "standardPrice": 0,
+      "isBogo": false,
+      "slug": "meniu-student-cf2168d9",
+      "outOfStock": false,
+      "availableOnlyOnDelivery": false,
+      "availableOnlyOnPickup": false,
+      "stamps": [
+       {
+        "tagId": null,
+        "name": "Disponibil doar in anumite restaurante",
+        "icon": null
+       }
+      ],
+      "removeFromList": false,
+      "type": "combo"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,4 +1,4 @@
-import { bucharestLocalToIso, parseRonPrice } from "@fentezfoamea/core";
+import { bucharestLocalToIso, collapseWhitespace, parseRonPrice } from "@fentezfoamea/core";
 
 const WEEKDAYS: [RegExp, number][] = [
   [/(?<!\d\s?)\blun(i|ea)\b|#lunea/, 1],
@@ -37,18 +37,25 @@ export function foldRomanian(text: string): string {
 }
 
 export function parseWeekdays(text: string): number[] | undefined {
-  const folded = foldRomanian(text);
   const days = new Set<number>();
-  for (const match of folded.matchAll(RANGE)) {
-    const from = weekdayNumber(match[1]);
-    const to = weekdayNumber(match[2]);
-    if (from && to && from <= to) for (let day = from; day <= to; day++) days.add(day);
-  }
-  if (days.size === 0) {
-    for (const [pattern, day] of WEEKDAYS) if (pattern.test(folded)) days.add(day);
-  }
+  const withoutRanges = foldRomanian(text).replace(RANGE, (_, from: string, to: string) => {
+    const start = weekdayNumber(from);
+    const end = weekdayNumber(to);
+    if (start && end && start <= end) for (let day = start; day <= end; day++) days.add(day);
+    return " ";
+  });
+  for (const [pattern, day] of WEEKDAYS) if (pattern.test(withoutRanges)) days.add(day);
   if (days.size === 0 || days.size === 7) return undefined;
   return [...days].sort((a, b) => a - b);
+}
+
+export function parseDailyWindow(text: string): [string, string] | undefined {
+  const match = /(\d{1,2})[:.](\d{2}) ?(?:[-–]|si|pana la) ?(\d{1,2})[:.](\d{2})/.exec(foldRomanian(text));
+  if (!match) return undefined;
+  const [, h1, m1, h2, m2] = match;
+  const start = `${h1!.padStart(2, "0")}:${m1}`;
+  const end = `${h2!.padStart(2, "0")}:${m2}`;
+  return isClock(start) && isClock(end) ? [start, end] : undefined;
 }
 
 export function findLeiPrice(text: string): number | undefined {
@@ -80,7 +87,16 @@ export function parseDateRange(text: string): DateRange | undefined {
   return undefined;
 }
 
-export function dateRangeToIso(range: DateRange): { startsAt?: string; endsAt?: string } {
+export type Validity = { startsAt?: string; endsAt?: string };
+
+export function parseValidity(text: string): Validity {
+  const range = parseDateRange(text);
+  if (range) return dateRangeToIso(range);
+  const until = parseUntilDate(foldRomanian(text));
+  return until ? { endsAt: bucharestLocalToIso(until, "23:59") } : {};
+}
+
+export function dateRangeToIso(range: DateRange): Validity {
   return {
     startsAt: bucharestLocalToIso(range.start, "00:00"),
     endsAt: bucharestLocalToIso(range.end, "23:59"),
@@ -106,10 +122,29 @@ export function detectConditions(text: string): string[] {
 }
 
 export function truncate(text: string, max = 200): string {
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max - 1);
+  const clean = collapseWhitespace(text);
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
   const lastSpace = cut.lastIndexOf(" ");
-  return `${(lastSpace > max / 2 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+  return `${trimTrailingPunctuation(lastSpace > max / 2 ? cut.slice(0, lastSpace) : cut)}…`;
+}
+
+function trimTrailingPunctuation(text: string): string {
+  let end = text.length;
+  while (end > 0 && " ,;:.-".includes(text[end - 1]!)) end--;
+  return text.slice(0, end);
+}
+
+function parseUntilDate(folded: string): string | undefined {
+  const numeric = /pana (?:la |pe |in )?(\d{1,2})\.(\d{1,2})\.(\d{4})/.exec(folded);
+  if (numeric) return isoDate(Number(numeric[3]), Number(numeric[2]), Number(numeric[1]));
+  const months = Object.keys(MONTHS).join("|");
+  const named = new RegExp(String.raw`pana (?:la |pe |in )?(\d{1,2}) (${months}) (\d{4})`).exec(folded);
+  return named ? isoDate(Number(named[3]), MONTHS[named[2]!]!, Number(named[1])) : undefined;
+}
+
+function isClock(value: string): boolean {
+  return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
 }
 
 function inferStartYear(startMonth: number, endMonth: number, endYear: number): number {
