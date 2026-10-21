@@ -1,0 +1,83 @@
+"use client";
+
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import { useEffect, useMemo } from "react";
+import { CircleMarker, MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import type { LatLon } from "@fentezfoamea/core";
+import { formatPrice } from "@/lib/format";
+import type { VenuePin } from "./explore";
+
+type Props = {
+  pins: VenuePin[];
+  origin: LatLon;
+  selectedVenueId: string | null;
+  onSelectVenue: (venueId: string | null) => void;
+};
+
+export default function OfferMap({ pins, origin, selectedVenueId, onSelectVenue }: Readonly<Props>) {
+  return (
+    <MapContainer center={[origin.lat, origin.lon]} zoom={14} className="h-full w-full" zoomControl={false} attributionControl>
+      <TileLayer
+        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        maxZoom={19}
+      />
+      <FollowOrigin origin={origin} />
+      <ZoomClass />
+      <CircleMarker center={[origin.lat, origin.lon]} radius={7} pathOptions={{ className: "origin-dot" }} />
+      {pins.map((pin) => (
+        <PricePin key={pin.venueId} pin={pin} selected={pin.venueId === selectedVenueId} onSelect={onSelectVenue} />
+      ))}
+    </MapContainer>
+  );
+}
+
+function PricePin({ pin, selected, onSelect }: Readonly<{ pin: VenuePin; selected: boolean; onSelect: Props["onSelectVenue"] }>) {
+  const icon = useMemo(() => {
+    const price = pin.minPrice === null ? "ofertă" : `${formatPrice(pin.minPrice)} lei`;
+    const more = pin.count > 1 ? `<span class="pin-count">${pin.count}</span>` : "";
+    return L.divIcon({
+      className: "",
+      html: `<button type="button" class="pin${selected ? " pin-selected" : ""}" aria-label="${escapeHtml(pin.name)}">${price}${more}</button>`,
+      iconSize: undefined,
+      iconAnchor: [0, 0],
+    });
+  }, [pin, selected]);
+
+  return (
+    <Marker
+      position={[pin.lat, pin.lon]}
+      icon={icon}
+      zIndexOffset={selected ? 1000 : Math.round(pin.bestDiscount ?? 0)}
+      eventHandlers={{ click: () => onSelect(selected ? null : pin.venueId) }}
+      title={pin.name}
+    />
+  );
+}
+
+function FollowOrigin({ origin }: { origin: LatLon }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo([origin.lat, origin.lon], Math.max(map.getZoom(), 14), { duration: 0.6 });
+  }, [map, origin.lat, origin.lon]);
+  return null;
+}
+
+const CLOSE_ZOOM = 16;
+
+function ZoomClass() {
+  const map = useMap();
+  const apply = () => {
+    map.getContainer().classList.toggle("map-far", map.getZoom() < CLOSE_ZOOM);
+  };
+  useMapEvents({ zoomend: apply });
+  useEffect(() => {
+    apply();
+  });
+  return null;
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (char) => `&#${char.codePointAt(0)};`);
+}
