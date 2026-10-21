@@ -400,6 +400,23 @@ function isPricePair(text: string, deal: SnippetPrice, regular: SnippetPrice): b
   return false;
 }
 
+const WORD_CHAR = /[a-z0-9]/;
+
+/**
+ * Where the snippet occurs in the source without cutting a word or number in half, or -1.
+ * "9 lei la pizza" inside "29 lei la pizza" and "ron 12" inside "macaron 12" don't count.
+ */
+function boundedOccurrence(source: string, snippet: string): number {
+  const first = snippet.charAt(0);
+  const last = snippet.charAt(snippet.length - 1);
+  for (let at = source.indexOf(snippet); at !== -1; at = source.indexOf(snippet, at + 1)) {
+    const cutStart = WORD_CHAR.test(first) && WORD_CHAR.test(source.charAt(at - 1));
+    const cutEnd = WORD_CHAR.test(last) && WORD_CHAR.test(source.charAt(at + snippet.length));
+    if (!cutStart && !cutEnd) return at;
+  }
+  return -1;
+}
+
 // Only a number written with a percent sign may vouch for a percentage.
 function percentagesIn(snippet: string): number[] {
   return [...snippet.matchAll(/(\d+(?:[.,]\d+)?)\s?%/g)].map((m) => Math.round(Number(m[1]?.replace(",", "."))));
@@ -688,7 +705,8 @@ export function validateExtraction(raw: unknown, ctx: ExtractionContext): Extrac
     let failure: "evidence_missing" | "evidence_too_long" | "evidence_not_found" | null = null;
     if (extracted.evidence_snippet === null || snippet.length < MIN_EVIDENCE_LENGTH) failure = "evidence_missing";
     else if (snippet.length > MAX_EVIDENCE_LENGTH) failure = "evidence_too_long";
-    else if (!source.includes(snippet)) failure = "evidence_not_found";
+    const offset = failure === null ? boundedOccurrence(source, snippet) : -1;
+    if (failure === null && offset === -1) failure = "evidence_not_found";
     evidenceVerified = failure === null;
 
     if (failure !== null) {
@@ -698,7 +716,9 @@ export function validateExtraction(raw: unknown, ctx: ExtractionContext): Extrac
         confidenceValue = Math.min(confidenceValue, UNVERIFIED_CONFIDENCE_CAP);
       }
     } else {
-      const prices = pricesIn(snippet);
+      // Prices are read from the source, not the snippet: the model picks the snippet's edges,
+      // and "9 lei" cut out of "29 lei" must not count as a price the page states.
+      const prices = pricesIn(source).filter((p) => p.start >= offset && p.end <= offset + snippet.length);
       const hasPrice = (value: number) => prices.some((p) => Math.abs(p.value - value) < 0.005);
 
       if (draft.dealPrice !== null && !hasPrice(draft.dealPrice)) {
@@ -710,12 +730,7 @@ export function validateExtraction(raw: unknown, ctx: ExtractionContext): Extrac
           priceDiscarded = true;
           warn("price_not_in_evidence");
         } else if (draft.regularPrice !== null) {
-          // Locate the snippet's prices in the source so the pair check sees the real context.
-          const offset = source.indexOf(snippet);
-          const at = (value: number | null) =>
-            prices
-              .filter((p) => value !== null && Math.abs(p.value - value) < 0.005)
-              .map((p) => ({ ...p, start: p.start + offset, end: p.end + offset }));
+          const at = (value: number | null) => prices.filter((p) => value !== null && Math.abs(p.value - value) < 0.005);
           const deals = at(draft.dealPrice);
           const regulars = at(draft.regularPrice);
           if (!deals.some((d) => regulars.some((r) => r.start !== d.start && isPricePair(source, d, r)))) {

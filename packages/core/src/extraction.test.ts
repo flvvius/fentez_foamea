@@ -687,3 +687,25 @@ describe("pairing loopholes", () => {
     expect(result.draft.regularPrice).toBe(regular);
   });
 });
+
+describe("snippets cut in the middle of a word or number", () => {
+  it.each([
+    ["Doar azi 29 lei la pizza", "9 lei la pizza", 9, null],
+    ["Meniu RON 129", "RON 12", 12, null],
+    ["Burger 49,90 lei", "9,90 lei", 9.9, null],
+    ["Cutie macaron 12 bucati", "ron 12 bucati", 12, null],
+    ["Pizza 125 lei in loc de 139 lei", "25 lei in loc de 139 lei", 25, 139],
+  ])("rejects a price invented by cutting %s", (source, snippet, deal, regular) => {
+    const result = text(raw({ evidence_snippet: snippet, deal_price: deal, regular_price: regular }), source);
+    expect(result.draft.dealPrice).toBeNull();
+    expect(result.draft.regularPrice).toBeNull();
+    expect(result.draft.percentOff).toBeNull();
+  });
+
+  it("uses a later occurrence when the first one cuts a word", () => {
+    const source = "Macaron 12 lei. Meniu: ron 12 la pranz";
+    const result = text(raw({ evidence_snippet: "ron 12", deal_price: 12, regular_price: null }), source);
+    expect(result.evidenceVerified).toBe(true);
+    expect(result.draft.dealPrice).toBe(12);
+  });
+});
