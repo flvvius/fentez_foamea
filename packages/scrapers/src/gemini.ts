@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { GoogleGenAI, Type, type Schema } from "@google/genai";
+import { GoogleGenAI, Type, type ContentListUnion, type GenerateContentParameters, type Schema } from "@google/genai";
 import { z } from "zod";
 import { OFFER_KINDS, bucharestToday } from "@fentezfoamea/core";
 import type { Sql } from "./db.ts";
@@ -57,8 +57,12 @@ Do not return the regular à la carte menu, gift cards, catering, events, or job
 Prices are in RON (lei). Use null when a field is not stated; never guess prices or dates.
 Kinds: daily_menu, happy_hour, combo, discount, coupon, surplus.`;
 
+export type GenerateContent = (params: GenerateContentParameters) => Promise<{ text?: string }>;
+
+export type PdfContext = { venueName: string; url: string; hint?: string };
+
 export class GeminiExtractor {
-  private readonly client: GoogleGenAI;
+  private readonly generate: GenerateContent;
   private readonly throttle: Throttle;
   private usedToday = 0;
 
@@ -67,8 +71,14 @@ export class GeminiExtractor {
     private readonly sql: Sql | null,
     private readonly log: Logger,
     private readonly model = env.geminiModel(),
+    generate?: GenerateContent,
   ) {
-    this.client = new GoogleGenAI({ apiKey });
+    if (generate) {
+      this.generate = generate;
+    } else {
+      const client = new GoogleGenAI({ apiKey });
+      this.generate = (params) => client.models.generateContent(params);
+    }
     this.throttle = new Throttle(Math.ceil(60_000 / Math.max(1, env.geminiRequestsPerMinute())));
   }
 
@@ -80,19 +90,37 @@ export class GeminiExtractor {
   async extractOffers(pageText: string, context: { venueName: string; url: string }): Promise<ExtractedOffer[]> {
     const trimmed = pageText.slice(0, 12_000);
     const hash = createHash("sha256").update(`${this.model}\n${context.venueName}\n${trimmed}`).digest("hex");
+    return this.generateOffers(hash, `${preamble(context)}\n\n---\n${trimmed}`, context.url);
+  }
 
+  async extractOffersFromPdf(pdf: Uint8Array, context: PdfContext): Promise<ExtractedOffer[]> {
+    const hash = createHash("sha256")
+      .update(`${this.model}\n${context.venueName}\n${context.hint ?? ""}\n`)
+      .update(pdf)
+      .digest("hex");
+    const prompt = context.hint ? `${preamble(context)}\n${context.hint}` : preamble(context);
+    const contents: ContentListUnion = [
+      {
+        role: "user",
+        parts: [{ text: prompt }, { inlineData: { mimeType: "application/pdf", data: Buffer.from(pdf).toString("base64") } }],
+      },
+    ];
+    return this.generateOffers(hash, contents, context.url);
+  }
+
+  private async generateOffers(hash: string, contents: ContentListUnion, url: string): Promise<ExtractedOffer[]> {
     const cached = await this.cached(hash);
     if (cached) return cached;
 
     if (!(await this.withinBudget())) {
-      this.log.warn("gemini daily budget reached, skipping", { url: context.url });
+      this.log.warn("gemini daily budget reached, skipping", { url });
       return [];
     }
 
     await this.throttle.wait();
-    const response = await this.client.models.generateContent({
+    const response = await this.generate({
       model: this.model,
-      contents: `Today is ${bucharestToday()}. Venue: ${context.venueName}. Page: ${context.url}\n\n---\n${trimmed}`,
+      contents,
       config: {
         systemInstruction: INSTRUCTIONS,
         responseMimeType: "application/json",
@@ -136,4 +164,8 @@ export class GeminiExtractor {
     `;
     return (row?.count ?? 0) < budget;
   }
+}
+
+function preamble(context: { venueName: string; url: string }): string {
+  return `Today is ${bucharestToday()}. Venue: ${context.venueName}. Page: ${context.url}`;
 }

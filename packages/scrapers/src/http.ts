@@ -38,6 +38,11 @@ export class PoliteHttp {
     return response.text();
   }
 
+  async bytes(url: string, options: RequestOptions = {}): Promise<Uint8Array> {
+    const response = await this.request(url, options);
+    return new Uint8Array(await response.arrayBuffer());
+  }
+
   async json<T>(url: string, options: RequestOptions = {}): Promise<T> {
     const response = await this.request(url, {
       ...options,
