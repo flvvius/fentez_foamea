@@ -52,6 +52,14 @@ describe("explore", () => {
     expect(kept.map((o) => o.id)).toEqual(["1"]);
   });
 
+  it("recommends concrete, nearby, deep deals over vague or far ones", () => {
+    const vague = { ...base, id: "vague", kind: "discount" as const, price: null, discountPct: null, deliveryOnly: true };
+    const far = { ...base, id: "far", lat: 44.5, lon: 26.2 };
+    const delivery = { ...base, id: "delivery", kind: "discount" as const, deliveryOnly: true };
+    const placed = placeOffers([vague, far, delivery, base], origin, now);
+    expect(sortOffers(placed, "best").map((o) => o.id)).toEqual(["1", "delivery", "far", "vague"]);
+  });
+
   it("sorts by price and groups pins by venue", () => {
     const cheap = { ...base, id: "cheap", price: 9, discountPct: 70 };
     const placed = placeOffers([base, cheap], origin, now);
@@ -81,10 +89,12 @@ describe("explore", () => {
         { ...base, id: "monday", daysOfWeek: [1] },
         { ...base, id: "always" },
         { ...base, id: "wednesday", daysOfWeek: [3] },
+        { ...base, id: "tomorrow-bag", pickupStart: "2026-10-22T09:00:00Z", pickupEnd: "2026-10-22T11:00:00Z" },
+        { ...base, id: "today-bag", pickupStart: "2026-10-21T15:00:00Z", pickupEnd: "2026-10-21T17:00:00Z" },
       ],
       origin,
       now,
     );
-    expect(validTodayFirst(placed, 3).map((o) => o.id)).toEqual(["always", "wednesday", "monday"]);
+    expect(validTodayFirst(placed, now).map((o) => o.id)).toEqual(["always", "wednesday", "today-bag", "monday", "tomorrow-bag"]);
   });
 });

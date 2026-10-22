@@ -18,8 +18,14 @@ test.describe("explorer", () => {
   });
 
   test("counts live offers and says when data was refreshed", async ({ page }) => {
-    await expect(page.locator(".lede")).toContainText("10 oferte");
+    await expect(page.locator(".lede")).toContainText("11 oferte");
     await expect(page.locator(".lede")).toContainText(/Actualizat acum 1\d min/);
+  });
+
+  test("recommends the deepest concrete deal nearby first and leaves tomorrow's bags for later", async ({ page }) => {
+    await expect(page.getByLabel("Ordine")).toHaveValue("best");
+    await expect.poll(async () => (await offerTitles(page)).slice(0, 2)).toEqual(["Pachet surpriză patiserie", "Burger dublu cu cartofi"]);
+    expect((await offerTitles(page)).slice(-2)).toEqual(["Pachet pentru mâine", "Ziua berii 1+1"]);
   });
 
   test("shows a pickup countdown on bags closing within the hour", async ({ page }) => {
@@ -39,16 +45,21 @@ test.describe("explorer", () => {
 
   test("filters by kind", async ({ page }) => {
     await page.getByRole("button", { name: /Pachet anti-risipă/ }).click();
-    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie"]);
+    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet pentru mâine"]);
     await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
-    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet de seară Titan", "Pachet verificat acum 2 ore"]);
+    await expect.poll(() => offerTitles(page)).toEqual([
+      "Pachet surpriză patiserie",
+      "Pachet de seară Titan",
+      "Pachet verificat acum 2 ore",
+      "Pachet pentru mâine",
+    ]);
   });
 
   test("keeps to a budget", async ({ page }) => {
     await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
     await page.getByLabel("Buget").selectOption({ label: "sub 15 lei" });
     await expect(page).toHaveURL(/buget=15/);
-    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet de seară Titan", "Pachet verificat acum 2 ore", "Ziua berii 1+1"]);
+    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet de seară Titan", "Pachet verificat acum 2 ore", "Pachet pentru mâine", "Ziua berii 1+1"]);
   });
 
   test("hides delivery-only offers when asked", async ({ page }) => {
@@ -87,7 +98,7 @@ test.describe("explorer", () => {
   test("scopes the list from a map pin", async ({ page }) => {
     await page.locator(".leaflet-marker-icon[title=\"Brutăria din Colț\"] .pin").click();
     await expect(offerList(page).locator(".venue-scope")).toContainText("Brutăria din Colț");
-    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie"]);
+    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet pentru mâine"]);
   });
 });
 

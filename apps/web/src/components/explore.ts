@@ -1,4 +1,5 @@
 import { distanceMeters, type LatLon } from "@fentezfoamea/core";
+import { bucharestWeekday, sameBucharestDay } from "@/lib/format";
 import type { Offer } from "@/lib/offers";
 import type { ExploreState, SortKey } from "@/lib/search";
 
@@ -43,7 +44,20 @@ function withinRadius(offer: PlacedOffer, radiusKm: number): boolean {
   return offer.distance <= radiusKm * 1000;
 }
 
+const POINTS_LOST_PER_KM = 8;
+const UNKNOWN_DISTANCE_M = 5000;
+
+export function dealScore(offer: PlacedOffer): number {
+  const discount = offer.discountPct ?? 0;
+  const priceKnown = offer.price === null ? -40 : 0;
+  const rescuedBag = offer.kind === "surplus" ? 20 : 0;
+  const deliveryOnly = offer.deliveryOnly ? -15 : 0;
+  const km = (offer.distance ?? UNKNOWN_DISTANCE_M) / 1000;
+  return discount + priceKnown + rescuedBag + deliveryOnly - POINTS_LOST_PER_KM * km;
+}
+
 const comparators: Record<SortKey, (a: PlacedOffer, b: PlacedOffer) => number> = {
+  best: (a, b) => dealScore(b) - dealScore(a),
   distance: (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity),
   discount: (a, b) => (b.discountPct ?? -1) - (a.discountPct ?? -1),
   price: (a, b) => (a.price ?? Infinity) - (b.price ?? Infinity),
@@ -95,7 +109,10 @@ export function collapseChainCopies(sorted: PlacedOffer[]): PlacedOffer[] {
   return result;
 }
 
-export function validTodayFirst(offers: PlacedOffer[], weekday: number): PlacedOffer[] {
-  const appliesToday = (offer: PlacedOffer) => !offer.daysOfWeek?.length || offer.daysOfWeek.includes(weekday);
+export function validTodayFirst(offers: PlacedOffer[], now: Date): PlacedOffer[] {
+  const weekday = bucharestWeekday(now);
+  const appliesToday = (offer: PlacedOffer) =>
+    (!offer.daysOfWeek?.length || offer.daysOfWeek.includes(weekday)) &&
+    (!offer.pickupStart || sameBucharestDay(new Date(offer.pickupStart), now));
   return [...offers.filter(appliesToday), ...offers.filter((offer) => !appliesToday(offer))];
 }

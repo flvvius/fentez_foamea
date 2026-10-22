@@ -1,6 +1,6 @@
 import { OFFER_KINDS, type OfferKind } from "@fentezfoamea/core";
 
-export type SortKey = "distance" | "discount" | "price";
+export type SortKey = "best" | "distance" | "discount" | "price";
 
 export type ExploreState = {
   kinds: OfferKind[];
@@ -29,13 +29,13 @@ export const DEFAULT_STATE: ExploreState = {
   kinds: [],
   radiusKm: 3,
   maxPrice: null,
-  sort: "distance",
+  sort: "best",
   includeDelivery: true,
   venueId: null,
   offerId: null,
 };
 
-const SORT_PARAMS: Record<SortKey, string> = { distance: "aproape", discount: "reducere", price: "pret" };
+const SORT_PARAMS: Record<SortKey, string> = { best: "recomandate", distance: "aproape", discount: "reducere", price: "pret" };
 const KIND_PARAMS: Record<OfferKind, string> = {
   surplus: "anti-risipa",
   discount: "reduceri",

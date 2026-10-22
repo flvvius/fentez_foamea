@@ -46,7 +46,7 @@ export function minutesUntil(iso: string, now: Date): number {
   return Math.round((new Date(iso).getTime() - now.getTime()) / 60_000);
 }
 
-function sameBucharestDay(a: Date, b: Date): boolean {
+export function sameBucharestDay(a: Date, b: Date): boolean {
   const day = new Intl.DateTimeFormat("en-CA", { timeZone: TZ });
   return day.format(a) === day.format(b);
 }

@@ -3,7 +3,7 @@
 import { Link } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
-import { bucharestWeekday, countOffers, formatRelative } from "@/lib/format";
+import { countOffers, formatRelative } from "@/lib/format";
 import { LANDINGS } from "@/lib/landing";
 import type { OfferSnapshot } from "@/lib/offers";
 import { BUDGET_OPTIONS, RADIUS_OPTIONS, type ExploreState, type SortKey } from "@/lib/search";
@@ -13,6 +13,7 @@ import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayF
 const OfferMap = lazy(() => import("./OfferMap"));
 
 const SORTS: { key: SortKey; label: string }[] = [
+  { key: "best", label: "recomandate" },
   { key: "distance", label: "cele mai aproape" },
   { key: "discount", label: "reducere mare" },
   { key: "price", label: "cele mai ieftine" },
@@ -54,7 +55,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
   const shared = offerId ? placed.find((offer) => offer.id === offerId) : undefined;
   const listed = useMemo(() => {
     const scoped = filtered.filter((offer) => (!venueId || offer.venueId === venueId) && offer.id !== offerId);
-    return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), bucharestWeekday(now));
+    return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), now);
   }, [filtered, venueId, offerId, sort, now]);
   const kindCounts = useMemo(() => countKinds(placed), [placed]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;

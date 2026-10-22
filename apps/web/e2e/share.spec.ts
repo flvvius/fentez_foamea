@@ -15,7 +15,7 @@ test("keeps filters in the URL so a reload or a shared link shows the same list"
   await page.reload();
   await waitForHydration(page);
   await expect(page.getByRole("button", { name: /Pachet anti-risipă/ })).toHaveAttribute("aria-pressed", "true");
-  await expect.poll(() => offerTitles(page)).toEqual(["Pachet verificat acum 2 ore", "Pachet de seară Titan", "Pachet surpriză patiserie"]);
+  await expect.poll(() => offerTitles(page)).toEqual(["Pachet verificat acum 2 ore", "Pachet de seară Titan", "Pachet surpriză patiserie", "Pachet pentru mâine"]);
 });
 
 test("opens a venue link even when the venue is outside the default radius", async ({ page }) => {

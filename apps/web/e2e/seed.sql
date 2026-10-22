@@ -28,6 +28,9 @@ insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ro
   ('00000000-0000-0000-0000-00000000b011', 'bonapp', 'bag-unseen', '00000000-0000-0000-0000-00000000a001', 'surplus', 'Pachet nevăzut de 7 ore', 9, 30, now() + interval '1 hour', now() + interval '3 hours', 3, 'https://bonapp.eco/p/bag-unseen', now() - interval '7 hours'),
   ('00000000-0000-0000-0000-00000000b012', 'bonapp', 'bag-checked', '00000000-0000-0000-0000-00000000a009', 'surplus', 'Pachet verificat acum 2 ore', 11, 33, now() + interval '1 hour', now() + interval '3 hours', 4, 'https://bonapp.eco/p/bag-checked', now() - interval '2 hours');
 
+insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ron, original_price_ron, pickup_start, pickup_end, available_count, url) values
+  ('00000000-0000-0000-0000-00000000b014', 'bonapp', 'bag-tomorrow', '00000000-0000-0000-0000-00000000a001', 'surplus', 'Pachet pentru mâine', 5, 50, date_trunc('day', now() at time zone 'Europe/Bucharest') at time zone 'Europe/Bucharest' + interval '1 day 9 hours', date_trunc('day', now() at time zone 'Europe/Bucharest') at time zone 'Europe/Bucharest' + interval '1 day 11 hours', 1, 'https://bonapp.eco/p/bag-tomorrow');
+
 insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ron, url, last_seen_at) values
   ('00000000-0000-0000-0000-00000000b013', 'kfc', 'kfc-unirii:old', '00000000-0000-0000-0000-00000000a004', 'combo', 'Ofertă KFC de acum 4 zile', 25, 'https://kfc.ro/oferte', now() - interval '4 days');
 
