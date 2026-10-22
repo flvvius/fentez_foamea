@@ -88,7 +88,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
   };
 
   return (
-    <div className="shell">
+    <main className="shell">
       <section className="panel" aria-label="Oferte">
         <header className="masthead">
           <p className="brand">fentez foamea</p>
@@ -225,7 +225,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           <div className="map-placeholder" aria-hidden />
         )}
       </section>
-    </div>
+    </main>
   );
 }
 

@@ -27,7 +27,7 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
           {OFFER_KIND_LABELS[offer.kind]}
           {offer.deliveryOnly && " · doar livrare"}
         </p>
-        <h3 className="offer-title">{offer.title}</h3>
+        <h2 className="offer-title">{offer.title}</h2>
         <p className="offer-venue">
           {offer.venueId && offer.venueName ? (
             <button type="button" className="link-quiet" onClick={() => onShowVenue(offer.venueId!)}>

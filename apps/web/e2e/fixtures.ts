@@ -18,7 +18,7 @@ export function offerRow(page: Page, title: string): Locator {
 }
 
 export async function offerTitles(page: Page): Promise<string[]> {
-  return offerList(page).locator("article h3").allTextContents();
+  return offerList(page).locator("article h2").allTextContents();
 }
 
 export async function waitForHydration(page: Page): Promise<void> {
