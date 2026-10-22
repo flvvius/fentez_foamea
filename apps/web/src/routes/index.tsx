@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
   loader: () => fetchOfferSnapshot(),
   headers: () => SNAPSHOT_HEADERS,
   head: ({ loaderData, match }) => ({
-    meta: sharedOfferMeta(loaderData, match.search.oferta),
+    meta: match.search.oferta ? sharedOfferMeta(loaderData, match.search.oferta) : searchMeta(match.search.q),
     links: [{ rel: "canonical", href: SITE_URL }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(WEBSITE_JSON_LD) }],
   }),
@@ -49,7 +49,27 @@ function Home() {
     [navigate],
   );
 
-  return <ExplorePage wire={wire} state={state} onChange={onChange} />;
+  const query = state.query.trim();
+  return <ExplorePage wire={wire} state={state} headline={query ? `${searchTitle(query)}, acum.` : undefined} onChange={onChange} />;
+}
+
+function searchTitle(query: string): string {
+  return `Oferte cu „${query}” în București`;
+}
+
+function searchMeta(rawQuery: string | undefined) {
+  const query = rawQuery?.trim().slice(0, 60);
+  if (!query) return [];
+  const title = searchTitle(query);
+  const description = `Pachete anti-risipă, meniuri și reduceri cu „${query}” la restaurante din București, pe o hartă, ordonate după distanță.`;
+  return [
+    { title: `${title} · fentez foamea` },
+    { name: "description", content: description },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+  ];
 }
 
 function sharedOfferMeta(wire: SnapshotWire | undefined, offerId: string | undefined) {
