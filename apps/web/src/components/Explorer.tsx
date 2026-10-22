@@ -36,6 +36,7 @@ type Props = {
 };
 
 const FEW_OFFERS = 3;
+const QUERY_DEBOUNCE_MS = 200;
 
 export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
   const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query } = state;
@@ -118,6 +119,14 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
       .catch(() => undefined);
   }, [center, findVisitor]);
 
+  const queryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(queryTimer.current), []);
+  const typeQuery = (value: string) => {
+    setDraftQuery(value);
+    clearTimeout(queryTimer.current);
+    queryTimer.current = setTimeout(() => change({ query: value }), QUERY_DEBOUNCE_MS);
+  };
+
   const toggleKind = (kind: OfferKind) =>
     change({ kinds: kinds.includes(kind) ? kinds.filter((k) => k !== kind) : [...kinds, kind] });
 
@@ -178,10 +187,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             aria-label="Caută"
             placeholder="Caută un local sau un produs"
             value={draftQuery}
-            onChange={(e) => {
-              setDraftQuery(e.target.value);
-              change({ query: e.target.value });
-            }}
+            onChange={(e) => typeQuery(e.target.value)}
           />
           <div className="chip-row">
             {OFFER_KINDS.filter((kind) => kindCounts[kind] || kinds.includes(kind)).map((kind) => (
