@@ -1,6 +1,6 @@
 # fentez foamea
 
-fentez foamea puts cheap food in Bucharest on one map: surplus bags restaurants would otherwise throw away, lunch menus, weekday chain deals and delivery-app discounts. Scrapers collect offers from public sources into Postgres. A small website shows what is open near you right now and links each offer back to where you can buy it.
+fentez foamea puts cheap food in Bucharest on one map: surplus bags restaurants would otherwise throw away, lunch menus, weekday chain deals and delivery-app discounts. Scrapers collect offers from public sources into Postgres. A small website shows what is open near you right now and links each offer back to where you can buy it. New surplus bags are also published as an RSS feed at [/feed.xml](https://fentez-foamea.vercel.app/feed.xml).
 
 The UI is in Romanian. The code and docs are in English. For how the parts fit together, read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
