@@ -1,5 +1,5 @@
 import { OFFER_KIND_LABELS } from "@fentezfoamea/core";
-import { formatPrice } from "./format";
+import { formatPickup, formatPrice } from "./format";
 import type { Offer } from "./offers";
 import { SITE_NAME } from "./site";
 
@@ -13,6 +13,14 @@ export function offerHeadline(offer: Pick<Offer, "title" | "price" | "discountPc
   return `${lead ? `${lead} · ` : ""}${offer.title}${place ? ` la ${place}` : ""}`;
 }
 
+export function offerShareText(
+  offer: Pick<Offer, "title" | "price" | "discountPct" | "venueName" | "chain" | "pickupStart" | "pickupEnd">,
+  now: Date,
+): string {
+  const pickup = offer.pickupStart && offer.pickupEnd ? `, ridici ${formatPickup(offer.pickupStart, offer.pickupEnd, now)}` : "";
+  return offerHeadline(offer) + pickup;
+}
+
 export function offerSummary(offer: Pick<Offer, "kind" | "deliveryOnly">): string {
   const kind = OFFER_KIND_LABELS[offer.kind] + (offer.deliveryOnly ? ", doar livrare" : "");
   return `${kind}. Vezi oferta și alte reduceri din apropiere pe ${SITE_NAME}.`;
@@ -23,7 +31,7 @@ export function offerLink(origin: string, offerId: string): string {
 }
 
 export function shareOffer(offer: Offer): Promise<ShareResult> {
-  return shareLink(offerHeadline(offer), offerLink(window.location.origin, offer.id));
+  return shareLink(offerShareText(offer, new Date()), offerLink(window.location.origin, offer.id));
 }
 
 export function shareCurrentView(text: string): Promise<ShareResult> {

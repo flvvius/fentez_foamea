@@ -75,7 +75,7 @@ test.describe("share button", () => {
     await offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: "Trimite" }).click();
     await expect(offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: "Trimis" })).toBeVisible();
     const shared = await page.evaluate(() => (window as unknown as { shared: ShareData }).shared);
-    expect(shared.text).toBe("15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț");
+    expect(shared.text).toMatch(/^15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț, ridici azi \d\d:\d\d–\d\d:\d\d$/);
     expect(shared.url).toMatch(new RegExp(`/\\?oferta=${BAG}$`));
   });
 
@@ -86,8 +86,8 @@ test.describe("share button", () => {
     await waitForHydration(page);
     await offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: "Trimite" }).click();
     await expect(offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: "Link copiat" })).toBeVisible();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-      `15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț ${baseURL}/?oferta=${BAG}`,
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
+      new RegExp(`^15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț, ridici azi [0-9:–]+ ${baseURL}/\\?oferta=${BAG}$`),
     );
   });
 });
