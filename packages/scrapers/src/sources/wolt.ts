@@ -181,7 +181,7 @@ export function rotationWindow<T>(items: T[], size: number, slot: number): T[] {
 
 export function isMerchantCampaign(campaign: WoltCampaign): boolean {
   if (campaign.conditions.has_wolt_plus === true) return false;
-  if (DELIVERY_FEE_ONLY.test(campaign.description.title.trim())) return false;
+  if (DELIVERY_FEE_ONLY.test(withoutWoltPlusUpsell(collapseWhitespace(campaign.description.title)))) return false;
   return !campaign.description.points.some((point) => PLATFORM_WIDE.test(point));
 }
 

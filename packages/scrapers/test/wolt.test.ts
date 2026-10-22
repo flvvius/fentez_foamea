@@ -94,7 +94,7 @@ describe("wolt", () => {
 
   it("skips free-delivery campaigns, which are not a food deal", () => {
     const deal = campaigns("dynamic-papa-gyros.json").find(isMerchantCampaign)!;
-    for (const title of ["0 RON taxă de livrare", "Livrare gratuită"]) {
+    for (const title of ["0 RON taxă de livrare", "0\u202fRON taxă de livrare", "Livrare gratuită"]) {
       expect(isMerchantCampaign({ ...deal, description: { ...deal.description, title } })).toBe(false);
     }
   });
