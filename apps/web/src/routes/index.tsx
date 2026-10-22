@@ -12,6 +12,19 @@ export const SNAPSHOT_HEADERS = {
   "cdn-cache-control": "public, s-maxage=300, stale-while-revalidate=3600",
 };
 
+const WEBSITE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "fentez foamea",
+  url: SITE_URL,
+  inLanguage: "ro",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/?q={search_term_string}&km=oras` },
+    "query-input": "required name=search_term_string",
+  },
+};
+
 export const Route = createFileRoute("/")({
   validateSearch,
   loader: () => fetchOfferSnapshot(),
@@ -19,6 +32,7 @@ export const Route = createFileRoute("/")({
   head: ({ loaderData, match }) => ({
     meta: sharedOfferMeta(loaderData, match.search.oferta),
     links: [{ rel: "canonical", href: SITE_URL }],
+    scripts: [{ type: "application/ld+json", children: JSON.stringify(WEBSITE_JSON_LD) }],
   }),
   component: Home,
 });

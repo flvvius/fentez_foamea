@@ -27,3 +27,9 @@ test("is installable", async ({ page, request }) => {
   for (const icon of manifest.icons) expect((await request.get(icon.src)).ok()).toBe(true);
   expect((await request.get("/apple-touch-icon.png")).ok()).toBe(true);
 });
+
+test("describes the site search to search engines", async ({ page }) => {
+  await page.goto("/");
+  const data = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? "{}");
+  expect(data.potentialAction.target.urlTemplate).toBe("https://fentez-foamea.vercel.app/?q={search_term_string}&km=oras");
+});
