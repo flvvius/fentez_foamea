@@ -5,6 +5,8 @@ import {
   withoutWoltPlusUpsell,
   campaignConditions,
   campaignOffer,
+  isLunchWithListedItems,
+  lunchItemOffers,
   isMerchantCampaign,
   itemOffers,
   listVenues,
@@ -57,6 +59,27 @@ describe("wolt", () => {
       conditions: "doar la produsele selectate; doar în raza de 3 km",
     });
     expect(offer.sourceOfferId).toBe("venue_campaign:6a829ee73479caf4691dee09@67dad3a2db56261b0e642333");
+  });
+
+  it("lists the lunch items a lunch campaign names, under its price cap", () => {
+    const lunch = campaigns("dynamic-burgerescu.json").find((campaign) => campaign.description.title.startsWith("Prânzul"))!;
+    expect(isLunchWithListedItems(lunch)).toBe(true);
+    const item = (id: string, name: string, price: number) => ({ id, name, price, disabled_info: null });
+    const assortment: WoltAssortment = {
+      categories: [],
+      items: [
+        item("69084dd928ad5f69bbbb56fb", "Meniu prânz burger", 3900),
+        item("69084dd928ad5f69bbbb56fd", "Meniu prânz wrap", 3500),
+        item("69084dd928ad5f69bbbb5703", "Platou mare", 5900),
+        item("not-listed", "Burger", 2500),
+      ],
+    };
+    const offers = lunchItemOffers(papaGyros, lunch, assortment).map((offer) => scrapedOfferSchema.parse(offer));
+    expect(offers.map((offer) => [offer.title, offer.priceRon, offer.kind])).toEqual([
+      ["Meniu prânz burger", 39, "daily_menu"],
+      ["Meniu prânz wrap", 35, "daily_menu"],
+    ]);
+    expect(offers[0]).toMatchObject({ timeStart: "10:00", timeEnd: "16:00", description: "Prânzul sub 40 lei", deliveryOnly: true });
   });
 
   it("keeps a dated end and flags the Wolt+ upsell", () => {
