@@ -16,6 +16,7 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
   const closingSoon = closesIn !== null && closesIn <= 60 && pickupStarted;
   const notToday = offer.daysOfWeek?.length ? !offer.daysOfWeek.includes(bucharestWeekday(now)) : false;
   const overForToday = !notToday && offer.timeEnd !== null && bucharestClock(now) >= offer.timeEnd;
+  const isNew = offer.firstSeenAt !== null && -minutesUntil(offer.firstSeenAt, now) < NEW_FOR_MINUTES;
   const when = schedule(offer);
   const place = placeNote(offer);
 
@@ -27,6 +28,7 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
         <p className="offer-kind">
           {OFFER_KIND_LABELS[offer.kind]}
           {offer.deliveryOnly && " · doar livrare"}
+          {isNew && <span className="offer-new"> · nou</span>}
         </p>
         <h2 className="offer-title">{offer.title}</h2>
         <p className="offer-venue">
@@ -103,6 +105,7 @@ function PriceFigure({ offer }: Readonly<{ offer: PlacedOffer }>) {
 }
 
 const CHECK_AGE_WORTH_MENTIONING_MIN = 45;
+const NEW_FOR_MINUTES = 180;
 
 function checkedLongAgo(offer: PlacedOffer, now: Date): boolean {
   return offer.checkedAt !== null && -minutesUntil(offer.checkedAt, now) > CHECK_AGE_WORTH_MENTIONING_MIN;

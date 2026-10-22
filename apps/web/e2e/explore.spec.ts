@@ -35,6 +35,13 @@ test.describe("explorer", () => {
     await expect(bag.getByRole("link", { name: /Vezi pe Bonapp/ })).toHaveAttribute("href", "https://bonapp.eco/p/bag-1");
   });
 
+  test("marks bags that appeared in the last three hours as new", async ({ page }) => {
+    await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
+    await expect(offerRow(page, "Pachet surpriză patiserie").locator(".offer-kind")).toHaveText("Pachet anti-risipă · nou");
+    await expect(offerRow(page, "Pachet de seară Titan").locator(".offer-kind")).toHaveText("Pachet anti-risipă");
+    await expect(offerRow(page, "Burger dublu cu cartofi").locator(".offer-new")).toHaveCount(0);
+  });
+
   test("drops offers sources stopped confirming and says when a bag was last checked", async ({ page }) => {
     await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
     await expect(offerRow(page, "Pachet verificat acum 2 ore")).toContainText("verificat acum 2 h");

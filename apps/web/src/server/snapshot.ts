@@ -19,6 +19,7 @@ type Row = {
   conditions: string | null;
   available_count: number | null;
   last_seen_at: Date;
+  first_seen_at: Date;
   url: string;
   delivery_only: boolean;
   venue_id: string | null;
@@ -34,7 +35,7 @@ export async function loadOfferSnapshot(): Promise<SnapshotWire> {
   const [rows, runs] = await Promise.all([
     sql<Row[]>`
       select l.id, l.source, l.kind, l.title, l.price_ron, l.original_price_ron, l.discount_pct,
-             l.ends_at, l.pickup_start, l.pickup_end, l.days_of_week, l.time_start, l.time_end, l.conditions, l.available_count, l.last_seen_at,
+             l.ends_at, l.pickup_start, l.pickup_end, l.days_of_week, l.time_start, l.time_end, l.conditions, l.available_count, l.last_seen_at, l.first_seen_at,
              l.url, l.delivery_only, l.venue_id, l.venue_name, l.venue_chain, v.url as venue_url, l.lat, l.lon
       from live_offers l
       left join venues v on v.id = l.venue_id
@@ -66,6 +67,7 @@ export async function loadOfferSnapshot(): Promise<SnapshotWire> {
       conditions: row.conditions,
       available: row.available_count,
       checkedAt: row.kind === "surplus" ? row.last_seen_at.toISOString() : null,
+      firstSeenAt: row.kind === "surplus" ? row.first_seen_at.toISOString() : null,
       url: row.url,
       deliveryOnly: row.delivery_only,
       venueId: row.venue_id,

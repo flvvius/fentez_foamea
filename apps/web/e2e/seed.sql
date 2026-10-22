@@ -44,5 +44,7 @@ insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ro
 insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ron, url, days_of_week, time_start, time_end) values
   ('00000000-0000-0000-0000-00000000b017', 'citygrill', 'breakfast', '00000000-0000-0000-0000-00000000a002', 'combo', 'Mic dejun 1+1', 20, 'https://citygrill.ro/mic-dejun', '{1,2,3,4,5,6,7}', '00:00', '00:01');
 
+update offers set first_seen_at = now() - interval '5 hours' where id = '00000000-0000-0000-0000-00000000b007';
+
 insert into scrape_runs (source, started_at, finished_at, status, offers_seen)
 values ('bonapp', now() - interval '12 minutes', now() - interval '10 minutes', 'ok', 3);

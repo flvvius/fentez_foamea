@@ -17,6 +17,7 @@ export type Offer = {
   conditions: string | null;
   available: number | null;
   checkedAt: string | null;
+  firstSeenAt: string | null;
   url: string;
   deliveryOnly: boolean;
   venueId: string | null;
@@ -64,6 +65,7 @@ const OFFER_KEYS = [
   "conditions",
   "available",
   "checkedAt",
+  "firstSeenAt",
   "url",
   "deliveryOnly",
   "venue",

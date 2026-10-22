@@ -18,6 +18,7 @@ const offer: Offer = {
   conditions: null,
   available: null,
   checkedAt: null,
+  firstSeenAt: null,
   url: "https://glovoapp.com/store",
   deliveryOnly: true,
   venueId: "v1",

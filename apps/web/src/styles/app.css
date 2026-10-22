@@ -372,6 +372,11 @@ body {
   max-width: var(--type-descriptionMeasure);
 }
 
+.offer-new {
+  color: var(--deal);
+  font-weight: 600;
+}
+
 .urgent {
   color: var(--warning-text);
   font-weight: 600;

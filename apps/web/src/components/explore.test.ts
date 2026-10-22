@@ -15,6 +15,7 @@ const base: Offer = {
   pickupEnd: null,
   available: 2,
   checkedAt: null,
+  firstSeenAt: null,
   url: "https://example.com",
   deliveryOnly: false,
   venueId: "v1",
