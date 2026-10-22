@@ -276,7 +276,7 @@ export function PostForm() {
         </h2>
         <p className="lede">Ai nevoie de un link sau de o captură de ecran. Le poți adăuga pe amândouă.</p>
 
-        <Field name="url" label="Link către ofertă" hint="De pe TikTok, Facebook, site-ul restaurantului sau altă pagină publică.">
+        <Field name="url" label="Link către ofertă" hint="De pe TikTok, site-ul restaurantului sau altă pagină publică. Pentru Instagram și Facebook adaugă și o captură.">
           <input
             id="f-url"
             type="url"
