@@ -2,6 +2,7 @@ import { GeminiExtractionProvider } from "./gemini.ts";
 import type { ExtractionProvider } from "./provider.ts";
 
 const DEFAULT_MODEL = "gemini-3.1-flash-lite";
+const DEFAULT_FALLBACK_MODEL = "gemini-3.5-flash-lite";
 
 // The result is memoized, a missing key included: after adding GEMINI_API_KEY to .env, restart the dev server.
 let cached: { provider: ExtractionProvider | null } | undefined;
@@ -19,7 +20,10 @@ export function getExtractionProvider(): ExtractionProvider | null {
   }
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   const model = process.env.DEALS_LLM_MODEL?.trim() || DEFAULT_MODEL;
-  cached = { provider: apiKey ? new GeminiExtractionProvider(apiKey, model) : null };
+  // "none" turns the fallback off.
+  const fallback = process.env.DEALS_LLM_FALLBACK_MODEL?.trim() || DEFAULT_FALLBACK_MODEL;
+  const fallbackModel = fallback.toLowerCase() === "none" ? null : fallback;
+  cached = { provider: apiKey ? new GeminiExtractionProvider(apiKey, model, { fallbackModel }) : null };
   return cached.provider;
 }
 

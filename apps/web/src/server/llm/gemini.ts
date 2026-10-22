@@ -17,7 +17,9 @@ import {
 
 export type GenerateContent = (params: GenerateContentParameters) => Promise<{ text?: string }>;
 
-export const REQUEST_TIMEOUT_MS = 20_000;
+// Covers every attempt together. Generous because an overloaded Gemini answers slowly (a one-word
+// reply took 25 s on 2026-10-22), and a slow pre-fill beats sending the user to manual entry.
+export const REQUEST_TIMEOUT_MS = 40_000;
 export const MAX_OUTPUT_TOKENS = 1024;
 
 export const SYSTEM_INSTRUCTION = `You extract ONE restaurant or food deal into the given JSON schema. That is your only job.
@@ -89,50 +91,84 @@ function isTimeout(error: unknown): boolean {
   return error instanceof Error && (error.name === "AbortError" || error.name === "TimeoutError");
 }
 
-/*
- * Not yet exercised against the live API (no key was available when this was written):
- * - the nullable enums in EXTRACTION_JSON_SCHEMA use anyOf [{type: string, enum}, {type: null}];
- * - toolConfig NONE is sent without any tools.
- * Both are valid per the SDK types and Gemini docs but need one live smoke call.
- */
+// Overload and quota answers (a live call on 2026-10-22 got 503 "high demand") go straight to the
+// fallback model, which is rarely overloaded at the same moment, then back to the main model once.
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+const RETRY_DELAY_MS = 800;
+
+function isRetryable(error: unknown): boolean {
+  const status = (error as { status?: unknown } | null)?.status;
+  return typeof status === "number" && RETRYABLE_STATUS.has(status);
+}
+
+export type GeminiOptions = {
+  generate?: GenerateContent;
+  /** Tried once after the main model keeps answering 429/5xx. */
+  fallbackModel?: string | null;
+  sleep?: (ms: number) => Promise<void>;
+};
+
 export class GeminiExtractionProvider implements ExtractionProvider {
   private readonly generate: GenerateContent;
+  private readonly fallbackModel: string | null;
+  private readonly sleep: (ms: number) => Promise<void>;
 
   constructor(
     apiKey: string,
     readonly model: string,
-    generate?: GenerateContent,
+    options: GeminiOptions = {},
   ) {
-    if (generate) {
-      this.generate = generate;
+    if (options.generate) {
+      this.generate = options.generate;
     } else {
       const client = new GoogleGenAI({ apiKey });
       this.generate = (params) => client.models.generateContent(params);
     }
+    this.fallbackModel = options.fallbackModel && options.fallbackModel !== model ? options.fallbackModel : null;
+    this.sleep = options.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
   }
 
   async extract(input: ExtractionInput, context: PromptContext): Promise<unknown> {
-    let response: { text?: string };
-    try {
-      response = await this.generate({
-        model: this.model,
-        contents: this.contents(input, context),
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          responseMimeType: "application/json",
-          responseJsonSchema: EXTRACTION_JSON_SCHEMA,
-          temperature: 0,
-          maxOutputTokens: MAX_OUTPUT_TOKENS,
-          toolConfig: { functionCallingConfig: { mode: FunctionCallingConfigMode.NONE } },
-          thinkingConfig: thinkingConfig(this.model),
-          abortSignal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-        },
-      });
-    } catch (error) {
-      if (isTimeout(error)) {
-        throw new ExtractionProviderError("timeout", `Gemini request timed out after ${REQUEST_TIMEOUT_MS} ms`, { cause: error });
+    // One deadline covers every attempt, so retries never stretch the request past it.
+    const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+    const attempts = [
+      { model: this.model, delay: 0 },
+      ...(this.fallbackModel ? [{ model: this.fallbackModel, delay: 0 }] : []),
+      { model: this.model, delay: RETRY_DELAY_MS },
+    ];
+
+    let response: { text?: string } | undefined;
+    let lastError: unknown;
+    for (const attempt of attempts) {
+      if (attempt.delay) await this.sleep(attempt.delay);
+      if (signal.aborted) break;
+      try {
+        response = await this.generate({
+          model: attempt.model,
+          contents: this.contents(input, context),
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
+            responseMimeType: "application/json",
+            responseJsonSchema: EXTRACTION_JSON_SCHEMA,
+            temperature: 0,
+            maxOutputTokens: MAX_OUTPUT_TOKENS,
+            toolConfig: { functionCallingConfig: { mode: FunctionCallingConfigMode.NONE } },
+            thinkingConfig: thinkingConfig(attempt.model),
+            abortSignal: signal,
+          },
+        });
+        break;
+      } catch (error) {
+        lastError = error;
+        if (!isRetryable(error)) break;
       }
-      throw new ExtractionProviderError("request_failed", "Gemini request failed", { cause: error });
+    }
+
+    if (!response) {
+      if (isTimeout(lastError) || signal.aborted) {
+        throw new ExtractionProviderError("timeout", `Gemini request timed out after ${REQUEST_TIMEOUT_MS} ms`, { cause: lastError });
+      }
+      throw new ExtractionProviderError("request_failed", "Gemini request failed", { cause: lastError });
     }
 
     const body = response.text?.trim();

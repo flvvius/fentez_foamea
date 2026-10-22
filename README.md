@@ -79,6 +79,7 @@ bun run check-types
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | web | Optional. Enables "Continuă cu Google". The OAuth callback is `<BETTER_AUTH_URL>/api/auth/callback/google` |
 | `DEALS_LLM_PROVIDER` | web | Which model service reads submitted deal links. Only `gemini` is supported, which is the default. Unset or empty means `gemini` |
 | `DEALS_LLM_MODEL` | web | Gemini model that reads submitted deal links, default `gemini-3.1-flash-lite` |
+| `DEALS_LLM_FALLBACK_MODEL` | web | Tried when the main model is overloaded (429/5xx), default `gemini-3.5-flash-lite`; `none` turns it off |
 | `DEALS_HIDE_SCORE` | web | Community deals at or below this score are hidden, default -5 |
 | `DEALS_EXTRACT_PER_HOUR` | web | Link or image reads per user per hour, default 10 |
 | `DEALS_SUBMIT_PER_DAY` | web | Deals a user can post per day, default 5 |

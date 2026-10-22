@@ -32,11 +32,18 @@ export async function extractDeal(
     raw = await provider.extract(seen, { today: bucharestToday(now), weekday: weekdayName(now) });
   } catch (error) {
     const timedOut = error instanceof ExtractionProviderError && error.kind === "timeout";
-    // Only the error kind and the model go to the log: messages can echo the request.
+    // Messages can echo the request, so the log gets only the kind plus the cause's HTTP status,
+    // name and code: enough to tell a quota error from a bad key or a network failure.
+    const cause = (error instanceof Error ? error.cause : undefined) as
+      | { status?: unknown; name?: unknown; code?: unknown; cause?: { code?: unknown } }
+      | undefined;
     console.warn("[deals-llm] extraction failed", {
       model: provider.model,
       input: input.kind,
       kind: error instanceof ExtractionProviderError ? error.kind : "unexpected",
+      status: typeof cause?.status === "number" ? cause.status : undefined,
+      cause: typeof cause?.name === "string" ? cause.name : undefined,
+      code: typeof cause?.code === "string" ? cause.code : typeof cause?.cause?.code === "string" ? cause.cause.code : undefined,
     });
     return { status: "failed", reason: timedOut ? "timeout" : "provider_error" };
   }

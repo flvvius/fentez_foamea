@@ -10,7 +10,7 @@ const context = { today: "2026-10-22", weekday: "Thursday" };
 // null stands for "the response has no text"; undefined takes the default JSON.
 function setup(text: string | null | undefined = '{"is_deal":true}', model = "gemini-3.1-flash-lite") {
   const generate = vi.fn(async (_params: GenerateContentParameters) => ({ text: text ?? undefined }));
-  return { generate, provider: new GeminiExtractionProvider("test-key", model, generate) };
+  return { generate, provider: new GeminiExtractionProvider("test-key", model, { generate }) };
 }
 
 function firstParams(generate: ReturnType<typeof setup>["generate"]): GenerateContentParameters {
@@ -203,14 +203,60 @@ describe("GeminiExtractionProvider", () => {
   });
 
   it("maps request failures and aborts to typed errors", async () => {
-    const failing = new GeminiExtractionProvider("k", "m", async () => {
-      throw new Error("500");
+    const failing = new GeminiExtractionProvider("k", "m", {
+      generate: async () => {
+        throw new Error("500");
+      },
     });
-    const timing = new GeminiExtractionProvider("k", "m", async () => {
-      throw new DOMException("The operation timed out", "TimeoutError");
+    const timing = new GeminiExtractionProvider("k", "m", {
+      generate: async () => {
+        throw new DOMException("The operation timed out", "TimeoutError");
+      },
     });
     const input = { kind: "text", text: "x", sourceUrl: null, postedAt: null } as const;
     await expect(failing.extract(input, context)).rejects.toMatchObject({ name: "ExtractionProviderError", kind: "request_failed" });
     await expect(timing.extract(input, context)).rejects.toMatchObject({ name: "ExtractionProviderError", kind: "timeout" });
+  });
+});
+
+describe("GeminiExtractionProvider retries", () => {
+  const input = { kind: "text", text: "x", sourceUrl: null, postedAt: null } as const;
+  const overloaded = () => Object.assign(new Error("high demand"), { status: 503 });
+  const ok = { text: JSON.stringify({ is_deal: true }) };
+  const noWait = async () => {};
+
+  it("goes to the fallback model after a 503 from the main one", async () => {
+    const generate = vi.fn().mockRejectedValueOnce(overloaded()).mockResolvedValueOnce(ok);
+    const provider = new GeminiExtractionProvider("k", "main", { generate, fallbackModel: "backup", sleep: noWait });
+    await expect(provider.extract(input, context)).resolves.toEqual({ is_deal: true });
+    expect(generate.mock.calls.map(([params]) => params.model)).toEqual(["main", "backup"]);
+  });
+
+  it("tries the main model once more when the fallback is overloaded too", async () => {
+    const generate = vi.fn().mockRejectedValueOnce(overloaded()).mockRejectedValueOnce(overloaded()).mockResolvedValueOnce(ok);
+    const provider = new GeminiExtractionProvider("k", "main", { generate, fallbackModel: "backup", sleep: noWait });
+    await expect(provider.extract(input, context)).resolves.toEqual({ is_deal: true });
+    expect(generate.mock.calls.map(([params]) => params.model)).toEqual(["main", "backup", "main"]);
+  });
+
+  it("retries the main model when no fallback is configured", async () => {
+    const generate = vi.fn().mockRejectedValueOnce(overloaded()).mockResolvedValueOnce(ok);
+    const provider = new GeminiExtractionProvider("k", "main", { generate, fallbackModel: null, sleep: noWait });
+    await expect(provider.extract(input, context)).resolves.toEqual({ is_deal: true });
+    expect(generate.mock.calls.map(([params]) => params.model)).toEqual(["main", "main"]);
+  });
+
+  it("does not retry a request the API rejected outright", async () => {
+    const generate = vi.fn().mockRejectedValue(Object.assign(new Error("bad request"), { status: 400 }));
+    const provider = new GeminiExtractionProvider("k", "main", { generate, fallbackModel: "backup", sleep: noWait });
+    await expect(provider.extract(input, context)).rejects.toMatchObject({ kind: "request_failed" });
+    expect(generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives up with request_failed when every attempt is overloaded", async () => {
+    const generate = vi.fn().mockRejectedValue(overloaded());
+    const provider = new GeminiExtractionProvider("k", "main", { generate, fallbackModel: "backup", sleep: noWait });
+    await expect(provider.extract(input, context)).rejects.toMatchObject({ kind: "request_failed" });
+    expect(generate).toHaveBeenCalledTimes(3);
   });
 });
