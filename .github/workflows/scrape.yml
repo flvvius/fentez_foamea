@@ -36,7 +36,7 @@ jobs:
             *) sources="${MANUAL:-all}" ;;
           esac
           echo "sources=$sources" >> "$GITHUB_OUTPUT"
-          if [ "$sources" = "bonapp" ]; then echo "passes=3" >> "$GITHUB_OUTPUT"; else echo "passes=1" >> "$GITHUB_OUTPUT"; fi
+          if [ "$sources" = "bonapp" ]; then echo "passes=6" >> "$GITHUB_OUTPUT"; else echo "passes=1" >> "$GITHUB_OUTPUT"; fi
 
       - uses: actions/checkout@v4
 
