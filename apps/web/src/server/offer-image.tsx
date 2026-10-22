@@ -1,6 +1,7 @@
 import { Resvg } from "@resvg/resvg-js";
 import satori from "satori";
 import { OFFER_KIND_LABELS, type OfferKind } from "@fentezfoamea/core";
+import { percentInTitle, priceCapInTitle } from "@/components/explore";
 import { formatPrice } from "@/lib/format";
 import type { Landing } from "@/lib/landing";
 import { ZONE_RADIUS_KM, type Zone } from "@/lib/zones";
@@ -41,6 +42,7 @@ export async function renderOfferImage(offer: OfferCardRow): Promise<Response> {
   const place = offer.venue_name ?? offer.venue_chain;
   const kind = OFFER_KIND_LABELS[offer.kind] + (offer.delivery_only ? " · doar livrare" : "");
   const wasHigher = offer.original_price_ron !== null && offer.price_ron !== null && offer.original_price_ron > offer.price_ron;
+  const figure = headlineFigure(offer);
 
   const svg = await satori(
     <div style={{ width: WIDTH, height: HEIGHT, boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "56px 80px 64px", background: "#fcfbf8", color: "#1d1a16", fontFamily: "Inter" }}>
@@ -50,16 +52,16 @@ export async function renderOfferImage(offer: OfferCardRow): Promise<Response> {
       </div>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", alignItems: "flex-end" }}>
-          <span style={{ fontSize: 160, fontWeight: 700, letterSpacing: -6, lineHeight: 1 }}>
-            {offer.price_ron === null ? OFFER_KIND_LABELS[offer.kind] : formatPrice(offer.price_ron)}
+          <span style={{ fontSize: 160, fontWeight: 700, letterSpacing: -6, lineHeight: 1, color: figure.deal ? "#c2410c" : "#1d1a16" }}>
+            {figure.text}
           </span>
-          {offer.price_ron !== null && <span style={{ fontSize: 48, fontWeight: 500, color: "#6b645b", marginLeft: 16, marginBottom: 18 }}>lei</span>}
+          {figure.unit && <span style={{ fontSize: 48, fontWeight: 500, color: "#6b645b", marginLeft: 16, marginBottom: 18 }}>{figure.unit}</span>}
           {wasHigher && (
             <span style={{ fontSize: 44, fontWeight: 500, color: "#6b645b", textDecoration: "line-through", marginLeft: 32, marginBottom: 20 }}>
               {formatPrice(offer.original_price_ron!)} lei
             </span>
           )}
-          {offer.discount_pct !== null && (
+          {offer.price_ron !== null && offer.discount_pct !== null && (
             <span style={{ fontSize: 56, fontWeight: 700, color: "#c2410c", marginLeft: 32, marginBottom: 16 }}>−{offer.discount_pct}%</span>
           )}
         </div>
@@ -70,6 +72,15 @@ export async function renderOfferImage(offer: OfferCardRow): Promise<Response> {
     { width: WIDTH, height: HEIGHT, fonts },
   );
   return pngResponse(svg);
+}
+
+function headlineFigure(offer: OfferCardRow): { text: string; unit?: string; deal?: boolean } {
+  if (offer.price_ron !== null) return { text: formatPrice(offer.price_ron), unit: "lei" };
+  const pct = offer.discount_pct ?? percentInTitle(offer.title);
+  if (pct !== null) return { text: `−${pct}%`, deal: true };
+  const cap = priceCapInTitle(offer.title);
+  if (cap !== null) return { text: `sub ${cap}`, unit: "lei" };
+  return { text: OFFER_KIND_LABELS[offer.kind] };
 }
 
 export type TodaySummary = { total: number; bags: number; highlights: OfferCardRow[] };
