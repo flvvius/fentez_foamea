@@ -32,6 +32,12 @@ describe("bonapp toOffer", () => {
     });
   });
 
+  it("skips flowers and plants, which Munch tags with Hungarian facets", () => {
+    expect(toOffer({ ...product, facets: ["virag"] })).toBeUndefined();
+    expect(toOffer({ ...product, facets: ["noveny"] })).toBeUndefined();
+    expect(toOffer({ ...product, facets: ["dessert", "bolt"] })).toBeDefined();
+  });
+
   it("skips sold-out bags", () => {
     expect(toOffer({ ...product, stock_quantity: 0 })).toBeUndefined();
   });
