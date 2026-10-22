@@ -108,3 +108,27 @@ function parseRadius(value: number | string | undefined): number | null {
 function findKey<K extends string>(map: Record<K, string>, value: string | undefined): K | undefined {
   return (Object.keys(map) as K[]).find((key) => map[key] === value);
 }
+
+export type PageDefaults = Partial<Pick<ExploreState, "kinds" | "radiusKm">>;
+
+export function stateForPage(search: ExploreSearch, defaults: PageDefaults): ExploreState {
+  const state = stateFromSearch(search);
+  if (defaults.kinds && search.tip === undefined) state.kinds = defaults.kinds;
+  if (defaults.radiusKm !== undefined && search.km === undefined) state.radiusKm = defaults.radiusKm;
+  return state;
+}
+
+export function searchForPage(state: ExploreState, defaults: PageDefaults): ExploreSearch {
+  const search = searchFromState(state);
+  if (defaults.kinds && sameKinds(state.kinds, defaults.kinds)) delete search.tip;
+  else if (defaults.kinds && !state.kinds.length) search.tip = "toate";
+  if (defaults.radiusKm !== undefined) {
+    if (state.radiusKm === defaults.radiusKm) delete search.km;
+    else search.km = state.radiusKm ?? "oras";
+  }
+  return search;
+}
+
+function sameKinds(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((kind) => b.includes(kind));
+}

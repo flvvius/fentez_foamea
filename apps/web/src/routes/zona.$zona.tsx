@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
-import { ExplorePage, searchForPage, useExploreState, type PageDefaults } from "@/components/ExplorePage";
-import { validateSearch, type ExploreState } from "@/lib/search";
+import { ExplorePage, useExploreState } from "@/components/ExplorePage";
+import { searchForPage, validateSearch, type ExploreState, type PageDefaults } from "@/lib/search";
 import { SITE_URL } from "@/lib/site";
 import { ZONE_RADIUS_KM, findZone } from "@/lib/zones";
 import { fetchOfferSnapshot } from "@/server/offers";

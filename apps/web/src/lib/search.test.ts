@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_STATE, searchFromState, stateFromSearch, validateSearch } from "./search";
+import { DEFAULT_STATE, searchForPage, searchFromState, stateForPage, stateFromSearch, validateSearch } from "./search";
 
 describe("explore search params", () => {
   it("keeps the default view out of the URL", () => {
@@ -28,5 +28,28 @@ describe("explore search params", () => {
 
   it("ignores values it does not know", () => {
     expect(stateFromSearch(validateSearch({ tip: "pizza", km: 7, buget: 13, ordine: "random", extra: "x" }))).toEqual(DEFAULT_STATE);
+  });
+});
+
+describe("pages with their own defaults", () => {
+  const zone = { radiusKm: 1 };
+  const landing = { kinds: ["surplus" as const] };
+
+  it("leaves a page's own defaults out of its URL", () => {
+    expect(searchForPage(stateForPage({}, zone), zone)).toEqual({});
+    expect(searchForPage(stateForPage({}, landing), landing)).toEqual({});
+  });
+
+  it("writes the site-wide default radius on a zone page, since the zone's is different", () => {
+    const state = { ...stateForPage({}, zone), radiusKm: 3 };
+    expect(searchForPage(state, zone)).toEqual({ km: 3 });
+    expect(stateForPage(validateSearch({ km: 3 }), zone).radiusKm).toBe(3);
+    expect(searchForPage({ ...state, radiusKm: null }, zone)).toEqual({ km: "oras" });
+  });
+
+  it("remembers that every kind was picked on a category page", () => {
+    const search = searchForPage({ ...stateForPage({}, landing), kinds: [] }, landing);
+    expect(search).toEqual({ tip: "toate" });
+    expect(stateForPage(validateSearch(search), landing).kinds).toEqual([]);
   });
 });
