@@ -1,8 +1,10 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
 import { bucharestWeekday, countOffers, formatRelative } from "@/lib/format";
+import { LANDINGS } from "@/lib/landing";
 import type { OfferSnapshot } from "@/lib/offers";
 import { BUDGET_OPTIONS, RADIUS_OPTIONS, type ExploreState, type SortKey } from "@/lib/search";
 import { OfferCard } from "./OfferCard";
@@ -24,10 +26,11 @@ type LocateState = "idle" | "locating" | "denied";
 type Props = {
   snapshot: OfferSnapshot;
   state: ExploreState;
+  headline?: string;
   onChange: (next: Partial<ExploreState>) => void;
 };
 
-export function Explorer({ snapshot, state, onChange }: Readonly<Props>) {
+export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", onChange }: Readonly<Props>) {
   const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId } = state;
   const [now, setNow] = useState(() => new Date(snapshot.generatedAt));
   const [mounted, setMounted] = useState(false);
@@ -88,7 +91,7 @@ export function Explorer({ snapshot, state, onChange }: Readonly<Props>) {
       <section className="panel" aria-label="Oferte">
         <header className="masthead">
           <p className="brand">fentez foamea</p>
-          <h1 className="headline">Mâncare ieftină în București, acum.</h1>
+          <h1 className="headline">{headline}</h1>
           <p className="lede">
             {countOffers(placed.length)} de la restaurante, fast-food-uri și cofetării: pachete salvate de la aruncat, meniuri
             de prânz, reduceri.
@@ -201,6 +204,13 @@ export function Explorer({ snapshot, state, onChange }: Readonly<Props>) {
           <footer className="colophon">
             Datele vin din aplicațiile și site-urile partenerilor; prețul și disponibilitatea finală sunt cele de acolo.
             Fiecare ofertă duce la sursa ei.
+            <nav aria-label="Categorii" className="categories">
+              {LANDINGS.map((landing) => (
+                <Link key={landing.slug} to="/$categorie" params={{ categorie: landing.slug }} className="link-quiet">
+                  {OFFER_KIND_LABELS[landing.kind]}
+                </Link>
+              ))}
+            </nav>
           </footer>
         </div>
       </section>

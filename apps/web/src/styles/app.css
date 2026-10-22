@@ -640,3 +640,10 @@ body {
     margin: 0 16px 8px;
   }
 }
+
+.categories {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}

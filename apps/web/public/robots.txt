@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fentez-foamea.vercel.app/sitemap.xml

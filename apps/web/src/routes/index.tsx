@@ -1,20 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
-import { Explorer } from "@/components/Explorer";
-import { decodeSnapshot, type SnapshotWire } from "@/lib/offers";
+import { useCallback } from "react";
+import { ExplorePage, useExploreState } from "@/components/ExplorePage";
+import type { SnapshotWire } from "@/lib/offers";
 import { searchFromState, stateFromSearch, validateSearch, type ExploreState } from "@/lib/search";
 import { offerHeadline, offerLink, offerSummary } from "@/lib/share";
 import { SITE_URL } from "@/lib/site";
 import { fetchOfferSnapshot } from "@/server/offers";
 
+export const SNAPSHOT_HEADERS = {
+  "cache-control": "public, max-age=0, must-revalidate",
+  "cdn-cache-control": "public, s-maxage=300, stale-while-revalidate=3600",
+};
+
 export const Route = createFileRoute("/")({
   validateSearch,
   loader: () => fetchOfferSnapshot(),
-  headers: () => ({
-    "cache-control": "public, max-age=0, must-revalidate",
-    "cdn-cache-control": "public, s-maxage=300, stale-while-revalidate=3600",
+  headers: () => SNAPSHOT_HEADERS,
+  head: ({ loaderData, match }) => ({
+    meta: sharedOfferMeta(loaderData, match.search.oferta),
+    links: [{ rel: "canonical", href: SITE_URL }],
   }),
-  head: ({ loaderData, match }) => ({ meta: sharedOfferMeta(loaderData, match.search.oferta) }),
   component: Home,
 });
 
@@ -22,8 +27,7 @@ function Home() {
   const wire = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const snapshot = useMemo(() => decodeSnapshot(wire), [wire]);
-  const state = useMemo(() => stateFromSearch(search), [search]);
+  const state = useExploreState(search);
 
   const onChange = useCallback(
     (next: Partial<ExploreState>) =>
@@ -31,7 +35,7 @@ function Home() {
     [navigate],
   );
 
-  return <Explorer snapshot={snapshot} state={state} onChange={onChange} />;
+  return <ExplorePage wire={wire} state={state} onChange={onChange} />;
 }
 
 function sharedOfferMeta(wire: SnapshotWire | undefined, offerId: string | undefined) {
