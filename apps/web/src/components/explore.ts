@@ -171,7 +171,7 @@ export function venuePins(offers: PlacedOffer[]): VenuePin[] {
     };
     pin.count++;
     if (offer.price !== null && (pin.minPrice === null || offer.price < pin.minPrice)) pin.minPrice = offer.price;
-    if (offer.discountPct !== null && (pin.bestDiscount === null || offer.discountPct > pin.bestDiscount)) pin.bestDiscount = offer.discountPct;
+    if (offer.headlinePct !== null && (pin.bestDiscount === null || offer.headlinePct > pin.bestDiscount)) pin.bestDiscount = offer.headlinePct;
     pins.set(offer.placeId, pin);
   }
   return [...pins.values()];

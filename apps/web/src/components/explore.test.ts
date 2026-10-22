@@ -101,6 +101,11 @@ describe("explore", () => {
     expect(sortOffers(placed, "price").map((o) => o.id)).toEqual(["lunch", "1"]);
   });
 
+  it("gives a price-less pin the best percent from its titles", () => {
+    const placed = placeOffers([{ ...base, price: null, discountPct: null, title: "-30% la shaorma" }], origin, now);
+    expect(venuePins(placed)[0]).toMatchObject({ minPrice: null, bestDiscount: 30 });
+  });
+
   it("sorts by price and groups pins by venue", () => {
     const cheap = { ...base, id: "cheap", price: 9, discountPct: 70 };
     const placed = placeOffers([base, cheap], origin, now);

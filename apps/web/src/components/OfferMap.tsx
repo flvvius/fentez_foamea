@@ -35,7 +35,7 @@ export default function OfferMap({ pins, origin, selectedVenueId, onSelectVenue 
 
 function PricePin({ pin, selected, onSelect }: Readonly<{ pin: VenuePin; selected: boolean; onSelect: Props["onSelectVenue"] }>) {
   const icon = useMemo(() => {
-    const price = pin.minPrice === null ? "ofertă" : `${formatPrice(pin.minPrice)} lei`;
+    const price = pinLabel(pin);
     const more = pin.count > 1 ? `<span class="pin-count">${pin.count}</span>` : "";
     return L.divIcon({
       className: "",
@@ -84,4 +84,10 @@ function ZoomClass() {
     apply();
   });
   return null;
+}
+
+function pinLabel(pin: VenuePin): string {
+  if (pin.minPrice !== null) return `${formatPrice(pin.minPrice)} lei`;
+  if (pin.bestDiscount !== null) return `−${pin.bestDiscount}%`;
+  return "ofertă";
 }
