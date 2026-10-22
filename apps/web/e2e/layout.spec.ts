@@ -40,3 +40,10 @@ test("map pins are one control each and work from the keyboard", async ({ page }
   await expect(offerList(page).locator(".venue-scope")).toContainText("Brutăria din Colț");
   await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Covrigi cu brânză", "Pachet pentru mâine"]);
 });
+
+test("the best deals keep their price tag when the map is zoomed out", async ({ page }) => {
+  await expect(page.locator(".map-far")).toHaveCount(1);
+  const featured = page.locator(".pin-featured");
+  await expect(featured.first()).toBeVisible();
+  await expect(featured.first()).toContainText("lei");
+});

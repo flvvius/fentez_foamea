@@ -548,7 +548,8 @@ body {
   display: none;
 }
 
-.map-far .pin-selected {
+.map-far .pin-selected,
+.map-far .pin-featured {
   width: auto;
   height: auto;
   font-size: 0.8125rem;
@@ -558,8 +559,13 @@ body {
   transform: translate(-50%, -100%);
 }
 
-.map-far .pin-selected::after {
+.map-far .pin-selected::after,
+.map-far .pin-featured::after {
   display: block;
+}
+
+.map-far .pin-featured:hover {
+  transform: translate(-50%, -100%) scale(1.06);
 }
 
 .origin-dot {

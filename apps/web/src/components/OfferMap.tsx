@@ -6,7 +6,7 @@ import { useEffect, useMemo } from "react";
 import { CircleMarker, MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type { LatLon } from "@fentezfoamea/core";
 import { formatPrice } from "@/lib/format";
-import type { VenuePin } from "./explore";
+import { featuredPinIds, type VenuePin } from "./explore";
 
 type Props = {
   pins: VenuePin[];
@@ -16,6 +16,7 @@ type Props = {
 };
 
 export default function OfferMap({ pins, origin, selectedVenueId, onSelectVenue }: Readonly<Props>) {
+  const featured = useMemo(() => featuredPinIds(pins), [pins]);
   return (
     <MapContainer center={[origin.lat, origin.lon]} zoom={14} className="h-full w-full" zoomControl={false} attributionControl>
       <TileLayer
@@ -27,24 +28,35 @@ export default function OfferMap({ pins, origin, selectedVenueId, onSelectVenue 
       <ZoomClass />
       <CircleMarker center={[origin.lat, origin.lon]} radius={7} pathOptions={{ className: "origin-dot" }} />
       {pins.map((pin) => (
-        <PricePin key={pin.venueId} pin={pin} selected={pin.venueId === selectedVenueId} onSelect={onSelectVenue} />
+        <PricePin
+          key={pin.venueId}
+          pin={pin}
+          selected={pin.venueId === selectedVenueId}
+          featured={featured.has(pin.venueId)}
+          onSelect={onSelectVenue}
+        />
       ))}
     </MapContainer>
   );
 }
 
-function PricePin({ pin, selected, onSelect }: Readonly<{ pin: VenuePin; selected: boolean; onSelect: Props["onSelectVenue"] }>) {
+function PricePin({
+  pin,
+  selected,
+  featured,
+  onSelect,
+}: Readonly<{ pin: VenuePin; selected: boolean; featured: boolean; onSelect: Props["onSelectVenue"] }>) {
   const label = pinLabel(pin);
   const { count } = pin;
   const icon = useMemo(() => {
     const more = count > 1 ? `<span class="pin-count">${count}</span>` : "";
     return L.divIcon({
       className: "",
-      html: `<span class="pin${selected ? " pin-selected" : ""}">${label}${more}</span>`,
+      html: `<span class="pin${selected ? " pin-selected" : ""}${featured ? " pin-featured" : ""}">${label}${more}</span>`,
       iconSize: undefined,
       iconAnchor: [0, 0],
     });
-  }, [label, count, selected]);
+  }, [label, count, selected, featured]);
 
   const toggle = () => onSelect(selected ? null : pin.venueId);
 
@@ -52,7 +64,7 @@ function PricePin({ pin, selected, onSelect }: Readonly<{ pin: VenuePin; selecte
     <Marker
       position={[pin.lat, pin.lon]}
       icon={icon}
-      zIndexOffset={selected ? 1000 : Math.round(pin.bestDiscount ?? 0)}
+      zIndexOffset={selected ? 1000 : featured ? 500 : Math.round(pin.bestDiscount ?? 0)}
       eventHandlers={{
         click: toggle,
         keypress: (event) => {

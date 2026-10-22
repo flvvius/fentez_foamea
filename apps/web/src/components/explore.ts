@@ -181,6 +181,22 @@ export function venuePins(offers: PlacedOffer[]): VenuePin[] {
   return [...pins.values()];
 }
 
+const FEATURED_PINS = 10;
+const FEATURED_SPACING_M = 400;
+
+export function featuredPinIds(pins: VenuePin[]): Set<string> {
+  const ranked = pins
+    .filter((pin) => pin.minPrice !== null && pin.bestDiscount !== null)
+    .sort((a, b) => b.bestDiscount! - a.bestDiscount! || a.minPrice! - b.minPrice!);
+  const featured: VenuePin[] = [];
+  for (const pin of ranked) {
+    if (featured.length === FEATURED_PINS) break;
+    if (featured.some((other) => distanceMeters(other, pin) < FEATURED_SPACING_M)) continue;
+    featured.push(pin);
+  }
+  return new Set(featured.map((pin) => pin.venueId));
+}
+
 export function collapseChainCopies(sorted: PlacedOffer[]): PlacedOffer[] {
   const firstByKey = new Map<string, PlacedOffer>();
   const result: PlacedOffer[] = [];

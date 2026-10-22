@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { applyFilters, collapseChainCopies, percentInTitle, placeOffers, priceCapInTitle, samePlaceIds, sortOffers, validTodayFirst, venuePins } from "./explore";
+import { applyFilters, collapseChainCopies, featuredPinIds, percentInTitle, placeOffers, priceCapInTitle, samePlaceIds, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const base: Offer = {
   id: "1",
@@ -184,5 +184,33 @@ describe("explore", () => {
       "tomorrow-bag",
       "lunch-over",
     ]);
+  });
+});
+
+describe("featuredPinIds", () => {
+  const pin = (venueId: string, lat: number, bestDiscount: number | null, minPrice: number | null = 10) => ({
+    venueId,
+    name: venueId,
+    lat,
+    lon: 26.1,
+    minPrice,
+    bestDiscount,
+    count: 1,
+  });
+
+  it("features the deepest discounts with a price, spread apart", () => {
+    const featured = featuredPinIds([
+      pin("deep", 44.43, 70),
+      pin("next-door", 44.4301, 65),
+      pin("across-town", 44.45, 50),
+      pin("no-price", 44.47, 90, null),
+      pin("no-discount", 44.49, null),
+    ]);
+    expect([...featured]).toEqual(["deep", "across-town"]);
+  });
+
+  it("stops at ten", () => {
+    const many = Array.from({ length: 30 }, (_, index) => pin(`p${index}`, 44.3 + index * 0.01, 40));
+    expect(featuredPinIds(many).size).toBe(10);
   });
 });
