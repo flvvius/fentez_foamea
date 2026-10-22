@@ -77,6 +77,7 @@ bun run check-types
 | `BETTER_AUTH_SECRET` | web | Signs sessions, at least 32 characters. Generate one with `openssl rand -base64 32` |
 | `BETTER_AUTH_URL` | web | Public URL of the site, `http://localhost:3001` locally. Required when `VERCEL_ENV` is `production`. On Vercel previews any `*.vercel.app` host is accepted and this value is the fallback |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | web | Optional. Enables "Continuă cu Google". The OAuth callback is `<BETTER_AUTH_URL>/api/auth/callback/google` |
+| `DEALS_LLM_PROVIDER` | web | Which model service reads submitted deal links. Only `gemini` is supported, which is the default. Unset or empty means `gemini` |
 | `DEALS_LLM_MODEL` | web | Gemini model that reads submitted deal links, default `gemini-3.1-flash-lite` |
 | `DEALS_HIDE_SCORE` | web | Community deals at or below this score are hidden, default -5 |
 | `DEALS_EXTRACT_PER_HOUR` | web | Link or image reads per user per hour, default 10 |
