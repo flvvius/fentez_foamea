@@ -11,10 +11,12 @@ test("carries the tags link previews read", async ({ page, request }) => {
   await expect(meta("twitter:card")).toHaveAttribute("content", "summary_large_image");
 
   const image = await meta("og:image").getAttribute("content");
-  expect(image).toMatch(/^https:\/\/.+\/og\.png$/);
+  expect(image).toMatch(/^https:\/\/.+\/og$/);
   const served = await request.get(new URL(image!).pathname);
   expect(served.headers()["content-type"]).toBe("image/png");
-  expect((await served.body()).length).toBeLessThan(300_000);
+  const png = await served.body();
+  expect(png.length).toBeLessThan(300_000);
+  expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1200, 630]);
 });
 
 test("is installable", async ({ page, request }) => {
