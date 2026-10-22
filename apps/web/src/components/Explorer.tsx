@@ -62,6 +62,10 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     const scoped = filtered.filter((offer) => (!scopedPlace || offer.placeId === scopedPlace) && offer.id !== offerId);
     return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), now);
   }, [filtered, scopedPlace, offerId, sort, now]);
+  const nearbyCount = useMemo(
+    () => (center && radiusKm !== null ? applyFilters(placed, { kinds: [], radiusKm, maxPrice: null, includeDelivery: true }).length : null),
+    [center, placed, radiusKm],
+  );
   const kindCounts = useMemo(() => countKinds(placed), [placed]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
 
@@ -99,8 +103,10 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           <p className="brand">fentez foamea</p>
           <h1 className="headline">{headline}</h1>
           <p className="lede">
-            {countOffers(placed.length)} de la restaurante, fast-food-uri și cofetării: pachete salvate de la aruncat, meniuri
-            de prânz, reduceri.
+            {nearbyCount === null
+              ? `${countOffers(placed.length)} de la restaurante, fast-food-uri și cofetării`
+              : `${countOffers(nearbyCount)} la cel mult ${radiusKm} km de ${center!.name}`}
+            : pachete salvate de la aruncat, meniuri de prânz, reduceri.
             {snapshot.updatedAt && <> Actualizat {formatRelative(snapshot.updatedAt, now)}.</>}
           </p>
           <div className="masthead-actions">

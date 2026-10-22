@@ -4,6 +4,7 @@ test("a zone page centres the list on the zone and keeps to 1 km", async ({ page
   await page.goto("/zona/titan");
   await expect(page).toHaveTitle("Mâncare ieftină lângă Titan · fentez foamea");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mâncare ieftină lângă Titan, acum.");
+  await expect(page.locator(".lede")).toContainText("1 ofertă la cel mult 1 km de Titan: pachete");
   await expect.poll(() => offerTitles(page)).toEqual(["Pachet de seară Titan"]);
   await waitForHydration(page);
   await expect(page.getByLabel("Distanță")).toHaveValue("1");
