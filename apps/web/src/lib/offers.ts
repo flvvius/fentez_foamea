@@ -99,6 +99,7 @@ export function decodeSnapshot(wire: SnapshotWire): OfferSnapshot {
     const venue = index === null ? undefined : venues[index];
     return {
       ...offer,
+      title: venue ? titleWithoutVenue(offer.title, venue.name) : offer.title,
       url: url ?? venue?.url ?? "",
       venueId: venue?.id ?? null,
       venueName: venue?.name ?? null,
@@ -108,6 +109,17 @@ export function decodeSnapshot(wire: SnapshotWire): OfferSnapshot {
     };
   });
   return { generatedAt: wire.generatedAt, updatedAt: wire.updatedAt, offers };
+}
+
+const AFTER_VENUE_SEPARATOR = /^\s*[•·|:\-–—]\s*/;
+
+export function titleWithoutVenue(title: string, venueName: string): string {
+  if (!title.toLocaleLowerCase("ro").startsWith(venueName.toLocaleLowerCase("ro"))) return title;
+  const rest = title.slice(venueName.length);
+  const separator = AFTER_VENUE_SEPARATOR.exec(rest);
+  if (!separator) return title;
+  const product = rest.slice(separator[0].length);
+  return product ? product.charAt(0).toLocaleUpperCase("ro") + product.slice(1) : title;
 }
 
 function toColumns<T, K extends keyof T>(rows: T[], keys: readonly K[]): Columns<Pick<T, K>> {

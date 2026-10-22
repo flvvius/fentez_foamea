@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decodeSnapshot, encodeSnapshot, type Offer } from "./offers";
+import { decodeSnapshot, encodeSnapshot, titleWithoutVenue, type Offer } from "./offers";
 
 const offer: Offer = {
   id: "o1",
@@ -45,5 +45,19 @@ describe("snapshot wire format", () => {
       { ...sibling, lat: 44.443, lon: 26.098 },
       national,
     ]);
+  });
+});
+
+describe("titleWithoutVenue", () => {
+  it("drops a venue name the title repeats before a separator", () => {
+    expect(titleWithoutVenue("Ciorbă, Baby! • 4 ciorbe surpriză", "Ciorbă, Baby!")).toBe("4 ciorbe surpriză");
+    expect(titleWithoutVenue("Synful Chocolate - Artisanal Surprise", "Synful Chocolate")).toBe("Artisanal Surprise");
+    expect(titleWithoutVenue("Throwback Bistro • surprise box patiserie", "Throwback Bistro")).toBe("Surprise box patiserie");
+  });
+
+  it("keeps titles where the venue name is part of the product", () => {
+    expect(titleWithoutVenue("Burger Van Classic Smash", "Burger Van")).toBe("Burger Van Classic Smash");
+    expect(titleWithoutVenue("Ciorbă, Baby!", "Ciorbă, Baby!")).toBe("Ciorbă, Baby!");
+    expect(titleWithoutVenue("Meniu Ciorbă", "La Mama")).toBe("Meniu Ciorbă");
   });
 });
