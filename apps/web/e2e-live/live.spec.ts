@@ -20,3 +20,13 @@ test("category pages and link previews are served", async ({ page, request }) =>
   const image = await page.locator('meta[property="og:image"]').getAttribute("content");
   expect((await request.get(image!)).ok()).toBe(true);
 });
+
+test("zone pages, the sitemap and search work", async ({ page, request }) => {
+  await page.goto("/zona/universitate/pachete-anti-risipa");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pachete anti-risipă lângă Universitate, acum.");
+  const sitemap = await (await request.get("/sitemap.xml")).text();
+  expect(sitemap.match(/<url>/g)?.length).toBeGreaterThan(100);
+
+  await page.goto("/?q=pizza&km=oras");
+  await expect(page.locator("#oferte article").first()).toContainText(/pizza/i);
+});
