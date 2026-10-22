@@ -22,9 +22,17 @@ export function offerLink(origin: string, offerId: string): string {
   return `${origin}/?oferta=${encodeURIComponent(offerId)}`;
 }
 
-export async function shareOffer(offer: Offer): Promise<ShareResult> {
-  const url = offerLink(window.location.origin, offer.id);
-  const text = offerHeadline(offer);
+export function shareOffer(offer: Offer): Promise<ShareResult> {
+  return shareLink(offerHeadline(offer), offerLink(window.location.origin, offer.id));
+}
+
+export function shareCurrentView(text: string): Promise<ShareResult> {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("oferta");
+  return shareLink(text, url.toString());
+}
+
+async function shareLink(text: string, url: string): Promise<ShareResult> {
   if (typeof navigator.share === "function") {
     try {
       await navigator.share({ title: text, text, url });

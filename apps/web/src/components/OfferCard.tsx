@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { OFFER_KIND_LABELS, SOURCE_LABELS, WEEKDAY_SHORT } from "@fentezfoamea/core";
-import { shareOffer, type ShareResult } from "@/lib/share";
+import { shareOffer } from "@/lib/share";
 import { bucharestWeekday, formatDistance, formatPickup, formatPrice, formatRelative, minutesUntil } from "@/lib/format";
 import type { PlacedOffer } from "./explore";
+import { ShareButton } from "./ShareButton";
 
 type Props = {
   offer: PlacedOffer;
@@ -59,7 +59,7 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
             <span className="muted">{offer.available === 1 ? "ultimul" : `mai sunt ${offer.available}`}</span>
           )}
           <span className="offer-actions">
-            <ShareButton offer={offer} />
+            <ShareButton className="link-quiet share" label="Trimite" share={() => shareOffer(offer)} />
             <a className="offer-link" href={offer.url} target="_blank" rel="noopener noreferrer">
               Vezi pe {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>
             </a>
@@ -67,29 +67,6 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
         </div>
       </div>
     </article>
-  );
-}
-
-const SHARE_LABELS: Record<ShareResult | "idle", string> = {
-  idle: "Trimite",
-  shared: "Trimis",
-  copied: "Link copiat",
-  failed: "Trimite",
-};
-
-function ShareButton({ offer }: Readonly<{ offer: PlacedOffer }>) {
-  const [status, setStatus] = useState<ShareResult | "idle">("idle");
-
-  useEffect(() => {
-    if (status === "idle") return;
-    const timer = setTimeout(() => setStatus("idle"), 2500);
-    return () => clearTimeout(timer);
-  }, [status]);
-
-  return (
-    <button type="button" className="link-quiet share" onClick={async () => setStatus(await shareOffer(offer))}>
-      <span aria-live="polite">{SHARE_LABELS[status]}</span>
-    </button>
   );
 }
 

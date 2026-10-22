@@ -92,6 +92,24 @@ test.describe("share button", () => {
   });
 });
 
+test("shares the current list with its filters", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", {
+      value: (data: ShareData) => {
+        (window as unknown as { shared: ShareData }).shared = data;
+        return Promise.resolve();
+      },
+    });
+  });
+  await page.goto("/?tip=anti-risipa&km=oras");
+  await waitForHydration(page);
+  await page.getByRole("button", { name: "Trimite lista" }).click();
+  await expect(page.getByRole("button", { name: "Trimis" })).toBeVisible();
+  const shared = await page.evaluate(() => (window as unknown as { shared: ShareData }).shared);
+  expect(shared.url).toMatch(/\/\?tip=anti-risipa&km=oras$/);
+  expect(shared.text).toMatch(/4 oferte pe fentez foamea\.$/);
+});
+
 test.describe("offer image", () => {
   test("renders the deal as a 1200x630 PNG", async ({ request }) => {
     const response = await request.get(`/og?oferta=${BAG}`);

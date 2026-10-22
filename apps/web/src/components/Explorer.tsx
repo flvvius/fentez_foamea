@@ -8,7 +8,9 @@ import { LANDINGS } from "@/lib/landing";
 import { ZONES } from "@/lib/zones";
 import type { OfferSnapshot } from "@/lib/offers";
 import { BUDGET_OPTIONS, RADIUS_OPTIONS, type ExploreState, type SortKey } from "@/lib/search";
+import { shareCurrentView } from "@/lib/share";
 import { OfferCard } from "./OfferCard";
+import { ShareButton } from "./ShareButton";
 import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const OfferMap = lazy(() => import("./OfferMap"));
@@ -100,9 +102,16 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             de prânz, reduceri.
             {snapshot.updatedAt && <> Actualizat {formatRelative(snapshot.updatedAt, now)}.</>}
           </p>
-          <button type="button" className="locate" onClick={locateMe} disabled={locate === "locating"}>
-            {locateLabel(locate, origin.mine)}
-          </button>
+          <div className="masthead-actions">
+            <button type="button" className="locate" onClick={locateMe} disabled={locate === "locating"}>
+              {locateLabel(locate, origin.mine)}
+            </button>
+            <ShareButton
+              className="share-view"
+              label="Trimite lista"
+              share={() => shareCurrentView(`${headline} ${countOffers(listed.length)} pe fentez foamea.`)}
+            />
+          </div>
           {locate === "denied" && (
             <p className="hint">Nu am primit locația. Permite accesul în browser sau mută harta; distanțele sunt calculate din {center ? `zona ${center.name}` : "centru"}.</p>
           )}
