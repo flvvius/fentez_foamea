@@ -57,10 +57,11 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
   );
   const pins = useMemo(() => venuePins(filtered), [filtered]);
   const shared = offerId ? placed.find((offer) => offer.id === offerId) : undefined;
+  const scopedPlace = venueId ? (placed.find((offer) => offer.venueId === venueId)?.placeId ?? venueId) : null;
   const listed = useMemo(() => {
-    const scoped = filtered.filter((offer) => (!venueId || offer.venueId === venueId) && offer.id !== offerId);
+    const scoped = filtered.filter((offer) => (!scopedPlace || offer.placeId === scopedPlace) && offer.id !== offerId);
     return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), now);
-  }, [filtered, venueId, offerId, sort, now]);
+  }, [filtered, scopedPlace, offerId, sort, now]);
   const kindCounts = useMemo(() => countKinds(placed), [placed]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
 
@@ -237,7 +238,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
       <section className="map" aria-label="Hartă">
         {mounted ? (
           <Suspense fallback={<div className="map-placeholder" aria-hidden />}>
-            <OfferMap pins={pins} origin={origin} selectedVenueId={venueId} onSelectVenue={showVenue} />
+            <OfferMap pins={pins} origin={origin} selectedVenueId={scopedPlace} onSelectVenue={showVenue} />
           </Suspense>
         ) : (
           <div className="map-placeholder" aria-hidden />

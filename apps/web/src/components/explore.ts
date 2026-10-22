@@ -4,6 +4,7 @@ import type { Offer } from "@/lib/offers";
 import type { ExploreState, SortKey } from "@/lib/search";
 
 export type PlacedOffer = Offer & {
+  placeId: string | null;
   distance: number | null;
   headlinePct: number | null;
   priceCap: number | null;
@@ -26,14 +27,49 @@ export function isStillAvailable(offer: Offer, now: Date): boolean {
 }
 
 export function placeOffers(offers: Offer[], origin: LatLon, now: Date): PlacedOffer[] {
+  const places = samePlaceIds(offers);
   return offers
     .filter((offer) => isStillAvailable(offer, now))
     .map((offer) => ({
       ...offer,
+      placeId: offer.venueId && (places.get(offer.venueId) ?? offer.venueId),
       headlinePct: offer.discountPct ?? percentInTitle(offer.title),
       priceCap: offer.price === null ? priceCapInTitle(offer.title) : null,
       distance: offer.lat !== null && offer.lon !== null ? distanceMeters(origin, { lat: offer.lat, lon: offer.lon }) : null,
     }));
+}
+
+const SAME_PLACE_METERS = 150;
+
+type VenueSpot = LatLon & { venueId: string };
+
+export function samePlaceIds(offers: Offer[]): Map<string, string> {
+  const spotsByName = new Map<string, Map<string, VenueSpot>>();
+  for (const offer of offers) {
+    if (!offer.venueId || !offer.venueName || offer.lat === null || offer.lon === null) continue;
+    const name = comparableName(offer.venueName);
+    const spots = spotsByName.get(name) ?? new Map<string, VenueSpot>();
+    spots.set(offer.venueId, { venueId: offer.venueId, lat: offer.lat, lon: offer.lon });
+    spotsByName.set(name, spots);
+  }
+  const placeIds = new Map<string, string>();
+  for (const spots of spotsByName.values()) {
+    const anchors: VenueSpot[] = [];
+    for (const spot of [...spots.values()].sort((a, b) => a.venueId.localeCompare(b.venueId))) {
+      const anchor = anchors.find((candidate) => distanceMeters(candidate, spot) <= SAME_PLACE_METERS);
+      if (anchor) placeIds.set(spot.venueId, anchor.venueId);
+      else anchors.push(spot);
+    }
+  }
+  return placeIds;
+}
+
+function comparableName(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 }
 
 export function applyFilters(offers: PlacedOffer[], filters: Pick<ExploreState, "kinds" | "radiusKm" | "maxPrice" | "includeDelivery">): PlacedOffer[] {
@@ -95,9 +131,9 @@ export function sortOffers(offers: PlacedOffer[], sort: SortKey): PlacedOffer[] 
 export function venuePins(offers: PlacedOffer[]): VenuePin[] {
   const pins = new Map<string, VenuePin>();
   for (const offer of offers) {
-    if (!offer.venueId || offer.lat === null || offer.lon === null) continue;
-    const pin = pins.get(offer.venueId) ?? {
-      venueId: offer.venueId,
+    if (!offer.placeId || offer.lat === null || offer.lon === null) continue;
+    const pin = pins.get(offer.placeId) ?? {
+      venueId: offer.placeId,
       name: offer.venueName ?? "",
       lat: offer.lat,
       lon: offer.lon,
@@ -108,7 +144,7 @@ export function venuePins(offers: PlacedOffer[]): VenuePin[] {
     pin.count++;
     if (offer.price !== null && (pin.minPrice === null || offer.price < pin.minPrice)) pin.minPrice = offer.price;
     if (offer.discountPct !== null && (pin.bestDiscount === null || offer.discountPct > pin.bestDiscount)) pin.bestDiscount = offer.discountPct;
-    pins.set(offer.venueId, pin);
+    pins.set(offer.placeId, pin);
   }
   return [...pins.values()];
 }

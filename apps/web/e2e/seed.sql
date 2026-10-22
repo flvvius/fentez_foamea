@@ -7,6 +7,7 @@ insert into venues (id, source, source_venue_id, name, address, chain, url, matc
   ('00000000-0000-0000-0000-00000000a006', 'kfc', 'kfc-militari', 'KFC Militari', 'Bulevardul Iuliu Maniu 546', 'KFC', 'https://kfc.ro', 'kfcmilitari|44.435|25.980', st_setsrid(st_makepoint(25.9800, 44.4350), 4326)::geography),
   ('00000000-0000-0000-0000-00000000a007', 'bonapp', 'v-titan', 'Patiserie Titan', 'Bulevardul Nicolae Grigorescu 50', null, 'https://bonapp.eco/v/titan', 'patiserietitan|44.420|26.180', st_setsrid(st_makepoint(26.1800, 44.4200), 4326)::geography),
   ('00000000-0000-0000-0000-00000000a009', 'bonapp', 'v-covrigi', 'Covrigăria Vest', 'Bulevardul Iuliu Maniu 300', null, 'https://bonapp.eco/v/covrigi', 'covrigariavest|44.440|25.990', st_setsrid(st_makepoint(25.9900, 44.4400), 4326)::geography),
+  ('00000000-0000-0000-0000-00000000a010', 'glovo', 'g-brutarie', 'Brutaria din Colt', 'Strada Academiei 5', null, 'https://glovoapp.com/ro/ro/bucuresti/brutaria', 'brutariadincolt|44.436|26.101', st_setsrid(st_makepoint(26.1011, 44.4361), 4326)::geography),
   ('00000000-0000-0000-0000-00000000a008', 'glovo', 'g-noloc', 'Shaorma Fără Adresă', null, null, 'https://glovoapp.com/ro/ro/bucuresti/shaorma', 'shaorma', null);
 
 insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ron, original_price_ron, pickup_start, pickup_end, available_count, url, delivery_only, days_of_week, time_start, time_end, conditions) values
@@ -36,6 +37,9 @@ insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ro
 
 insert into offers (id, source, source_offer_id, venue_id, kind, title, url, delivery_only) values
   ('00000000-0000-0000-0000-00000000b015', 'glovo', 'g-burger:lunch', '00000000-0000-0000-0000-00000000a003', 'daily_menu', 'Prânzul sub 25 lei', 'https://glovoapp.com/ro/ro/bucuresti/burger-rapid', true);
+
+insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ron, original_price_ron, url, delivery_only) values
+  ('00000000-0000-0000-0000-00000000b016', 'glovo', 'g-brutarie:item:1', '00000000-0000-0000-0000-00000000a010', 'discount', 'Covrigi cu brânză', 8, 10, 'https://glovoapp.com/ro/ro/bucuresti/brutaria', true);
 
 insert into scrape_runs (source, started_at, finished_at, status, offers_seen)
 values ('bonapp', now() - interval '12 minutes', now() - interval '10 minutes', 'ok', 3);

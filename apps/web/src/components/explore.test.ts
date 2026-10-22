@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { applyFilters, collapseChainCopies, percentInTitle, placeOffers, priceCapInTitle, sortOffers, validTodayFirst, venuePins } from "./explore";
+import { applyFilters, collapseChainCopies, percentInTitle, placeOffers, priceCapInTitle, samePlaceIds, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const base: Offer = {
   id: "1",
@@ -85,6 +85,20 @@ describe("explore", () => {
     expect(sortOffers(placed, "price")[0]?.id).toBe("cheap");
     expect(venuePins(placed)).toEqual([
       expect.objectContaining({ venueId: "v1", count: 2, minPrice: 9, bestDiscount: 70 }),
+    ]);
+  });
+
+  it("treats venues with the same name within 150 m as one place", () => {
+    const bonapp = { ...base, id: "a", venueId: "v-bonapp", venueName: "Brutăria din Colț" };
+    const glovo = { ...base, id: "b", source: "glovo" as const, venueId: "v-glovo", venueName: "BRUTARIA DIN COLT", lat: 44.4362, lon: 26.1027 };
+    const otherBranch = { ...base, id: "c", venueId: "v-far", venueName: "Brutăria din Colț", lat: 44.45, lon: 26.1 };
+    const places = samePlaceIds([glovo, bonapp, otherBranch]);
+    expect(places.get("v-glovo")).toBe("v-bonapp");
+    expect(places.has("v-far")).toBe(false);
+    const placed = placeOffers([glovo, bonapp, otherBranch], origin, now);
+    expect(venuePins(placed).map((pin) => [pin.venueId, pin.count])).toEqual([
+      ["v-bonapp", 2],
+      ["v-far", 1],
     ]);
   });
 

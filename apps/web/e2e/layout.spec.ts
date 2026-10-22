@@ -32,5 +32,5 @@ test("map pins are one control each and work from the keyboard", async ({ page }
   await pin.focus();
   await page.keyboard.press("Enter");
   await expect(offerList(page).locator(".venue-scope")).toContainText("Brutăria din Colț");
-  await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet pentru mâine"]);
+  await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Covrigi cu brânză", "Pachet pentru mâine"]);
 });

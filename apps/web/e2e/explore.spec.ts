@@ -18,7 +18,7 @@ test.describe("explorer", () => {
   });
 
   test("counts live offers and says when data was refreshed", async ({ page }) => {
-    await expect(page.locator(".lede")).toContainText("12 oferte");
+    await expect(page.locator(".lede")).toContainText("13 oferte");
     await expect(page.locator(".lede")).toContainText(/Actualizat acum 1\d min/);
   });
 
@@ -59,7 +59,7 @@ test.describe("explorer", () => {
     await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
     await page.getByLabel("Buget").selectOption({ label: "sub 15 lei" });
     await expect(page).toHaveURL(/buget=15/);
-    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet de seară Titan", "Pachet verificat acum 2 ore", "Pachet pentru mâine", "Ziua berii 1+1"]);
+    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet de seară Titan", "Pachet verificat acum 2 ore", "Covrigi cu brânză", "Pachet pentru mâine", "Ziua berii 1+1"]);
   });
 
   test("reads a price ceiling from the title", async ({ page }) => {
@@ -112,7 +112,8 @@ test.describe("explorer", () => {
   test("scopes the list from a map pin", async ({ page }) => {
     await page.locator(".leaflet-marker-icon[title=\"Brutăria din Colț\"] .pin").click();
     await expect(offerList(page).locator(".venue-scope")).toContainText("Brutăria din Colț");
-    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet pentru mâine"]);
+    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Covrigi cu brânză", "Pachet pentru mâine"]);
+    await expect(page.locator(".leaflet-marker-icon[title=\"Brutaria din Colt\"]")).toHaveCount(0);
   });
 });
 
