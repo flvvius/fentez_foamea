@@ -58,7 +58,7 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
 
         <div className="offer-foot">
           {offer.available !== null && offer.available <= 5 && (
-            <span className="muted">{offer.available === 1 ? "ultimul" : `mai sunt ${offer.available}`}</span>
+            <span className={offer.available === 1 ? "urgent" : "muted"}>{offer.available === 1 ? "ultimul" : `mai sunt ${offer.available}`}</span>
           )}
           <span className="offer-actions">
             <ShareButton className="link-quiet share" label="Trimite" share={() => shareOffer(offer)} />
