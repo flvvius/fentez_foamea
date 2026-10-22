@@ -63,6 +63,17 @@ bun run test
 bun run check-types
 ```
 
+End-to-end tests build the site and drive it with Playwright against a seeded database called `fentezfoamea_e2e`, created on the local PostGIS. Install Chromium once with `bunx playwright install chromium`, then:
+
+```sh
+cd apps/web
+bun run build
+bun run e2e
+bun run e2e:live
+```
+
+`e2e:live` runs a short smoke test against the deployed site, or against `LIVE_URL` if set. `bun run --cwd packages/scrapers health` prints how long ago each source last ran successfully.
+
 ### Environment
 
 | Variable | Used by | Notes |
@@ -83,7 +94,7 @@ The project runs on free tiers: Supabase for Postgres, Vercel for the site, GitH
 
 **Website (Vercel).** Import this repository. `vercel.json` points Vercel at `apps/web` with the TanStack Start preset and installs dependencies from the repo root with Bun. Set `DATABASE_URL` in the project's environment variables.
 
-**Scrapers (GitHub Actions).** Add these repository secrets: `DATABASE_URL`, `GEMINI_API_KEY`, `SCRAPER_CONTACT`. The scheduled workflow in `.github/workflows/scrape.yml` runs Bonapp every 30 minutes in the daytime, Wolt and Glovo three times a day and the chain sites once a day. You can also start it by hand from the Actions tab with a list of sources. GitHub turns off scheduled workflows in public repositories after 60 days without commits, so push something now and then.
+**Scrapers (GitHub Actions).** Add these repository secrets: `DATABASE_URL`, `GEMINI_API_KEY`, `SCRAPER_CONTACT`. The scheduled workflow in `.github/workflows/scrape.yml` runs Bonapp every 30 minutes in the daytime, Wolt and Glovo three times a day and the chain sites once a day. You can also start it by hand from the Actions tab with a list of sources. GitHub turns off scheduled workflows in public repositories after 60 days without commits. The hourly `health` workflow re-enables them, checks that every source had a successful run within its schedule (2 hours for Bonapp in the daytime, 12 for Wolt and Glovo, 30 for the chains) and smoke-tests the live site. It fails when either check does, and GitHub emails you about failed scheduled runs.
 
 ## Status and terms
 

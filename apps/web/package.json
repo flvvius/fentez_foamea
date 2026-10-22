@@ -9,7 +9,8 @@
     "check-types": "tsc --noEmit",
     "test": "vitest run",
     "e2e": "playwright test",
-    "brand-assets": "node --experimental-strip-types scripts/brand-assets.ts"
+    "brand-assets": "node --experimental-strip-types scripts/brand-assets.ts",
+    "e2e:live": "playwright test -c playwright.live.config.ts"
   },
   "dependencies": {
     "@fentezfoamea/core": "workspace:*",
