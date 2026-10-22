@@ -79,7 +79,10 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     () => (center && radiusKm !== null ? applyFilters(placed, { kinds: [], radiusKm, maxPrice: null, includeDelivery: true }).length : null),
     [center, placed, radiusKm],
   );
-  const kindCounts = useMemo(() => countKinds(placed), [placed]);
+  const kindCounts = useMemo(() => {
+    const anyKind = applyFilters(placed, { kinds: [], radiusKm: venueId ? null : radiusKm, maxPrice, includeDelivery, query });
+    return countKinds(collapseChainCopies(sortOffers(anyKind, "distance")));
+  }, [placed, venueId, radiusKm, maxPrice, includeDelivery, query]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
 
   const change = (next: Partial<ExploreState>) => {
@@ -167,7 +170,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             }}
           />
           <div className="chip-row">
-            {OFFER_KINDS.filter((kind) => kindCounts[kind]).map((kind) => (
+            {OFFER_KINDS.filter((kind) => kindCounts[kind] || kinds.includes(kind)).map((kind) => (
               <button
                 key={kind}
                 type="button"
@@ -176,7 +179,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
                 data-kind={kind}
                 onClick={() => toggleKind(kind)}
               >
-                {OFFER_KIND_LABELS[kind]} <span className="chip-count">{kindCounts[kind]}</span>
+                {OFFER_KIND_LABELS[kind]} <span className="chip-count">{kindCounts[kind] ?? 0}</span>
               </button>
             ))}
           </div>

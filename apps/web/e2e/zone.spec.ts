@@ -8,6 +8,8 @@ test("a zone page centres the list on the zone and keeps to 1 km", async ({ page
   await expect.poll(() => offerTitles(page)).toEqual(["Pachet de seară Titan"]);
   await waitForHydration(page);
   await expect(page.getByLabel("Distanță")).toHaveValue("1");
+  await expect(page.getByRole("button", { name: /Pachet anti-risipă/ }).locator(".chip-count")).toHaveText("1");
+  await expect(page.getByRole("button", { name: /Combo/ })).toHaveCount(0);
 });
 
 test("offers a wider radius when a zone has few offers", async ({ page }) => {
