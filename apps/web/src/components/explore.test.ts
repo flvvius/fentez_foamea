@@ -70,6 +70,13 @@ describe("explore", () => {
     expect(percentInTitle(title)).toBe(pct);
   });
 
+  it("spreads recommendations across venues", () => {
+    const bags = [70, 65, 60].map((discountPct, i) => ({ ...base, id: `same-${i}`, discountPct }));
+    const elsewhere = { ...base, id: "elsewhere", venueId: "v2", venueName: "Altundeva", discountPct: 55 };
+    const placed = placeOffers([...bags, elsewhere], origin, now);
+    expect(sortOffers(placed, "best").map((o) => o.id)).toEqual(["same-0", "elsewhere", "same-1", "same-2"]);
+  });
+
   it("treats a price ceiling in the title as the price for budget and sorting", () => {
     expect(priceCapInTitle("Prânzul sub 40 lei")).toBe(40);
     expect(priceCapInTitle("20% reducere")).toBeNull();

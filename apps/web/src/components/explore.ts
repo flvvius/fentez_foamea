@@ -124,8 +124,22 @@ const comparators: Record<SortKey, (a: PlacedOffer, b: PlacedOffer) => number> =
   price: (a, b) => (comparablePrice(a) ?? Infinity) - (comparablePrice(b) ?? Infinity),
 };
 
+const POINTS_LOST_PER_REPEAT = 12;
+
 export function sortOffers(offers: PlacedOffer[], sort: SortKey): PlacedOffer[] {
-  return [...offers].sort((a, b) => comparators[sort](a, b) || comparators.distance(a, b));
+  const sorted = [...offers].sort((a, b) => comparators[sort](a, b) || comparators.distance(a, b));
+  return sort === "best" ? spreadVenues(sorted) : sorted;
+}
+
+function spreadVenues(ranked: PlacedOffer[]): PlacedOffer[] {
+  const seenAtPlace = new Map<string, number>();
+  const scored = ranked.map((offer, rank) => {
+    const place = offer.placeId ?? offer.id;
+    const repeats = seenAtPlace.get(place) ?? 0;
+    seenAtPlace.set(place, repeats + 1);
+    return { offer, rank, score: dealScore(offer) - POINTS_LOST_PER_REPEAT * repeats };
+  });
+  return scored.sort((a, b) => b.score - a.score || a.rank - b.rank).map(({ offer }) => offer);
 }
 
 export function venuePins(offers: PlacedOffer[]): VenuePin[] {
