@@ -182,9 +182,21 @@ async function loadTiktok(url: string, fetcher: Fetcher, now: Date): Promise<Sou
     if (!oembed) return needsScreenshot(url, "fetch_failed");
   }
 
-  const caption = typeof oembed.title === "string" ? collapseWhitespace(oembed.title) : "";
-  if (!caption) return needsScreenshot(url, "empty");
-  const author = typeof oembed.author_name === "string" ? collapseWhitespace(oembed.author_name) : "";
+  let caption = typeof oembed.title === "string" ? collapseWhitespace(oembed.title) : "";
+  let author = typeof oembed.author_name === "string" ? collapseWhitespace(oembed.author_name) : "";
+  let thumbnail = typeof oembed.thumbnail_url === "string" ? oembed.thumbnail_url : null;
+  let pagePostedAt: string | null = null;
+
+  // TikTok's oEmbed has stopped returning the caption (only the player iframe comes back as of
+  // October 2026), so read it from the video page's own data instead.
+  if (!caption) {
+    if (remaining() <= 0) return needsScreenshot(url, "fetch_failed");
+    const page = await tiktokPage(canonical, fetcher, remaining(), now);
+    if (!page?.caption) return needsScreenshot(url, "empty");
+    ({ caption, author, thumbnail } = { caption: page.caption, author: page.author || author, thumbnail: page.cover ?? thumbnail });
+    canonical = page.finalUrl ?? canonical;
+    pagePostedAt = page.postedAt;
+  }
 
   const idCandidates = [
     videoIdFromUrl(canonical),
@@ -192,7 +204,7 @@ async function loadTiktok(url: string, fetcher: Fetcher, now: Date): Promise<Sou
     typeof oembed.embed_product_id === "string" ? oembed.embed_product_id : null,
     typeof oembed.html === "string" ? (/data-video-id="(\d+)"/.exec(oembed.html)?.[1] ?? null) : null,
   ];
-  const postedAt = idCandidates.map((id) => postedAtFromVideoId(id, now)).find((value) => value !== null) ?? null;
+  const postedAt = pagePostedAt ?? idCandidates.map((id) => postedAtFromVideoId(id, now)).find((value) => value !== null) ?? null;
 
   const text = collapseWhitespace(author ? `${caption} Autor: ${author}` : caption);
   return {
@@ -203,8 +215,67 @@ async function loadTiktok(url: string, fetcher: Fetcher, now: Date): Promise<Sou
     title: caption.length > 120 ? `${caption.slice(0, 120).trimEnd()}…` : caption,
     text: truncate(text),
     postedAt,
-    imageUrl: httpUrl(typeof oembed.thumbnail_url === "string" ? oembed.thumbnail_url : null, canonical),
+    imageUrl: httpUrl(thumbnail, canonical),
   };
+}
+
+const TIKTOK_DATA_MARKER = 'id="__UNIVERSAL_DATA_FOR_REHYDRATION__"';
+
+type TiktokPage = { caption: string; author: string; cover: string | null; postedAt: string | null; finalUrl: string | null };
+
+/**
+ * Caption, author, cover and post time from a TikTok video page's embedded JSON. The script tag is
+ * found with indexOf rather than a DOM: the page is about 450 KB and we need one JSON blob.
+ */
+async function tiktokPage(pageUrl: string, fetcher: Fetcher, timeoutMs: number, now: Date): Promise<TiktokPage | null> {
+  let res;
+  try {
+    res = await fetcher(pageUrl, { accept: ["text/html"], maxBytes: 1_500_000, timeoutMs });
+  } catch (error) {
+    if (error instanceof UnsafeUrlError) throw error;
+    return null;
+  }
+  try {
+    const html = res.body.toString("utf-8");
+    const marker = html.indexOf(TIKTOK_DATA_MARKER);
+    if (marker === -1) return null;
+    const start = html.indexOf(">", marker);
+    const end = html.indexOf("</script>", start);
+    if (start === -1 || end === -1) return null;
+    const data = JSON.parse(html.slice(start + 1, end)) as {
+      __DEFAULT_SCOPE__?: { "webapp.video-detail"?: { itemInfo?: { itemStruct?: Record<string, unknown> } } };
+    };
+    const item = data.__DEFAULT_SCOPE__?.["webapp.video-detail"]?.itemInfo?.itemStruct;
+    if (!item) return null;
+    const author = item.author as { nickname?: unknown } | undefined;
+    const video = item.video as { cover?: unknown } | undefined;
+    const createdMs = Number(item.createTime) * 1000;
+
+    let finalUrl: string | null = null;
+    try {
+      const final = new URL(res.url);
+      if (hostMatches(final.hostname, TIKTOK_HOSTS)) {
+        final.search = "";
+        final.hash = "";
+        finalUrl = final.href;
+      }
+    } catch {
+      // keep the URL we asked for
+    }
+
+    return {
+      caption: typeof item.desc === "string" ? collapseWhitespace(item.desc) : "",
+      author: typeof author?.nickname === "string" ? collapseWhitespace(author.nickname) : "",
+      cover: typeof video?.cover === "string" ? video.cover : null,
+      postedAt:
+        Number.isFinite(createdMs) && createdMs >= TIKTOK_EPOCH_MS && createdMs <= now.getTime() + DAY_MS
+          ? new Date(createdMs).toISOString()
+          : null,
+      finalUrl,
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ---------- generic web ----------

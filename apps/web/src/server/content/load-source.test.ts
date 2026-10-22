@@ -439,6 +439,33 @@ describe("loadSource: TikTok", () => {
     expect(await loadSource("https://vm.tiktok.com/ZM1/", { fetch, now })).toEqual({ kind: "needs_screenshot", url: "https://vm.tiktok.com/ZM1/", reason: "fetch_failed" });
   });
 
+  it("reads the caption from the video page when oEmbed leaves it out", async () => {
+    const created = 1_792_050_044;
+    const data = {
+      __DEFAULT_SCOPE__: {
+        "webapp.video-detail": {
+          itemInfo: {
+            itemStruct: { desc: "Comanzi 2 pizza, iar a treia e din partea noastră!", createTime: String(created), author: { nickname: "Meso" }, video: { cover: "https://p16.tiktokcdn.example/c.jpg" } },
+          },
+        },
+      },
+    };
+    const page = `<html><head></head><body><script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">${JSON.stringify(data)}</script></body></html>`;
+    const fetch = fakeFetch((url) =>
+      url.startsWith("https://www.tiktok.com/oembed")
+        ? jsonResponse({ html: "<iframe></iframe>", embed_product_id: VIDEO_ID })
+        : htmlResponse(page, `${VIDEO_URL}?_r=1`),
+    );
+    expect(await loadSource(VIDEO_URL, { fetch, now })).toMatchObject({
+      kind: "text",
+      platform: "tiktok",
+      finalUrl: VIDEO_URL,
+      text: "Comanzi 2 pizza, iar a treia e din partea noastră! Autor: Meso",
+      postedAt: new Date(created * 1000).toISOString(),
+      imageUrl: "https://p16.tiktokcdn.example/c.jpg",
+    });
+  });
+
   it("asks for a screenshot when the caption is empty", async () => {
     const fetch = fakeFetch(() => jsonResponse({ title: "   ", author_name: "Scout" }));
     expect(await loadSource(VIDEO_URL, { fetch, now })).toEqual({ kind: "needs_screenshot", url: VIDEO_URL, reason: "empty" });
