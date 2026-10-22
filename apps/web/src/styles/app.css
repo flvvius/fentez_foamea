@@ -931,6 +931,123 @@ body {
   color: var(--warning-text);
 }
 
+/* Autofill progress: a hairline sweep, then the steps the server works through. */
+.autofill {
+  display: grid;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.autofill-bar {
+  position: relative;
+  height: 2px;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.autofill-bar span {
+  position: absolute;
+  inset-block: 0;
+  width: 35%;
+  background: var(--foreground);
+  animation: autofill-sweep 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.autofill-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--type-small);
+}
+
+.autofill-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted-foreground);
+  transition: color 200ms ease-out;
+}
+
+.autofill-steps li[data-state="active"],
+.autofill-steps li[data-state="done"] {
+  color: var(--foreground);
+}
+
+.autofill-steps li[data-state="active"] {
+  font-weight: 500;
+}
+
+.autofill-mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--input);
+  border-radius: 50%;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.autofill-steps li[data-state="active"] .autofill-mark {
+  border-color: var(--foreground);
+}
+
+.autofill-steps li[data-state="active"] .autofill-mark::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--foreground);
+  animation: autofill-pulse 0.9s ease-in-out infinite alternate;
+}
+
+.autofill-steps li[data-state="done"] .autofill-mark {
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+  animation: autofill-pop 220ms ease-out;
+}
+
+.autofill-meta {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--type-small);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes autofill-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(290%);
+  }
+}
+
+@keyframes autofill-pulse {
+  from {
+    opacity: 0.3;
+    transform: scale(0.65);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes autofill-pop {
+  from {
+    transform: scale(0.6);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 .notice-error {
   color: var(--foreground);
 }
@@ -1070,6 +1187,19 @@ body {
   .btn-primary:active,
   .btn-secondary:active {
     transform: none;
+  }
+
+  .autofill-bar span {
+    width: 100%;
+    opacity: 0.35;
+    animation: none;
+  }
+
+  .autofill-steps li,
+  .autofill-steps li[data-state="done"] .autofill-mark,
+  .autofill-steps li[data-state="active"] .autofill-mark::after {
+    transition: none;
+    animation: none;
   }
 }
 

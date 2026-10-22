@@ -15,7 +15,9 @@ import {
   type FormField,
   type FormState,
 } from "@/lib/deals/deal-form";
+import type { AutofillSource } from "@/lib/deals/autofill-progress";
 import { isOvernight } from "@/lib/deals/deal-display";
+import { AutofillProgress } from "./AutofillProgress";
 import { markPosted } from "@/lib/deals/posted-flag";
 import {
   EXTRACTION_UNAVAILABLE,
@@ -101,6 +103,7 @@ export function PostForm() {
   const [duplicateFor, setDuplicateFor] = useState<string | null>(null);
   const [used, setUsed] = useState<ExtractionUsed | null>(null);
   const [working, setWorking] = useState<"extract" | "submit" | null>(null);
+  const [extractSource, setExtractSource] = useState<AutofillSource>("link");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const detailsRef = useRef<HTMLHeadingElement>(null);
@@ -184,6 +187,7 @@ export function PostForm() {
 
   async function autofill() {
     if (!hasSource || working) return;
+    setExtractSource(trimmedUrl ? "link" : "image");
     setWorking("extract");
     setNotice(null);
     setSubmitError(null);
@@ -200,6 +204,8 @@ export function PostForm() {
             setNotice({ kind: "needs_screenshot", reason: result.reason });
             return;
           }
+          // The link couldn't be read; the screenshot takes over, with its own steps.
+          setExtractSource("image");
         } else {
           applyExtraction(result.extraction, result.extractionStatus, "text");
           return;
@@ -339,8 +345,8 @@ export function PostForm() {
           <span className="muted small">Nimic nu se publică până nu apeși „Publică oferta”.</span>
         </div>
 
+        {working === "extract" && <AutofillProgress key={extractSource} source={extractSource} />}
         <div aria-live="polite" aria-busy={working === "extract"} className="notices">
-          {working === "extract" && <p className="muted">Citim sursa, poate dura câteva secunde.</p>}
           {notice?.kind === "duplicate" && notice.origin === "extract" && <DuplicateNotice dealId={notice.dealId} title={notice.title} />}
           {notice?.kind === "needs_screenshot" && <p className="notice notice-warn">{needsScreenshotMessage(notice.reason)}</p>}
           {notice?.kind === "unavailable" && <p className="notice notice-warn">{EXTRACTION_UNAVAILABLE}</p>}
