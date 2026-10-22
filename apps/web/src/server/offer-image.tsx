@@ -1,11 +1,12 @@
 import { Resvg } from "@resvg/resvg-js";
 import satori from "satori";
-import { OFFER_KIND_LABELS, type OfferKind } from "@fentezfoamea/core";
-import { percentInTitle, priceCapInTitle } from "@/components/explore";
-import { formatPrice } from "@/lib/format";
+import { distanceMeters, OFFER_KIND_LABELS, type OfferKind } from "@fentezfoamea/core";
+import { isStillAvailable, percentInTitle, priceCapInTitle } from "@/components/explore";
+import { formatPrice, sameBucharestDay } from "@/lib/format";
 import type { Landing } from "@/lib/landing";
+import type { Offer } from "@/lib/offers";
 import { ZONE_RADIUS_KM, type Zone } from "@/lib/zones";
-import { getSql } from "./db";
+import { sharedSnapshot } from "./shared-snapshot";
 import interBold from "./fonts/Inter-Bold.woff?inline";
 import interMedium from "./fonts/Inter-Medium.woff?inline";
 
@@ -22,20 +23,28 @@ type OfferCardRow = {
 
 const WIDTH = 1200;
 const HEIGHT = 630;
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const fonts = [
   { name: "Inter", data: fromDataUrl(interMedium), weight: 500 as const },
   { name: "Inter", data: fromDataUrl(interBold), weight: 700 as const },
 ];
 
-export async function findOfferForImage(id: string): Promise<OfferCardRow | undefined> {
-  if (!UUID.test(id)) return undefined;
-  const [row] = await getSql()<OfferCardRow[]>`
-    select title, kind, price_ron, original_price_ron, discount_pct, delivery_only, venue_name, venue_chain
-    from live_offers where id = ${id}
-  `;
-  return row;
+export async function findOfferForImage(id: string, now = new Date()): Promise<OfferCardRow | undefined> {
+  const offer = (await sharedSnapshot()).offers.find((candidate) => candidate.id === id);
+  return offer && isStillAvailable(offer, now) ? toCardRow(offer) : undefined;
+}
+
+function toCardRow(offer: Offer): OfferCardRow {
+  return {
+    title: offer.title,
+    kind: offer.kind,
+    price_ron: offer.price,
+    original_price_ron: offer.originalPrice,
+    discount_pct: offer.discountPct,
+    delivery_only: offer.deliveryOnly,
+    venue_name: offer.venueName,
+    venue_chain: offer.chain,
+  };
 }
 
 export async function renderOfferImage(offer: OfferCardRow): Promise<Response> {
@@ -85,39 +94,49 @@ function headlineFigure(offer: OfferCardRow): { text: string; unit?: string; dea
 
 export type TodaySummary = { total: number; bags: number; highlights: OfferCardRow[] };
 
-export type SummaryScope = { zone?: Zone; landing?: Landing };
+export type VenueRef = { id: string; name: string };
+export type SummaryScope = { zone?: Zone; landing?: Landing; venue?: VenueRef };
 
-export async function findTodaySummary({ zone, landing }: SummaryScope = {}): Promise<TodaySummary> {
-  const sql = getSql();
-  const nearZone = zone
-    ? sql`and st_dwithin(location, st_setsrid(st_makepoint(${zone.lon}, ${zone.lat}), 4326)::geography, ${ZONE_RADIUS_KM * 1000})`
-    : sql``;
-  const ofKind = landing ? sql`and kind = ${landing.kind}` : sql``;
-  const deepEnough = landing ? sql`` : sql`and discount_pct >= 40`;
-  const [[counts], highlights] = await Promise.all([
-    sql<{ total: number; bags: number }[]>`
-      select count(*)::int as total, (count(*) filter (where kind = 'surplus'))::int as bags from live_offers
-      where true ${nearZone} ${ofKind}
-    `,
-    sql<OfferCardRow[]>`
-      with picks as (
-        select distinct on (coalesce(venue_chain, venue_name, title))
-          title, kind, price_ron, original_price_ron, discount_pct, delivery_only, venue_name, venue_chain
-        from live_offers
-        where price_ron is not null ${deepEnough} and not delivery_only and lat is not null ${nearZone} ${ofKind}
-          and (pickup_start is null
-            or pickup_start < (date_trunc('day', now() at time zone 'Europe/Bucharest') + interval '1 day') at time zone 'Europe/Bucharest')
-        order by coalesce(venue_chain, venue_name, title), discount_pct desc nulls last, price_ron
-      )
-      select * from picks order by discount_pct desc nulls last, price_ron limit 3
-    `,
-  ]);
-  return { total: counts?.total ?? 0, bags: counts?.bags ?? 0, highlights };
+export async function findVenue(id: string): Promise<VenueRef | undefined> {
+  const offer = (await sharedSnapshot()).offers.find((candidate) => candidate.venueId === id);
+  return offer?.venueId && offer.venueName ? { id: offer.venueId, name: offer.venueName } : undefined;
+}
+
+export async function findTodaySummary({ zone, landing, venue }: SummaryScope = {}, now = new Date()): Promise<TodaySummary> {
+  const inScope = (await sharedSnapshot()).offers.filter(
+    (offer) =>
+      isStillAvailable(offer, now) &&
+      (!landing || offer.kind === landing.kind) &&
+      (!venue || offer.venueId === venue.id) &&
+      (!zone || (offer.lat !== null && offer.lon !== null && distanceMeters(zone, { lat: offer.lat, lon: offer.lon }) <= ZONE_RADIUS_KM * 1000)),
+  );
+  const showcase = inScope.filter(
+    (offer) =>
+      offer.price !== null &&
+      (landing || venue || (offer.discountPct ?? 0) >= 40) &&
+      !offer.deliveryOnly &&
+      offer.lat !== null &&
+      (!offer.pickupStart || new Date(offer.pickupStart) <= now || sameBucharestDay(new Date(offer.pickupStart), now)),
+  );
+  const bestPerPlace = new Map<string, Offer>();
+  for (const offer of showcase.sort(byShowcaseOrder)) {
+    const place = offer.chain ?? offer.venueName ?? offer.title;
+    if (!bestPerPlace.has(place)) bestPerPlace.set(place, offer);
+  }
+  return {
+    total: inScope.length,
+    bags: inScope.filter((offer) => offer.kind === "surplus").length,
+    highlights: [...bestPerPlace.values()].sort(byShowcaseOrder).slice(0, 3).map(toCardRow),
+  };
+}
+
+function byShowcaseOrder(a: Offer, b: Offer): number {
+  return (b.discountPct ?? -1) - (a.discountPct ?? -1) || (a.price ?? Infinity) - (b.price ?? Infinity);
 }
 
 const dayFormat = new Intl.DateTimeFormat("ro-RO", { timeZone: "Europe/Bucharest", weekday: "long", day: "numeric", month: "long" });
 
-export async function renderTodayImage(today: TodaySummary, now: Date, { zone, landing }: SummaryScope = {}): Promise<Response> {
+export async function renderTodayImage(today: TodaySummary, now: Date, { zone, landing, venue }: SummaryScope = {}): Promise<Response> {
   const counted = landing ? countLabel(today.total, ...landing.countNoun) : countLabel(today.total, "ofertă", "oferte");
   const svg = await satori(
     <div style={{ width: WIDTH, height: HEIGHT, boxSizing: "border-box", display: "flex", padding: "64px 80px", background: "#fcfbf8", color: "#1d1a16", fontFamily: "Inter" }}>
@@ -125,11 +144,11 @@ export async function renderTodayImage(today: TodaySummary, now: Date, { zone, l
         <span style={{ fontSize: 30, fontWeight: 700 }}>fentez foamea</span>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span style={{ fontSize: 30, fontWeight: 500, color: "#6b645b" }}>Azi, {dayFormat.format(now)}</span>
-          <span style={{ fontSize: zone || landing ? 64 : 76, fontWeight: 700, letterSpacing: -2, lineHeight: 1.05, marginTop: 12 }}>
-            {counted} {zone ? `lângă ${zone.name}` : "în București"}
+          <span style={{ fontSize: zone || landing || venue ? 64 : 76, fontWeight: 700, letterSpacing: -2, lineHeight: 1.05, marginTop: 12 }}>
+            {counted} {venue ? `la ${clip(venue.name, 40)}` : zone ? `lângă ${zone.name}` : "în București"}
           </span>
           <span style={{ fontSize: 30, fontWeight: 500, color: "#6b645b", marginTop: 20 }}>
-            {landing
+            {landing || venue
               ? "Pe o hartă, ordonate după cât de aproape sunt de tine."
               : `${countLabel(today.bags, "pachet anti-risipă", "pachete anti-risipă")}, meniuri de prânz și reduceri, pe o hartă.`}
           </span>

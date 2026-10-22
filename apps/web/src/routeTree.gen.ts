@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategorieRouteImport } from './routes/$categorie'
 import { Route as OgRouteImport } from './routes/og'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ApiSnapshotRouteImport } from './routes/api.snapshot'
 import { Route as ZonaZonaRouteImport } from './routes/zona.$zona'
 import { Route as ZonaZonaCategorieRouteImport } from './routes/zona.$zona_.$categorie'
 
@@ -36,6 +37,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSnapshotRoute = ApiSnapshotRouteImport.update({
+  id: '/api/snapshot',
+  path: '/api/snapshot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ZonaZonaRoute = ZonaZonaRouteImport.update({
   id: '/zona/$zona',
   path: '/zona/$zona',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/snapshot': typeof ApiSnapshotRoute
   '/zona/$zona': typeof ZonaZonaRoute
   '/zona/$zona/$categorie': typeof ZonaZonaCategorieRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/snapshot': typeof ApiSnapshotRoute
   '/zona/$zona': typeof ZonaZonaRoute
   '/zona/$zona/$categorie': typeof ZonaZonaCategorieRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/snapshot': typeof ApiSnapshotRoute
   '/zona/$zona': typeof ZonaZonaRoute
   '/zona/$zona_/$categorie': typeof ZonaZonaCategorieRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/$categorie'
     | '/og'
     | '/sitemap.xml'
+    | '/api/snapshot'
     | '/zona/$zona'
     | '/zona/$zona/$categorie'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/$categorie'
     | '/og'
     | '/sitemap.xml'
+    | '/api/snapshot'
     | '/zona/$zona'
     | '/zona/$zona/$categorie'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/$categorie'
     | '/og'
     | '/sitemap.xml'
+    | '/api/snapshot'
     | '/zona/$zona'
     | '/zona/$zona_/$categorie'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   CategorieRoute: typeof CategorieRoute
   OgRoute: typeof OgRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiSnapshotRoute: typeof ApiSnapshotRoute
   ZonaZonaRoute: typeof ZonaZonaRoute
   ZonaZonaCategorieRoute: typeof ZonaZonaCategorieRoute
 }
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/snapshot': {
+      id: '/api/snapshot'
+      path: '/api/snapshot'
+      fullPath: '/api/snapshot'
+      preLoaderRoute: typeof ApiSnapshotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/zona/$zona': {
       id: '/zona/$zona'
       path: '/zona/$zona'
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategorieRoute: CategorieRoute,
   OgRoute: OgRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiSnapshotRoute: ApiSnapshotRoute,
   ZonaZonaRoute: ZonaZonaRoute,
   ZonaZonaCategorieRoute: ZonaZonaCategorieRoute,
 }

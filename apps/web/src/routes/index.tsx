@@ -77,6 +77,8 @@ function venueMeta(wire: SnapshotWire | undefined, venueId: string) {
     { property: "og:description", content: description },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
+    { property: "og:image", content: `${SITE_URL}/og?local=${venueId}` },
+    { name: "twitter:image", content: `${SITE_URL}/og?local=${venueId}` },
   ];
 }
 

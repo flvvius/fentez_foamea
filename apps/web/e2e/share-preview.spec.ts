@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { decodeSnapshot } from "../src/lib/offers";
 
 test.use({ javaScriptEnabled: false });
 
@@ -45,4 +46,15 @@ test("names the venue in a shared venue link", async ({ page }) => {
   await page.goto("/?local=00000000-0000-0000-0000-00000000a002");
   await expect(page).toHaveTitle("Oferte la City Grill Centru · fentez foamea");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /^3 oferte la City Grill Centru acum/);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\?local=00000000-0000-0000-0000-00000000a002$/);
+  const image = await page.request.get("/og?local=00000000-0000-0000-0000-00000000a002");
+  expect(image.headers()["content-type"]).toBe("image/png");
+});
+
+test("serves the offer snapshot as a CDN-cacheable document", async ({ request }) => {
+  const response = await request.get("/api/snapshot");
+  expect(response.ok()).toBe(true);
+  expect(response.headers()["cdn-cache-control"]).toContain("s-maxage=");
+  const snapshot = decodeSnapshot(await response.json());
+  expect(snapshot.offers.map((offer) => offer.id)).toContain("00000000-0000-0000-0000-00000000b001");
 });
