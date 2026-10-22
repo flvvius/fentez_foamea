@@ -109,6 +109,23 @@ describe("explore", () => {
     ]);
   });
 
+  it("shows one copy of a bag sold under two brand names from the same kitchen", () => {
+    const bag = { ...base, title: "Cartofe Sambosa", price: 3.78 };
+    const placed = placeOffers(
+      [
+        { ...bag, id: "holy", venueId: "a", venueName: "Holy Indian Curries" },
+        { ...bag, id: "sana", venueId: "b", venueName: "Sana's Kitchen Hut" },
+        { ...bag, id: "elsewhere", venueId: "c", venueName: "Sana's Kitchen Hut Pipera", lat: 44.5 },
+      ],
+      origin,
+      now,
+    );
+    expect(collapseChainCopies(sortOffers(placed, "distance")).map((o) => [o.id, o.otherLocations])).toEqual([
+      ["holy", 1],
+      ["elsewhere", 0],
+    ]);
+  });
+
   it("keeps only the nearest copy of a chain deal", () => {
     const deal = { ...base, source: "kfc" as const, kind: "combo" as const, chain: "KFC", title: "Bucket" };
     const placed = placeOffers(

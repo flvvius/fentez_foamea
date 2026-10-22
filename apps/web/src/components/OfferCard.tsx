@@ -111,7 +111,7 @@ function checkedLongAgo(offer: PlacedOffer, now: Date): boolean {
 function placeNote(offer: PlacedOffer): string | null {
   const parts = [
     offer.distance === null ? null : formatDistance(offer.distance),
-    offer.otherLocations ? `și în alte ${offer.otherLocations} locații` : null,
+    offer.otherLocations ? otherLocationsLabel(offer.otherLocations) : null,
   ];
   return parts.filter(Boolean).join(" · ") || null;
 }
@@ -128,4 +128,10 @@ function formatDays(days: number[]): string {
   const contiguous = sorted.every((day, index) => index === 0 || day === sorted[index - 1]! + 1);
   if (contiguous && sorted.length > 2) return `${WEEKDAY_SHORT[sorted[0]! - 1]}–${WEEKDAY_SHORT[sorted.at(-1)! - 1]}`;
   return sorted.map((day) => WEEKDAY_SHORT[day - 1]).join(", ");
+}
+
+function otherLocationsLabel(count: number): string {
+  if (count === 1) return "și într-o altă locație";
+  const lastTwo = count % 100;
+  return lastTwo === 0 || lastTwo >= 20 ? `și în alte ${count} de locații` : `și în alte ${count} locații`;
 }

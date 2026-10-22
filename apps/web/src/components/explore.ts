@@ -167,11 +167,11 @@ export function collapseChainCopies(sorted: PlacedOffer[]): PlacedOffer[] {
   const firstByKey = new Map<string, PlacedOffer>();
   const result: PlacedOffer[] = [];
   for (const offer of sorted) {
-    if (!offer.chain) {
+    const key = copyKey(offer);
+    if (!key) {
       result.push(offer);
       continue;
     }
-    const key = `${offer.source}|${offer.chain}|${offer.title}|${offer.price ?? ""}`;
     const first = firstByKey.get(key);
     if (first) {
       first.otherLocations = (first.otherLocations ?? 0) + 1;
@@ -182,6 +182,13 @@ export function collapseChainCopies(sorted: PlacedOffer[]): PlacedOffer[] {
     result.push(copy);
   }
   return result;
+}
+
+function copyKey(offer: PlacedOffer): string | null {
+  const deal = `${offer.source}|${offer.title}|${offer.price ?? ""}`;
+  if (offer.chain) return `${deal}|${offer.chain}`;
+  if (offer.lat === null || offer.lon === null) return null;
+  return `${deal}|${offer.lat.toFixed(4)},${offer.lon.toFixed(4)}`;
 }
 
 export function validTodayFirst(offers: PlacedOffer[], now: Date): PlacedOffer[] {
