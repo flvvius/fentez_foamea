@@ -213,9 +213,14 @@ function copyKey(offer: PlacedOffer): string | null {
 export function validTodayFirst(offers: PlacedOffer[], now: Date): PlacedOffer[] {
   const weekday = bucharestWeekday(now);
   const clock = bucharestClock(now);
-  const appliesToday = (offer: PlacedOffer) =>
-    (!offer.daysOfWeek?.length || offer.daysOfWeek.includes(weekday)) &&
-    (!offer.timeEnd || clock < offer.timeEnd) &&
-    (!offer.pickupStart || sameBucharestDay(new Date(offer.pickupStart), now));
-  return [...offers.filter(appliesToday), ...offers.filter((offer) => !appliesToday(offer))];
+  const today: PlacedOffer[] = [];
+  const later: PlacedOffer[] = [];
+  for (const offer of offers) {
+    const appliesToday =
+      (!offer.daysOfWeek?.length || offer.daysOfWeek.includes(weekday)) &&
+      (!offer.timeEnd || clock < offer.timeEnd) &&
+      (!offer.pickupStart || sameBucharestDay(new Date(offer.pickupStart), now));
+    (appliesToday ? today : later).push(offer);
+  }
+  return [...today, ...later];
 }

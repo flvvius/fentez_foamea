@@ -4,6 +4,9 @@ const wholePriceFormat = new Intl.NumberFormat("ro-RO", { maximumFractionDigits:
 const centsPriceFormat = new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const timeFormat = new Intl.DateTimeFormat("ro-RO", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
 const dayFormat = new Intl.DateTimeFormat("ro-RO", { timeZone: TZ, weekday: "short", day: "numeric", month: "short" });
+const weekdayFormat = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short" });
+const clockFormat = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const calendarDayFormat = new Intl.DateTimeFormat("en-CA", { timeZone: TZ });
 
 export function formatPrice(value: number): string {
   return (Number.isInteger(value) ? wholePriceFormat : centsPriceFormat).format(value);
@@ -39,12 +42,12 @@ export function formatRelative(iso: string, now: Date): string {
 }
 
 export function bucharestWeekday(now: Date): number {
-  const name = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short" }).format(now);
+  const name = weekdayFormat.format(now);
   return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(name) + 1;
 }
 
 export function bucharestClock(now: Date): string {
-  return new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(now);
+  return clockFormat.format(now);
 }
 
 export function minutesUntil(iso: string, now: Date): number {
@@ -52,6 +55,5 @@ export function minutesUntil(iso: string, now: Date): number {
 }
 
 export function sameBucharestDay(a: Date, b: Date): boolean {
-  const day = new Intl.DateTimeFormat("en-CA", { timeZone: TZ });
-  return day.format(a) === day.format(b);
+  return calendarDayFormat.format(a) === calendarDayFormat.format(b);
 }

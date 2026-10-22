@@ -34,16 +34,17 @@ export default function OfferMap({ pins, origin, selectedVenueId, onSelectVenue 
 }
 
 function PricePin({ pin, selected, onSelect }: Readonly<{ pin: VenuePin; selected: boolean; onSelect: Props["onSelectVenue"] }>) {
+  const label = pinLabel(pin);
+  const { count } = pin;
   const icon = useMemo(() => {
-    const price = pinLabel(pin);
-    const more = pin.count > 1 ? `<span class="pin-count">${pin.count}</span>` : "";
+    const more = count > 1 ? `<span class="pin-count">${count}</span>` : "";
     return L.divIcon({
       className: "",
-      html: `<span class="pin${selected ? " pin-selected" : ""}">${price}${more}</span>`,
+      html: `<span class="pin${selected ? " pin-selected" : ""}">${label}${more}</span>`,
       iconSize: undefined,
       iconAnchor: [0, 0],
     });
-  }, [pin, selected]);
+  }, [label, count, selected]);
 
   const toggle = () => onSelect(selected ? null : pin.venueId);
 
