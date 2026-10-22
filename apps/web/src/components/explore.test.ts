@@ -135,9 +135,9 @@ describe("explore", () => {
       origin,
       now,
     );
-    expect(collapseChainCopies(sortOffers(placed, "distance")).map((o) => [o.id, o.otherLocations])).toEqual([
-      ["holy", 1],
-      ["elsewhere", 0],
+    expect(collapseChainCopies(sortOffers(placed, "distance")).map((o) => [o.id, o.alsoSoldAs])).toEqual([
+      ["holy", ["Sana's Kitchen Hut"]],
+      ["elsewhere", []],
     ]);
   });
 

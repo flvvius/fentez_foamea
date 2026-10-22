@@ -112,6 +112,7 @@ function placeNote(offer: PlacedOffer): string | null {
   const parts = [
     offer.distance === null ? null : formatDistance(offer.distance),
     offer.otherLocations ? otherLocationsLabel(offer.otherLocations) : null,
+    offer.alsoSoldAs?.length ? `și ca ${offer.alsoSoldAs.join(", ")}` : null,
   ];
   return parts.filter(Boolean).join(" · ") || null;
 }

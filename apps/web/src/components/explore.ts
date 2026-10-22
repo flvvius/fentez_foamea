@@ -9,6 +9,7 @@ export type PlacedOffer = Offer & {
   headlinePct: number | null;
   priceCap: number | null;
   otherLocations?: number;
+  alsoSoldAs?: string[];
 };
 
 export type VenuePin = {
@@ -186,11 +187,16 @@ export function collapseChainCopies(sorted: PlacedOffer[]): PlacedOffer[] {
       continue;
     }
     const first = firstByKey.get(key);
+    if (first && !offer.chain) {
+      const name = offer.venueName;
+      if (name && name !== first.venueName && !first.alsoSoldAs?.includes(name)) first.alsoSoldAs = [...(first.alsoSoldAs ?? []), name];
+      continue;
+    }
     if (first) {
       first.otherLocations = (first.otherLocations ?? 0) + 1;
       continue;
     }
-    const copy = { ...offer, otherLocations: 0 };
+    const copy = { ...offer, otherLocations: 0, alsoSoldAs: [] };
     firstByKey.set(key, copy);
     result.push(copy);
   }
