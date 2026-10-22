@@ -205,12 +205,12 @@ describe("featuredPinIds", () => {
       pin("across-town", 44.45, 50),
       pin("no-price", 44.47, 90, null),
       pin("no-discount", 44.49, null),
-    ]);
+    ], 400);
     expect([...featured]).toEqual(["deep", "across-town"]);
   });
 
   it("stops at ten", () => {
     const many = Array.from({ length: 30 }, (_, index) => pin(`p${index}`, 44.3 + index * 0.01, 40));
-    expect(featuredPinIds(many).size).toBe(10);
+    expect(featuredPinIds(many, 400).size).toBe(10);
   });
 });

@@ -182,16 +182,15 @@ export function venuePins(offers: PlacedOffer[]): VenuePin[] {
 }
 
 const FEATURED_PINS = 10;
-const FEATURED_SPACING_M = 400;
 
-export function featuredPinIds(pins: VenuePin[]): Set<string> {
+export function featuredPinIds(pins: VenuePin[], spacingMeters: number): Set<string> {
   const ranked = pins
     .filter((pin) => pin.minPrice !== null && pin.bestDiscount !== null)
     .sort((a, b) => b.bestDiscount! - a.bestDiscount! || a.minPrice! - b.minPrice!);
   const featured: VenuePin[] = [];
   for (const pin of ranked) {
     if (featured.length === FEATURED_PINS) break;
-    if (featured.some((other) => distanceMeters(other, pin) < FEATURED_SPACING_M)) continue;
+    if (featured.some((other) => distanceMeters(other, pin) < spacingMeters)) continue;
     featured.push(pin);
   }
   return new Set(featured.map((pin) => pin.venueId));

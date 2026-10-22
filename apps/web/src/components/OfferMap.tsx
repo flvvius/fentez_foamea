@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CircleMarker, MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type { LatLon } from "@fentezfoamea/core";
 import { formatPrice } from "@/lib/format";
@@ -16,7 +16,12 @@ type Props = {
 };
 
 export default function OfferMap({ pins, origin, selectedVenueId, onSelectVenue }: Readonly<Props>) {
-  const featured = useMemo(() => featuredPinIds(pins), [pins]);
+  const [view, setView] = useState<MapView | null>(null);
+  const featured = useMemo(() => {
+    if (!view) return new Set<string>();
+    const visible = pins.filter((pin) => view.bounds.contains([pin.lat, pin.lon]));
+    return featuredPinIds(visible, view.metersPerPixel * FEATURED_SPACING_PX);
+  }, [pins, view]);
   return (
     <MapContainer center={[origin.lat, origin.lon]} zoom={14} className="h-full w-full" zoomControl={false} attributionControl>
       <TileLayer
@@ -26,6 +31,7 @@ export default function OfferMap({ pins, origin, selectedVenueId, onSelectVenue 
       />
       <FollowOrigin origin={origin} />
       <ZoomClass />
+      <TrackView onChange={setView} />
       <CircleMarker center={[origin.lat, origin.lon]} radius={7} pathOptions={{ className: "origin-dot" }} />
       {pins.map((pin) => (
         <PricePin
@@ -82,6 +88,22 @@ function FollowOrigin({ origin }: { origin: LatLon }) {
   useEffect(() => {
     map.flyTo([origin.lat, origin.lon], Math.max(map.getZoom(), 14), { duration: 0.6 });
   }, [map, origin.lat, origin.lon]);
+  return null;
+}
+
+const FEATURED_SPACING_PX = 110;
+
+type MapView = { bounds: L.LatLngBounds; metersPerPixel: number };
+
+function TrackView({ onChange }: { onChange: (view: MapView) => void }) {
+  const map = useMap();
+  const report = () => {
+    const center = map.getCenter();
+    const metersPerPixel = (40_075_016 * Math.cos((center.lat * Math.PI) / 180)) / 2 ** (map.getZoom() + 8);
+    onChange({ bounds: map.getBounds().pad(-0.1), metersPerPixel });
+  };
+  useMapEvents({ moveend: report });
+  useEffect(report, [map]);
   return null;
 }
 
