@@ -4,7 +4,7 @@ test.describe("server render", () => {
   test.use({ javaScriptEnabled: false });
 
   test("lists live offers before any script runs", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/harta");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Mâncare ieftină");
     await expect(offerRow(page, "Pachet surpriză patiserie")).toBeVisible();
     await expect(page.getByText("Pachet expirat")).toHaveCount(0);
@@ -13,7 +13,7 @@ test.describe("server render", () => {
 
 test.describe("explorer", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/harta");
     await waitForHydration(page);
   });
 
@@ -152,16 +152,16 @@ test.describe("near me", () => {
   test.use({ geolocation: { latitude: 44.4205, longitude: 26.1795 }, permissions: ["geolocation"] });
 
   test("locates a visitor who already allowed it, without changing the order", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/harta");
     await waitForHydration(page);
     await expect(page.getByRole("button", { name: "Actualizează locația" })).toBeVisible();
     await expect(page.getByLabel("Ordine")).toHaveValue("best");
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/harta$/);
     await expect.poll(async () => (await offerTitles(page))[0]).toBe("Pachet de seară Titan");
   });
 
   test("re-sorts by distance from the visitor", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/harta");
     await waitForHydration(page);
     await page.getByRole("button", { name: "Actualizează locația" }).click();
     await expect(page.getByLabel("Ordine")).toHaveValue("distance");

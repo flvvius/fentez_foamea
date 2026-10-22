@@ -4,7 +4,7 @@ import { decodeSnapshot } from "../src/lib/offers";
 test.use({ javaScriptEnabled: false });
 
 test("carries the tags link previews read", async ({ page, request }) => {
-  await page.goto("/");
+  await page.goto("/harta");
   const meta = (key: string) => page.locator(`meta[property="${key}"], meta[name="${key}"]`).first();
 
   await expect(meta("og:title")).toHaveAttribute("content", /fentez foamea/);
@@ -21,7 +21,7 @@ test("carries the tags link previews read", async ({ page, request }) => {
 });
 
 test("is installable", async ({ page, request }) => {
-  await page.goto("/");
+  await page.goto("/harta");
   const href = await page.locator('link[rel="manifest"]').getAttribute("href");
   const manifest = await (await request.get(href!)).json();
   expect(manifest).toMatchObject({ lang: "ro", display: "standalone", start_url: "/" });
@@ -30,13 +30,13 @@ test("is installable", async ({ page, request }) => {
 });
 
 test("describes the site search to search engines", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/harta");
   const data = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? "{}");
-  expect(data.potentialAction.target.urlTemplate).toBe("https://fentez-foamea.vercel.app/?q={search_term_string}&km=oras");
+  expect(data.potentialAction.target.urlTemplate).toBe("https://fentez-foamea.vercel.app/harta?q={search_term_string}&km=oras");
 });
 
 test("names the search in a shared search link", async ({ page, request }) => {
-  await page.goto("/?q=covrigi");
+  await page.goto("/harta?q=covrigi");
   await expect(page.locator('meta[property="og:image"]')).toHaveCount(1);
   const image = await page.locator('meta[property="og:image"]').getAttribute("content");
   expect(image).toMatch(/\/og\?q=covrigi$/);
@@ -48,7 +48,7 @@ test("names the search in a shared search link", async ({ page, request }) => {
 });
 
 test("names the venue in a shared venue link", async ({ page }) => {
-  await page.goto("/?local=00000000-0000-0000-0000-00000000a002");
+  await page.goto("/harta?local=00000000-0000-0000-0000-00000000a002");
   await expect(page).toHaveTitle("Oferte la City Grill Centru · fentez foamea");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /^3 oferte la City Grill Centru acum/);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\?local=00000000-0000-0000-0000-00000000a002$/);
@@ -56,7 +56,7 @@ test("names the venue in a shared venue link", async ({ page }) => {
   expect(image.headers()["content-type"]).toBe("image/png");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    "https://fentez-foamea.vercel.app/?local=00000000-0000-0000-0000-00000000a002",
+    "https://fentez-foamea.vercel.app/harta?local=00000000-0000-0000-0000-00000000a002",
   );
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oferte la City Grill Centru, acum.");
 });
@@ -77,8 +77,8 @@ test("publishes newly listed bags as an RSS feed, newest first", async ({ page, 
   expect(titles).toContainEqual(expect.stringMatching(/^15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț, ridici azi/));
   expect(titles.at(-1)).toContain("Pachet de seară Titan");
   expect(titles.every((title) => !title.includes("Meniul zilei"))).toBe(true);
-  expect(feed).toContain("/?oferta=00000000-0000-0000-0000-00000000b001</link>");
+  expect(feed).toContain("/harta?oferta=00000000-0000-0000-0000-00000000b001</link>");
 
-  await page.goto("/");
+  await page.goto("/harta");
   await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveAttribute("href", "/feed.xml");
 });

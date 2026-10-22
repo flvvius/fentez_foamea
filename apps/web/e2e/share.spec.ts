@@ -5,7 +5,7 @@ const EXPIRED_BAG = "00000000-0000-0000-0000-00000000b009";
 const TITAN = "00000000-0000-0000-0000-00000000a007";
 
 test("keeps filters in the URL so a reload or a shared link shows the same list", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/harta");
   await waitForHydration(page);
   await page.getByRole("button", { name: /Pachet anti-risipă/ }).click();
   await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
@@ -19,14 +19,14 @@ test("keeps filters in the URL so a reload or a shared link shows the same list"
 });
 
 test("opens a venue link even when the venue is outside the default radius", async ({ page }) => {
-  await page.goto(`/?local=${TITAN}`);
+  await page.goto(`/harta?local=${TITAN}`);
   await expect(offerList(page).locator(".venue-scope")).toContainText("Patiserie Titan");
   await expect.poll(() => offerTitles(page)).toEqual(["Pachet de seară Titan"]);
 });
 
 test.describe("a shared offer link", () => {
   test("shows the offer on top", async ({ page }) => {
-    await page.goto(`/?oferta=${BAG}`);
+    await page.goto(`/harta?oferta=${BAG}`);
     const shared = page.getByRole("region", { name: "Oferta primită" });
     await expect(shared).toContainText("Ți-a trimis cineva oferta asta");
     await expect(shared.getByRole("heading", { name: "Pachet surpriză patiserie" })).toBeVisible();
@@ -34,12 +34,12 @@ test.describe("a shared offer link", () => {
 
     await waitForHydration(page);
     await shared.getByRole("button", { name: "Închide" }).click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/harta$/);
     await expect(offerRow(page, "Pachet surpriză patiserie")).toHaveCount(1);
   });
 
   test("says so when the offer is gone", async ({ page }) => {
-    await page.goto(`/?oferta=${EXPIRED_BAG}`);
+    await page.goto(`/harta?oferta=${EXPIRED_BAG}`);
     await expect(page.getByRole("region", { name: "Oferta primită" })).toContainText("nu mai e disponibilă");
   });
 
@@ -47,7 +47,7 @@ test.describe("a shared offer link", () => {
     test.use({ javaScriptEnabled: false });
 
     test("names the deal in the link preview", async ({ page }) => {
-      await page.goto(`/?oferta=${BAG}`);
+      await page.goto(`/harta?oferta=${BAG}`);
       await expect(page).toHaveTitle("15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț · fentez foamea");
       await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
         "content",
@@ -70,24 +70,24 @@ test.describe("share button", () => {
         },
       });
     });
-    await page.goto("/");
+    await page.goto("/harta");
     await waitForHydration(page);
     await offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: "Trimite" }).click();
     await expect(offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: "Trimis" })).toBeVisible();
     const shared = await page.evaluate(() => (window as unknown as { shared: ShareData }).shared);
     expect(shared.text).toMatch(/^15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț, ridici azi \d\d:\d\d–\d\d:\d\d$/);
-    expect(shared.url).toMatch(new RegExp(`/\\?oferta=${BAG}$`));
+    expect(shared.url).toMatch(new RegExp(`/harta\\?oferta=${BAG}$`));
   });
 
   test("copies the link otherwise", async ({ page, context, baseURL }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.addInitScript(() => Object.defineProperty(navigator, "share", { value: undefined }));
-    await page.goto("/");
+    await page.goto("/harta");
     await waitForHydration(page);
     await offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: "Trimite" }).click();
     await expect(offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: "Link copiat" })).toBeVisible();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
-      new RegExp(`^15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț, ridici azi [0-9:–]+ ${baseURL}/\\?oferta=${BAG}$`),
+      new RegExp(`^15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț, ridici azi [0-9:–]+ ${baseURL}/harta\\?oferta=${BAG}$`),
     );
   });
 });
@@ -101,12 +101,12 @@ test("shares the current list with its filters", async ({ page }) => {
       },
     });
   });
-  await page.goto("/?tip=anti-risipa&km=oras");
+  await page.goto("/harta?tip=anti-risipa&km=oras");
   await waitForHydration(page);
   await page.getByRole("button", { name: "Trimite lista" }).click();
   await expect(page.getByRole("button", { name: "Trimis" })).toBeVisible();
   const shared = await page.evaluate(() => (window as unknown as { shared: ShareData }).shared);
-  expect(shared.url).toMatch(/\/\?tip=anti-risipa&km=oras$/);
+  expect(shared.url).toMatch(/\/harta\?tip=anti-risipa&km=oras$/);
   expect(shared.text).toMatch(/4 oferte pe fentez foamea\.$/);
 });
 

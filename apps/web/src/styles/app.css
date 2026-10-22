@@ -80,6 +80,9 @@ body {
 }
 
 .panel {
+  /* Contains absolutely positioned children (sr-only labels): without it they are placed against
+     the page and stretch it past the viewport, so the window scrolls along with the list. */
+  position: relative;
   overflow-y: auto;
   border-right: 1px solid var(--border);
 }
@@ -1255,6 +1258,38 @@ body {
   .site-header-inner,
   .page {
     padding-inline: 16px;
+  }
+
+  /* The header's height comes partly out of the map and partly out of the masthead padding, so the
+     list starts about where it did before the header and the map stays roomy enough to tap pins. */
+  .harta-page .map {
+    height: calc(34dvh - 1.5rem);
+  }
+
+  .harta-page .masthead {
+    padding-top: 8px;
+  }
+
+  /* One row on phones: a wrapped header pushed the map page's first offer below the fold. */
+  .site-header-inner {
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding-block: 4px;
+  }
+
+  .site-nav {
+    gap: 12px;
+  }
+
+  .site-brand {
+    white-space: nowrap;
+  }
+
+  .site-user {
+    max-width: 6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .page .headline {

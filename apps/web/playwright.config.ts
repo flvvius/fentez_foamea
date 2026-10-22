@@ -24,6 +24,12 @@ export default defineConfig({
     command: "node .output/server/index.mjs",
     url: `http://localhost:${PORT}/favicon.svg`,
     reuseExistingServer: !process.env.CI,
-    env: { PORT: String(PORT), DATABASE_URL: E2E_DATABASE_URL },
+    env: {
+      PORT: String(PORT),
+      DATABASE_URL: E2E_DATABASE_URL,
+      // Test-only values so sign-in and the session endpoint work like in production.
+      BETTER_AUTH_SECRET: "e2e-only-secret-that-is-never-used-anywhere-else",
+      BETTER_AUTH_URL: `http://localhost:${PORT}`,
+    },
   },
 });
