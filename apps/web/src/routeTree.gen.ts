@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategorieRouteImport } from './routes/$categorie'
+import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as OgRouteImport } from './routes/og'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiSnapshotRouteImport } from './routes/api.snapshot'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const CategorieRoute = CategorieRouteImport.update({
   id: '/$categorie',
   path: '/$categorie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
+  id: '/feed.xml',
+  path: '/feed.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OgRoute = OgRouteImport.update({
@@ -56,6 +62,7 @@ const ZonaZonaCategorieRoute = ZonaZonaCategorieRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/og': typeof OgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/snapshot': typeof ApiSnapshotRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/og': typeof OgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/snapshot': typeof ApiSnapshotRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/og': typeof OgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/snapshot': typeof ApiSnapshotRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$categorie'
+    | '/feed.xml'
     | '/og'
     | '/sitemap.xml'
     | '/api/snapshot'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$categorie'
+    | '/feed.xml'
     | '/og'
     | '/sitemap.xml'
     | '/api/snapshot'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$categorie'
+    | '/feed.xml'
     | '/og'
     | '/sitemap.xml'
     | '/api/snapshot'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategorieRoute: typeof CategorieRoute
+  FeedDotxmlRoute: typeof FeedDotxmlRoute
   OgRoute: typeof OgRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiSnapshotRoute: typeof ApiSnapshotRoute
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/$categorie'
       fullPath: '/$categorie'
       preLoaderRoute: typeof CategorieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed.xml': {
+      id: '/feed.xml'
+      path: '/feed.xml'
+      fullPath: '/feed.xml'
+      preLoaderRoute: typeof FeedDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/og': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategorieRoute: CategorieRoute,
+  FeedDotxmlRoute: FeedDotxmlRoute,
   OgRoute: OgRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiSnapshotRoute: ApiSnapshotRoute,

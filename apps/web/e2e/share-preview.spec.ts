@@ -58,3 +58,17 @@ test("serves the offer snapshot as a CDN-cacheable document", async ({ request }
   const snapshot = decodeSnapshot(await response.json());
   expect(snapshot.offers.map((offer) => offer.id)).toContain("00000000-0000-0000-0000-00000000b001");
 });
+
+test("publishes newly listed bags as an RSS feed, newest first", async ({ page, request }) => {
+  const response = await request.get("/feed.xml");
+  expect(response.headers()["content-type"]).toContain("application/rss+xml");
+  const feed = await response.text();
+  const titles = [...feed.matchAll(/<item>\s*<title>([^<]+)<\/title>/g)].map((match) => match[1]);
+  expect(titles).toContainEqual(expect.stringMatching(/^15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț, ridici azi/));
+  expect(titles.at(-1)).toContain("Pachet de seară Titan");
+  expect(titles.every((title) => !title.includes("Meniul zilei"))).toBe(true);
+  expect(feed).toContain("/?oferta=00000000-0000-0000-0000-00000000b001</link>");
+
+  await page.goto("/");
+  await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveAttribute("href", "/feed.xml");
+});
