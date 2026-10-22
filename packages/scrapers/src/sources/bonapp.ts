@@ -21,6 +21,7 @@ type MunchProduct = {
   description?: string;
   type?: string;
   audience?: string;
+  facets?: string[];
 };
 
 type MunchPage = { meta: { page: number; per_page: number; total_found: number }; data: MunchProduct[] };
@@ -28,6 +29,7 @@ type MunchPage = { meta: { page: number; per_page: number; total_found: number }
 const API = "https://api.service.munch.eco/v1/products";
 const SHOP = "https://shop.munch.eco/ro";
 const PER_PAGE = 100;
+const NON_FOOD_FACETS = new Set(["virag", "noveny"]);
 const MAX_PAGES = 20;
 
 const HEADERS = {
@@ -66,6 +68,7 @@ export const bonapp: Source = {
 
 export function toOffer(product: MunchProduct): ScrapedOffer | undefined {
   if (product.currency !== "RON" || product.stock_quantity <= 0) return undefined;
+  if (product.facets?.some((facet) => NON_FOOD_FACETS.has(facet))) return undefined;
   const [pickupStart, pickupEnd] = pickupWindow(product) ?? [];
   const address = formatAddress(product.vendor.address);
   return {

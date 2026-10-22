@@ -2,8 +2,11 @@ import { readFileSync } from "node:fs";
 import { scrapedOfferSchema } from "@fentezfoamea/core";
 import { describe, expect, it } from "vitest";
 import {
+  withoutWoltPlusUpsell,
   campaignConditions,
   campaignOffer,
+  isLunchWithListedItems,
+  lunchItemOffers,
   isMerchantCampaign,
   itemOffers,
   listVenues,
@@ -58,13 +61,48 @@ describe("wolt", () => {
     expect(offer.sourceOfferId).toBe("venue_campaign:6a829ee73479caf4691dee09@67dad3a2db56261b0e642333");
   });
 
+  it("lists the lunch items a lunch campaign names, under its price cap", () => {
+    const lunch = campaigns("dynamic-burgerescu.json").find((campaign) => campaign.description.title.startsWith("Prânzul"))!;
+    expect(isLunchWithListedItems(lunch)).toBe(true);
+    const item = (id: string, name: string, price: number) => ({ id, name, price, disabled_info: null });
+    const assortment: WoltAssortment = {
+      categories: [],
+      items: [
+        item("69084dd928ad5f69bbbb56fb", "Meniu prânz burger", 3900),
+        item("69084dd928ad5f69bbbb56fd", "Meniu prânz wrap", 3500),
+        item("69084dd928ad5f69bbbb5703", "Platou mare", 5900),
+        item("not-listed", "Burger", 2500),
+      ],
+    };
+    const offers = lunchItemOffers(papaGyros, lunch, assortment).map((offer) => scrapedOfferSchema.parse(offer));
+    expect(offers.map((offer) => [offer.title, offer.priceRon, offer.kind])).toEqual([
+      ["Meniu prânz burger", 39, "daily_menu"],
+      ["Meniu prânz wrap", 35, "daily_menu"],
+    ]);
+    expect(offers[0]).toMatchObject({ timeStart: "10:00", timeEnd: "16:00", description: "Prânzul sub 40 lei", deliveryOnly: true });
+  });
+
   it("keeps a dated end and flags the Wolt+ upsell", () => {
     const deal = campaigns("dynamic-papa-gyros.json").find(isMerchantCampaign);
     const offer = scrapedOfferSchema.parse(campaignOffer(papaGyros, deal!));
     expect(offer.endsAt).toBe("2026-10-31T21:59:59.999Z");
     expect(offer.conditions).toContain("doar cu Wolt+");
+    expect(offer.title).not.toContain("Wolt+");
     expect(offer.url).toBe("https://wolt.com/ro/rou/bucharest/restaurant/papa-gyros-rahova-67dad3a2db56261b0e642333");
     expect(offer.venue).toMatchObject({ lat: 44.4141, lon: 26.0681, chain: "Papa Gyros" });
+  });
+
+  it("skips free-delivery campaigns, which are not a food deal", () => {
+    const deal = campaigns("dynamic-papa-gyros.json").find(isMerchantCampaign)!;
+    for (const title of ["0 RON taxă de livrare", "0\u202fRON taxă de livrare", "Livrare gratuită"]) {
+      expect(isMerchantCampaign({ ...deal, description: { ...deal.description, title } })).toBe(false);
+    }
+  });
+
+  it("drops the Wolt+ upsell from campaign titles", () => {
+    expect(withoutWoltPlusUpsell("20% la articolele selectate | 40% cu Wolt+")).toBe("20% la articolele selectate");
+    expect(withoutWoltPlusUpsell("20% reducere pentru toate articolele | 30% with W+")).toBe("20% reducere pentru toate articolele");
+    expect(withoutWoltPlusUpsell("-20% la tot meniul")).toBe("-20% la tot meniul");
   });
 
   it("prices discounted items from the assortment, biggest saving first", () => {

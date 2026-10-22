@@ -10,9 +10,10 @@ const SITE = "https://glovoapp.com/ro/ro/bucharest/stores";
 const FOOD_CATEGORY = 1;
 const PAGE_SIZE = 50;
 const MAX_WALL_PAGES = 45;
-const MAX_ADDRESS_LOOKUPS = 200;
+const MAX_ADDRESS_LOOKUPS = 500;
 const MAX_ITEM_STORES = 150;
 const ITEMS_PER_STORE = 5;
+const MIN_ITEM_PRICE_RON = 15;
 
 const WALL_POINTS: LatLon[] = [
   BUCHAREST_CENTER,
@@ -60,6 +61,7 @@ export type Outlet = {
   slug: string;
   title: string;
   promotions: WallPromotion[];
+  seenFrom?: LatLon;
 };
 
 export const glovo: Source = {
@@ -75,7 +77,7 @@ export const glovo: Source = {
     for (const point of points) {
       for (const entry of await crawlWall(http, point, maxPages)) {
         const outlet = toOutlet(entry);
-        if (outlet) outlets.set(outletKey(outlet), outlet);
+        if (outlet) outlets.set(outletKey(outlet), { ...outlet, seenFrom: point });
       }
       log.info("glovo wall", { point, outlets: outlets.size });
     }
@@ -125,7 +127,7 @@ async function crawlWall(http: PoliteHttp, point: LatLon, maxPages: number): Pro
 
 async function lookupOutlet(ctx: SourceContext, outlet: Outlet): Promise<{ address?: string; minimumBasket?: number } | undefined> {
   try {
-    const details = await ctx.http.json<StoreDetails>(`${API}/v3/stores/${outlet.storeId}`, { headers: glovoHeaders() });
+    const details = await ctx.http.json<StoreDetails>(`${API}/v3/stores/${outlet.storeId}`, { headers: glovoHeaders(outlet.seenFrom) });
     const minimumBasket = minimumBasketFor(details);
     if (details.addressId === outlet.addressId && details.address) {
       return { address: formatGlovoAddress(details.address), minimumBasket };
@@ -247,6 +249,7 @@ export function cheapestDiscountedItems(rows: ProductRow[], count: number): { ro
       if (!promo?.price) return [];
       const price = roundRon(promo.price);
       const original = roundRon(row.price);
+      if (original < MIN_ITEM_PRICE_RON) return [];
       return isGenuineDiscount(price, original, 5) ? [{ row, price }] : [];
     })
     .sort((a, b) => a.price - b.price)

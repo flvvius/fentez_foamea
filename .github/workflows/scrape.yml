@@ -2,9 +2,9 @@ name: scrape
 
 on:
   schedule:
-    - cron: "*/30 4-19 * * *"
-    - cron: "20 6,10,15 * * *"
-    - cron: "40 4 * * *"
+    - cron: "7,37 4-19 * * *"
+    - cron: "23 6,10,15 * * *"
+    - cron: "47 4 * * *"
   workflow_dispatch:
     inputs:
       sources:
@@ -18,7 +18,7 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 240
     concurrency:
       group: scrape-${{ github.event.schedule || inputs.sources }}
       cancel-in-progress: false
@@ -30,12 +30,13 @@ jobs:
           MANUAL: ${{ inputs.sources }}
         run: |
           case "$SCHEDULE" in
-            "*/30 4-19 * * *") sources="bonapp" ;;
-            "20 6,10,15 * * *") sources="wolt glovo" ;;
-            "40 4 * * *") sources="kfc pizzahut tacobell dominos paul citygrill" ;;
+            "7,37 4-19 * * *") sources="bonapp" ;;
+            "23 6,10,15 * * *") sources="wolt glovo" ;;
+            "47 4 * * *") sources="kfc pizzahut tacobell dominos paul citygrill" ;;
             *) sources="${MANUAL:-all}" ;;
           esac
           echo "sources=$sources" >> "$GITHUB_OUTPUT"
+          if [ "$sources" = "bonapp" ]; then echo "passes=20" >> "$GITHUB_OUTPUT"; else echo "passes=1" >> "$GITHUB_OUTPUT"; fi
 
       - uses: actions/checkout@v4
 
@@ -52,4 +53,13 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           SCRAPER_CONTACT: ${{ secrets.SCRAPER_CONTACT }}
-        run: bun run src/cli.ts ${{ steps.pick.outputs.sources }}
+          PASSES: ${{ steps.pick.outputs.passes }}
+          SOURCES: ${{ steps.pick.outputs.sources }}
+        run: |
+          status=0
+          for pass in $(seq 1 "$PASSES"); do
+            bun run src/cli.ts $SOURCES || status=1
+            if [ "$pass" -ge "$PASSES" ] || [ "$(date -u +%H)" -ge 20 ]; then break; fi
+            sleep 540
+          done
+          exit $status

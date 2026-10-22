@@ -10,17 +10,29 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CategorieRouteImport } from './routes/$categorie'
 import { Route as AutentificareRouteImport } from './routes/autentificare'
+import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as HartaRouteImport } from './routes/harta'
+import { Route as OgRouteImport } from './routes/og'
 import { Route as PosteazaRouteImport } from './routes/posteaza'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ApiSnapshotRouteImport } from './routes/api.snapshot'
 import { Route as OfertaIdRouteImport } from './routes/oferta.$id'
+import { Route as ZonaZonaRouteImport } from './routes/zona.$zona'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiDealImagesIndexRouteImport } from './routes/api/deal-images/index'
 import { Route as ApiDealImagesIdRouteImport } from './routes/api/deal-images/$id'
+import { Route as ZonaZonaCategorieRouteImport } from './routes/zona.$zona_.$categorie'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategorieRoute = CategorieRouteImport.update({
+  id: '/$categorie',
+  path: '/$categorie',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutentificareRoute = AutentificareRouteImport.update({
@@ -28,9 +40,19 @@ const AutentificareRoute = AutentificareRouteImport.update({
   path: '/autentificare',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
+  id: '/feed.xml',
+  path: '/feed.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HartaRoute = HartaRouteImport.update({
   id: '/harta',
   path: '/harta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OgRoute = OgRouteImport.update({
+  id: '/og',
+  path: '/og',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PosteazaRoute = PosteazaRouteImport.update({
@@ -38,9 +60,24 @@ const PosteazaRoute = PosteazaRouteImport.update({
   path: '/posteaza',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSnapshotRoute = ApiSnapshotRouteImport.update({
+  id: '/api/snapshot',
+  path: '/api/snapshot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OfertaIdRoute = OfertaIdRouteImport.update({
   id: '/oferta/$id',
   path: '/oferta/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZonaZonaRoute = ZonaZonaRouteImport.update({
+  id: '/zona/$zona',
+  path: '/zona/$zona',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -58,79 +95,133 @@ const ApiDealImagesIdRoute = ApiDealImagesIdRouteImport.update({
   path: '/api/deal-images/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZonaZonaCategorieRoute = ZonaZonaCategorieRouteImport.update({
+  id: '/zona/$zona_/$categorie',
+  path: '/zona/$zona/$categorie',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$categorie': typeof CategorieRoute
   '/autentificare': typeof AutentificareRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/harta': typeof HartaRoute
+  '/og': typeof OgRoute
   '/posteaza': typeof PosteazaRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/snapshot': typeof ApiSnapshotRoute
   '/oferta/$id': typeof OfertaIdRoute
+  '/zona/$zona': typeof ZonaZonaRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/deal-images/$id': typeof ApiDealImagesIdRoute
+  '/zona/$zona/$categorie': typeof ZonaZonaCategorieRoute
   '/api/deal-images/': typeof ApiDealImagesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$categorie': typeof CategorieRoute
   '/autentificare': typeof AutentificareRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/harta': typeof HartaRoute
+  '/og': typeof OgRoute
   '/posteaza': typeof PosteazaRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/snapshot': typeof ApiSnapshotRoute
   '/oferta/$id': typeof OfertaIdRoute
+  '/zona/$zona': typeof ZonaZonaRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/deal-images/$id': typeof ApiDealImagesIdRoute
+  '/zona/$zona/$categorie': typeof ZonaZonaCategorieRoute
   '/api/deal-images': typeof ApiDealImagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$categorie': typeof CategorieRoute
   '/autentificare': typeof AutentificareRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/harta': typeof HartaRoute
+  '/og': typeof OgRoute
   '/posteaza': typeof PosteazaRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/snapshot': typeof ApiSnapshotRoute
   '/oferta/$id': typeof OfertaIdRoute
+  '/zona/$zona': typeof ZonaZonaRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/deal-images/$id': typeof ApiDealImagesIdRoute
+  '/zona/$zona_/$categorie': typeof ZonaZonaCategorieRoute
   '/api/deal-images/': typeof ApiDealImagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$categorie'
     | '/autentificare'
+    | '/feed.xml'
     | '/harta'
+    | '/og'
     | '/posteaza'
+    | '/sitemap.xml'
+    | '/api/snapshot'
     | '/oferta/$id'
+    | '/zona/$zona'
     | '/api/auth/$'
     | '/api/deal-images/$id'
+    | '/zona/$zona/$categorie'
     | '/api/deal-images/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$categorie'
     | '/autentificare'
+    | '/feed.xml'
     | '/harta'
+    | '/og'
     | '/posteaza'
+    | '/sitemap.xml'
+    | '/api/snapshot'
     | '/oferta/$id'
+    | '/zona/$zona'
     | '/api/auth/$'
     | '/api/deal-images/$id'
+    | '/zona/$zona/$categorie'
     | '/api/deal-images'
   id:
     | '__root__'
     | '/'
+    | '/$categorie'
     | '/autentificare'
+    | '/feed.xml'
     | '/harta'
+    | '/og'
     | '/posteaza'
+    | '/sitemap.xml'
+    | '/api/snapshot'
     | '/oferta/$id'
+    | '/zona/$zona'
     | '/api/auth/$'
     | '/api/deal-images/$id'
+    | '/zona/$zona_/$categorie'
     | '/api/deal-images/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategorieRoute: typeof CategorieRoute
   AutentificareRoute: typeof AutentificareRoute
+  FeedDotxmlRoute: typeof FeedDotxmlRoute
   HartaRoute: typeof HartaRoute
+  OgRoute: typeof OgRoute
   PosteazaRoute: typeof PosteazaRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiSnapshotRoute: typeof ApiSnapshotRoute
   OfertaIdRoute: typeof OfertaIdRoute
+  ZonaZonaRoute: typeof ZonaZonaRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiDealImagesIdRoute: typeof ApiDealImagesIdRoute
+  ZonaZonaCategorieRoute: typeof ZonaZonaCategorieRoute
   ApiDealImagesIndexRoute: typeof ApiDealImagesIndexRoute
 }
 
@@ -143,11 +234,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$categorie': {
+      id: '/$categorie'
+      path: '/$categorie'
+      fullPath: '/$categorie'
+      preLoaderRoute: typeof CategorieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/autentificare': {
       id: '/autentificare'
       path: '/autentificare'
       fullPath: '/autentificare'
       preLoaderRoute: typeof AutentificareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed.xml': {
+      id: '/feed.xml'
+      path: '/feed.xml'
+      fullPath: '/feed.xml'
+      preLoaderRoute: typeof FeedDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/harta': {
@@ -157,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HartaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/og': {
+      id: '/og'
+      path: '/og'
+      fullPath: '/og'
+      preLoaderRoute: typeof OgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posteaza': {
       id: '/posteaza'
       path: '/posteaza'
@@ -164,11 +276,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosteazaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/snapshot': {
+      id: '/api/snapshot'
+      path: '/api/snapshot'
+      fullPath: '/api/snapshot'
+      preLoaderRoute: typeof ApiSnapshotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/oferta/$id': {
       id: '/oferta/$id'
       path: '/oferta/$id'
       fullPath: '/oferta/$id'
       preLoaderRoute: typeof OfertaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zona/$zona': {
+      id: '/zona/$zona'
+      path: '/zona/$zona'
+      fullPath: '/zona/$zona'
+      preLoaderRoute: typeof ZonaZonaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -192,17 +325,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDealImagesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zona/$zona_/$categorie': {
+      id: '/zona/$zona_/$categorie'
+      path: '/zona/$zona/$categorie'
+      fullPath: '/zona/$zona/$categorie'
+      preLoaderRoute: typeof ZonaZonaCategorieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategorieRoute: CategorieRoute,
   AutentificareRoute: AutentificareRoute,
+  FeedDotxmlRoute: FeedDotxmlRoute,
   HartaRoute: HartaRoute,
+  OgRoute: OgRoute,
   PosteazaRoute: PosteazaRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiSnapshotRoute: ApiSnapshotRoute,
   OfertaIdRoute: OfertaIdRoute,
+  ZonaZonaRoute: ZonaZonaRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiDealImagesIdRoute: ApiDealImagesIdRoute,
+  ZonaZonaCategorieRoute: ZonaZonaCategorieRoute,
   ApiDealImagesIndexRoute: ApiDealImagesIndexRoute,
 }
 export const routeTree = rootRouteImport

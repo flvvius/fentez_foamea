@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { setResponseHeaders } from "@tanstack/react-start/server";
-import { loadOfferSnapshot } from "./snapshot";
+import { sharedSnapshotWire } from "./shared-snapshot";
 
 export const fetchOfferSnapshot = createServerFn({ method: "GET" }).handler(async () => {
   setResponseHeaders(
@@ -9,5 +9,5 @@ export const fetchOfferSnapshot = createServerFn({ method: "GET" }).handler(asyn
       "cdn-cache-control": "public, s-maxage=300, stale-while-revalidate=3600",
     }),
   );
-  return loadOfferSnapshot();
+  return sharedSnapshotWire();
 });

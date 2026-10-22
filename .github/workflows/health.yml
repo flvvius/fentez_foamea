@@ -1,0 +1,61 @@
+name: health
+
+on:
+  schedule:
+    - cron: "53 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - run: bun install --frozen-lockfile
+
+      - name: Check each source ran recently
+        working-directory: packages/scrapers
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: bun run src/health-cli.ts
+
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - run: bun install --frozen-lockfile
+
+      - name: Install Chromium
+        working-directory: apps/web
+        run: bunx playwright install --with-deps chromium
+
+      - name: Smoke test the live site
+        working-directory: apps/web
+        run: bunx playwright test -c playwright.live.config.ts
+
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Keep scheduled workflows enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for workflow in scrape.yml health.yml; do
+            gh api -X PUT "repos/${{ github.repository }}/actions/workflows/$workflow/enable"
+          done

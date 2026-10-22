@@ -1,6 +1,6 @@
 # fentez foamea
 
-fentez foamea puts cheap food in Bucharest on one map: surplus bags restaurants would otherwise throw away, lunch menus, weekday chain deals and delivery-app discounts. Scrapers collect offers from public sources into Postgres. A small website shows what is open near you right now and links each offer back to where you can buy it.
+fentez foamea puts cheap food in Bucharest on one map: surplus bags restaurants would otherwise throw away, lunch menus, weekday chain deals and delivery-app discounts. Scrapers collect offers from public sources into Postgres. A small website shows what is open near you right now and links each offer back to where you can buy it. New surplus bags are also published as an RSS feed at [/feed.xml](https://fentez-foamea.vercel.app/feed.xml).
 
 The UI is in Romanian. The code and docs are in English. For how the parts fit together, read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -63,6 +63,17 @@ bun run test
 bun run check-types
 ```
 
+End-to-end tests build the site and drive it with Playwright against a seeded database called `fentezfoamea_e2e`, created on the local PostGIS. Install Chromium once with `bunx playwright install chromium`, then:
+
+```sh
+cd apps/web
+bun run build
+bun run e2e
+bun run e2e:live
+```
+
+`e2e:live` runs a short smoke test against the deployed site, or against `LIVE_URL` if set. `bun run --cwd packages/scrapers health` prints how long ago each source last ran successfully.
+
 ### Environment
 
 | Variable | Used by | Notes |
@@ -95,7 +106,9 @@ The project runs on free tiers: Supabase for Postgres, Vercel for the site, GitH
 
 Password accounts are not email-verified until the site can send email. For that reason Google sign-in does not auto-link to an existing password account with the same email address; the person would have to sign in with their password.
 
-**Scrapers (GitHub Actions).** Add these repository secrets: `DATABASE_URL`, `GEMINI_API_KEY`, `SCRAPER_CONTACT`. The scheduled workflow in `.github/workflows/scrape.yml` runs Bonapp every 30 minutes in the daytime, Wolt and Glovo three times a day and the chain sites once a day. You can also start it by hand from the Actions tab with a list of sources. GitHub turns off scheduled workflows in public repositories after 60 days without commits, so push something now and then.
+**Scrapers (GitHub Actions).** Add these repository secrets: `DATABASE_URL`, `GEMINI_API_KEY`, `SCRAPER_CONTACT`. The scheduled workflow in `.github/workflows/scrape.yml` starts a Bonapp job every 30 minutes in the daytime. Each job scrapes up to 20 times, 9 minutes apart, stopping at 20:00 UTC, and the next trigger waits in the concurrency queue behind it, so one trigger that does fire keeps Bonapp fresh for about three hours even when GitHub drops the rest. It scrapes Wolt and Glovo three times a day and the chain sites once a day. You can also start it by hand from the Actions tab with a list of sources. GitHub turns off scheduled workflows in public repositories after 60 days without commits. The hourly `health` workflow re-enables them, checks that every source had a successful run within its schedule (2 hours for Bonapp in the daytime, 12 for Wolt and Glovo, 30 for the chains) and smoke-tests the live site. It fails when either check does, and GitHub emails you about failed scheduled runs.
+
+GitHub's scheduler is the weak spot. On 22 October 2026 it started 6 of the 32 planned Bonapp jobs and then none for three hours during an Actions incident. To trigger runs from the database instead, create a fine-grained token limited to this repository with "Actions: read and write", store it with `select vault.create_secret('<token>', 'github_dispatch_token');` in the Supabase SQL editor, enable `pg_cron` and `pg_net`, and schedule `net.http_post` calls to `https://api.github.com/repos/<owner>/<repo>/actions/workflows/scrape.yml/dispatches` with the body `{"ref":"main","inputs":{"sources":"bonapp"}}`. This is not set up by default because it keeps a GitHub token in the database.
 
 ## Status and terms
 

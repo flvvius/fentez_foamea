@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { DealFeed } from "@/components/deals/DealFeed";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useSession } from "@/lib/auth-client";
@@ -8,12 +8,21 @@ import { UUID_RE } from "@/server/deals/uuid";
 
 type IndexSearch = { sort?: FeedSort; posted?: string };
 
+// Query parameters of the map, which lived at "/" before the feed did. Links already shared or
+// indexed (venue pages, shared offers, searches) are sent on to /harta with their parameters.
+const MAP_PARAMS = ["tip", "km", "buget", "ordine", "livrare", "local", "oferta", "q"] as const;
+
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): IndexSearch => ({
     sort: search.sort === "latest" || search.sort === "popular" ? search.sort : undefined,
     // The id of a deal the user just published (see /posteaza): pinned on top of the list.
     posted: typeof search.posted === "string" && UUID_RE.test(search.posted) ? search.posted.toLowerCase() : undefined,
   }),
+  beforeLoad: ({ location }) => {
+    const raw = location.search as Record<string, unknown>;
+    const legacy = Object.fromEntries(MAP_PARAMS.filter((key) => raw[key] !== undefined).map((key) => [key, raw[key]]));
+    if (Object.keys(legacy).length) throw redirect({ to: "/harta", search: legacy, statusCode: 301 });
+  },
   loaderDeps: ({ search }) => ({ sort: search.sort ?? "popular" }),
   loader: ({ deps }) => fetchDealFeed({ data: { sort: deps.sort } }),
   // Header precedence: during SSR the loader's server fn (fetchDealFeed) sets its own

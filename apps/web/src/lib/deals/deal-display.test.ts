@@ -25,7 +25,7 @@ describe("priceFigure", () => {
   });
 
   it("formats decimals the Romanian way and names other currencies", () => {
-    expect(priceFigure({ ...base, dealPrice: 12.5, currency: "EUR" })).toMatchObject({ price: "12,5", unit: "EUR" });
+    expect(priceFigure({ ...base, dealPrice: 12.5, currency: "EUR" })).toMatchObject({ price: "12,50", unit: "EUR" });
   });
 });
 

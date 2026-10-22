@@ -60,6 +60,8 @@ const MAX_VENUES = Number(process.env.WOLT_MAX_VENUES ?? 600);
 const ROTATION_SLOT_MS = 4 * 60 * 60 * 1000;
 const MAX_ASSORTMENTS = Number(process.env.WOLT_MAX_ASSORTMENTS ?? 120);
 const ITEMS_PER_VENUE = 5;
+const LUNCH_ITEMS_PER_VENUE = 3;
+const PRICE_CAP = /\bsub\s+(\d{1,3})\s*lei\b/i;
 const MIN_ITEM_PRICE = 1500;
 const OPEN_ENDED_YEAR = 2049;
 const LIST_PAUSE_MS = 8000;
@@ -67,7 +69,9 @@ const RATE_LIMIT_COOLDOWNS_MS = [20_000, 45_000, 90_000];
 const HEADERS = { "App-Language": "ro" };
 
 const PLATFORM_WIDE = /utilizatorii noi|new users|prima comand|first order/i;
+const DELIVERY_FEE_ONLY = /^(?:0 (?:RON|lei) taxă de livrare|livrare gratuită|free delivery)$/i;
 const WOLT_PLUS_UPSELL = /\b(cu|with) W(olt)?\+/i;
+const WOLT_PLUS_TAIL = /\s*\|[^|]*\b(cu|with) W(olt)?\+.*$/i;
 const ALL_ITEMS = /toate articolele|all items/i;
 
 const CHAINS = [
@@ -122,17 +126,25 @@ export const wolt: Source = {
       const campaigns = (dynamic?.venue_raw.discounts ?? []).filter(isMerchantCampaign);
       if (campaigns.length === 0) continue;
 
-      for (const campaign of campaigns) yield campaignOffer(venue, campaign);
+      const lunches = campaigns.filter(isLunchWithListedItems);
+      for (const campaign of campaigns) if (!lunches.includes(campaign)) yield campaignOffer(venue, campaign);
 
-      if (!campaigns.some((campaign) => campaign.effects.item_discount)) continue;
-      if (assortments >= MAX_ASSORTMENTS) continue;
-      assortments++;
-      const assortment = await fetchOptional(log, () =>
-        http.json<WoltAssortment>(`${API}/consumer-api/consumer-assortment/v1/venues/slug/${venue.slug}/assortment?language=ro`, {
-          headers: HEADERS,
-        }),
-      );
+      const needsMenu = lunches.length > 0 || campaigns.some((campaign) => campaign.effects.item_discount);
+      let assortment: WoltAssortment | undefined;
+      if (needsMenu && assortments < MAX_ASSORTMENTS) {
+        assortments++;
+        assortment = await fetchOptional(log, () =>
+          http.json<WoltAssortment>(`${API}/consumer-api/consumer-assortment/v1/venues/slug/${venue.slug}/assortment?language=ro`, {
+            headers: HEADERS,
+          }),
+        );
+      }
       if (assortment) yield* itemOffers(venue, campaigns, assortment);
+      for (const lunch of lunches) {
+        const items = assortment ? lunchItemOffers(venue, lunch, assortment) : [];
+        if (items.length) yield* items;
+        else yield campaignOffer(venue, lunch);
+      }
     }
     log.info("wolt assortments", { fetched: assortments, cap: MAX_ASSORTMENTS });
   },
@@ -169,14 +181,19 @@ export function rotationWindow<T>(items: T[], size: number, slot: number): T[] {
 
 export function isMerchantCampaign(campaign: WoltCampaign): boolean {
   if (campaign.conditions.has_wolt_plus === true) return false;
+  if (DELIVERY_FEE_ONLY.test(withoutWoltPlusUpsell(collapseWhitespace(campaign.description.title)))) return false;
   return !campaign.description.points.some((point) => PLATFORM_WIDE.test(point));
+}
+
+export function withoutWoltPlusUpsell(title: string): string {
+  return title.replace(WOLT_PLUS_TAIL, "") || title;
 }
 
 export function campaignOffer(venue: WoltListVenue, campaign: WoltCampaign): ScrapedOffer {
   return {
     sourceOfferId: `${campaign.id}@${venue.id}`,
     kind: campaignKind(campaign),
-    title: collapseWhitespace(campaign.description.title),
+    title: withoutWoltPlusUpsell(collapseWhitespace(campaign.description.title)),
     endsAt: endDate(campaign),
     ...weeklySchedule(campaign.conditions.weekly_time_restrictions),
     conditions: campaignConditions(campaign),
@@ -225,6 +242,46 @@ export function itemOffers(venue: WoltListVenue, campaigns: WoltCampaign[], asso
       deliveryOnly: true,
       venue: toVenue(venue),
     }));
+}
+
+export function isLunchWithListedItems(campaign: WoltCampaign): boolean {
+  return (
+    campaignKind(campaign) === "daily_menu" &&
+    !campaign.effects.item_discount &&
+    listedItemIds(campaign, new Map()).length > 0
+  );
+}
+
+export function lunchItemOffers(venue: WoltListVenue, campaign: WoltCampaign, assortment: WoltAssortment): ScrapedOffer[] {
+  const categoryItems = new Map(assortment.categories.map((category) => [category.id, category.item_ids]));
+  const listed = new Set(listedItemIds(campaign, categoryItems));
+  const cap = PRICE_CAP.exec(campaign.description.title);
+  const maxPrice = cap ? Number(cap[1]) * 100 : Infinity;
+  return assortment.items
+    .filter((item) => listed.has(item.id) && !item.disabled_info && !item.is_wolt_plus_only)
+    .filter((item) => item.price >= MIN_ITEM_PRICE && item.price <= maxPrice)
+    .sort((a, b) => b.price - a.price)
+    .slice(0, LUNCH_ITEMS_PER_VENUE)
+    .map((item) => ({
+      sourceOfferId: `${item.id}@${campaign.id}@${venue.id}`,
+      kind: "daily_menu",
+      title: collapseWhitespace(item.name),
+      description: collapseWhitespace(campaign.description.title),
+      priceRon: fromMinorUnits(item.price),
+      endsAt: endDate(campaign),
+      ...weeklySchedule(campaign.conditions.weekly_time_restrictions),
+      conditions: campaignConditions(campaign, { forItem: true }),
+      url: venueUrl(venue),
+      deliveryOnly: true,
+      venue: toVenue(venue),
+    }));
+}
+
+function listedItemIds(campaign: WoltCampaign, categoryItems: Map<string, string[]>): string[] {
+  return (campaign.conditions.basket_contains ?? []).flatMap((entry) => [
+    ...(entry.any_of_items ?? []),
+    ...(entry.items_from_categories ?? []).flatMap((categoryId) => categoryItems.get(categoryId) ?? [categoryId]),
+  ]);
 }
 
 export function discountedPrice(

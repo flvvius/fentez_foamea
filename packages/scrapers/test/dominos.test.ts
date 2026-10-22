@@ -11,8 +11,18 @@ describe("domino's", () => {
   it("reads every homepage deal", () => {
     const deals = parseDominosDeals(home);
     expect(deals.map((deal) => deal.dealId)).toEqual(["1565", "4680", "4692", "4694", "1777"]);
-    expect(deals[1]).toMatchObject({ title: "Pizza Break", kind: "combo", priceRon: 9.99, daysOfWeek: [1, 2, 3, 4] });
+    expect(deals[1]).toMatchObject({ title: "Pizza Break", kind: "combo", daysOfWeek: [1, 2, 3, 4] });
     expect(deals[0]).toMatchObject({ title: "Plătești 3 și primești 4 pizza", priceRon: undefined, daysOfWeek: undefined });
+  });
+
+  it("does not show the price of an add-on as the price of the deal", () => {
+    const [, pizzaBreak, summerCombo] = parseDominosDeals(home);
+    expect(pizzaBreak?.priceRon).toBeUndefined();
+    expect(summerCombo).toMatchObject({
+      title: "Summer Combo",
+      priceRon: undefined,
+      conditions: "2,99 lei e prețul produsului în plus, doar împreună cu o pizza la preț întreg",
+    });
   });
 
   it("keeps Bucharest stores and leaves coordinates to the geocoder", () => {

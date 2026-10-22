@@ -1,4 +1,6 @@
-import { BUCHAREST_BBOX, isInBucharest, type LatLon } from "@fentezfoamea/core";
+import { BUCHAREST_BBOX, BUCHAREST_CENTER, isInBucharest, type LatLon } from "@fentezfoamea/core";
+import { addressCandidates } from "./address.ts";
+import { decodePlusCode, plusCodeIn } from "./plus-code.ts";
 import type { Sql } from "./db.ts";
 import type { PoliteHttp } from "./http.ts";
 
@@ -17,10 +19,22 @@ export class Geocoder {
     if (!query) return Promise.resolve(undefined);
     let pending = this.memo.get(query);
     if (!pending) {
-      pending = this.lookup(address, query);
+      pending = this.locateAny(address, query);
       this.memo.set(query, pending);
     }
     return pending;
+  }
+
+  private async locateAny(address: string, query: string): Promise<LatLon | undefined> {
+    const fromPlusCode = locatePlusCode(address);
+    if (fromPlusCode) return fromPlusCode;
+    const known = await this.fromCache(query);
+    if (known) return known;
+    for (const candidate of addressCandidates(address)) {
+      const point = await this.lookup(candidate, candidate.toLowerCase());
+      if (point) return point;
+    }
+    return undefined;
   }
 
   private async lookup(address: string, query: string): Promise<LatLon | undefined> {
@@ -60,4 +74,10 @@ export class Geocoder {
       on conflict (query) do nothing
     `;
   }
+}
+
+function locatePlusCode(address: string): LatLon | undefined {
+  const code = plusCodeIn(address);
+  const point = code ? decodePlusCode(code, BUCHAREST_CENTER) : undefined;
+  return point && isInBucharest(point) ? point : undefined;
 }

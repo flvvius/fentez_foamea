@@ -1,0 +1,46 @@
+import { expect, test } from "@playwright/test";
+
+test.beforeEach(async ({ page }) => {
+  await page.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ status: 204 }));
+});
+
+test("the live site lists offers refreshed in the last few hours", async ({ page }) => {
+  const response = await page.goto(`/?health=${Date.now()}`);
+  expect(response?.status()).toBe(200);
+  const lede = page.locator(".lede");
+  const count = Number((await lede.textContent())?.match(/^(\d+)/)?.[1]);
+  expect(count).toBeGreaterThan(1000);
+  await expect(lede).toContainText(/Actualizat (chiar acum|acum \d+ min|acum [1-3] h)\./);
+  await expect(page.locator("#oferte article").first()).toBeVisible();
+});
+
+test("category pages and link previews are served", async ({ page, request }) => {
+  await page.goto("/pachete-anti-risipa");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pachete anti-risipă în București, azi.");
+  const image = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect((await request.get(image!)).ok()).toBe(true);
+});
+
+test("zone pages, the sitemap and search work", async ({ page, request }) => {
+  await page.goto("/zona/universitate/pachete-anti-risipa");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pachete anti-risipă lângă Universitate, acum.");
+  const sitemap = await (await request.get("/sitemap.xml")).text();
+  expect(sitemap.match(/<url>/g)?.length).toBeGreaterThan(100);
+
+  await page.goto("/?q=pizza&km=oras");
+  await expect(page.locator("#oferte article").first()).toContainText(/pizza/i);
+});
+
+test("the offer snapshot is served from the CDN cache", async ({ request }) => {
+  await request.get("/api/snapshot");
+  const response = await request.get("/api/snapshot");
+  expect(response.ok()).toBe(true);
+  expect(response.headers()["x-vercel-cache"]).toMatch(/HIT|STALE/);
+});
+
+test("the bags feed lists bags with a pickup window", async ({ request }) => {
+  const feed = await (await request.get("/feed.xml")).text();
+  const items = feed.match(/<item>/g)?.length ?? 0;
+  expect(items).toBeGreaterThan(5);
+  expect(feed).toMatch(/<title>[^<]+, ridici [^<]+<\/title>/);
+});

@@ -59,7 +59,7 @@ Bun workspaces manage dependencies, with a catalog for shared versions (zod, Typ
 
 ## Data model
 
-Two migrations define everything: `20261021000000_init.sql` and `20261021120000_offer_schedule.sql`.
+Three migrations define everything: `20261021000000_init.sql`, `20261021120000_offer_schedule.sql` and `20261022120000_live_offers_freshness.sql`.
 
 ### Tables
 
@@ -83,7 +83,7 @@ Two migrations define everything: `20261021000000_init.sql` and `20261021120000_
 
 ### Read side
 
-`live_offers` is a view joining offers to venues. It keeps active offers whose `ends_at` and `pickup_end` are still in the future and whose `starts_at` is at most 7 days away, and exposes lat/lon as plain numbers.
+`live_offers` is a view joining offers to venues. It keeps active offers whose `ends_at` and `pickup_end` are still in the future and whose `starts_at` is at most 7 days away, and exposes lat/lon as plain numbers. It also drops offers no scrape has confirmed recently: 6 hours for surplus bags, whose stock changes by the hour, and 72 hours for everything else. A source that starts failing stops showing old deals within three days instead of keeping them forever.
 
 `offers_near(lat, lon, radius_m, kinds, include_delivery, max_rows)` returns live offers within a radius, ordered by distance, with national offers last. The site does not use it yet; it exists for an API or alerts.
 
@@ -143,7 +143,7 @@ Notes on the bigger sources:
 
 **Wolt** returns about 1,400 venues per point and 2,000 to 3,000 across the city. Each run checks at most 650 venues for campaigns (`WOLT_MAX_VENUES`) and fetches at most 120 menus (`WOLT_MAX_ASSORTMENTS`). Platform-wide new-user campaigns and Wolt+-only campaigns are filtered out. Item prices come from joining campaign item ids with the menu and applying the campaign's fraction.
 
-**Glovo** has no coordinates in its data, so store addresses go through the geocoder. Per run it does at most 300 address lookups and fetches menus for at most 150 promo stores, rotating which ones by date so coverage spreads over days. Prime-only promos and the first-order free delivery are ignored. Discounts are computed from the item price and the promo price, never from the label. The required `glovo-*` headers and app version are constants at the top of the file because Glovo can change them.
+**Glovo** has no coordinates in its data, so store addresses go through the geocoder. Per run it does at most 500 address lookups and fetches menus for at most 150 promo stores, rotating which ones by date so coverage spreads over days. Prime-only promos and the first-order free delivery are ignored. Discounts are computed from the item price and the promo price, never from the label. The required `glovo-*` headers and app version are constants at the top of the file because Glovo can change them.
 
 **Chains** publish national deals. Each deal is emitted once per Bucharest restaurant so it shows on the map near the user, and the site collapses the copies in the list.
 
@@ -160,16 +160,30 @@ Notes on the bigger sources:
 
 ## Website
 
-`apps/web` is a single route.
+`apps/web` is one page served under several routes.
 
-1. The `/` route loader calls `fetchOfferSnapshot`, a TanStack Start server function.
-2. The server function reads up to 8,000 rows from `live_offers` plus the last successful run time, using `postgres` with one connection and prepared statements off (required by the Supabase transaction pooler).
+1. The `/` route and the category routes (`/pachete-anti-risipa`, `/meniul-zilei`, `/reduceri`, `/oferte-1-plus-1`, `/happy-hour`, listed in `src/lib/landing.ts`) call `fetchOfferSnapshot`, a TanStack Start server function. A category route is the same page with one kind preselected and its own title, H1, description and canonical link. Zone routes (`/zona/<slug>`, 32 areas in `src/lib/zones.ts`, each with at least about 20 walk-in offers within 1 km when added) centre the list on a neighbourhood with a 1 km radius, and `/zona/<slug>/<category>` combines both. `/sitemap.xml` is generated from these lists.
+2. In production the server function does not query the database itself. It fetches `/api/snapshot`, which Vercel's CDN caches for 120 s and serves stale for an hour (a day if the origin errors), and keeps the result in memory for 60 s (`src/server/shared-snapshot.ts`). On 22 October 2026 every warm function holding its own connection, plus two scrapes, filled the 15-client session pooler and pages answered 500; with the snapshot endpoint the database sees about one read every two minutes however many functions are warm. Locally, or if that fetch fails, the function queries directly. `/api/snapshot` reads up to 8,000 rows from `live_offers` plus the last successful run time, using `postgres` with one connection and prepared statements off (required by the Supabase transaction pooler). It sends them as columns, one array per field, with venues in a separate table and offer links left out when they equal the venue link (`encodeSnapshot` in `src/lib/offers.ts`). That is about 235 bytes per offer in the HTML, against 624 for an array of objects. Functions run in `dub1`, next to the database in eu-west-1.
 3. Responses carry `CDN-Cache-Control: public, s-maxage=300, stale-while-revalidate=3600`, so Vercel's edge serves the page and the database sees roughly one query every 5 minutes regardless of traffic.
-4. Everything else happens in the browser: dropping expired offers, computing distance from the user (or the city centre), filtering by kind, radius and delivery, and sorting by distance, discount or price.
+4. Everything else happens in the browser: dropping expired offers, computing distance from the user (or the city centre), filtering by kind, radius, budget and delivery, and sorting. The default order, "recomandate", scores each offer by discount, adds points for surplus bags and subtracts them for a missing price, delivery-only offers and distance (`dealScore` in `explore.ts`), then takes 12 points off each further offer from the same place so one restaurant cannot fill the top of the list. The other orders are distance, discount and price. A title like "Prânzul sub 40 lei" counts as a 40 lei price for the budget filter and the price order. Offers that do not run today, or whose daily window has already closed, go to the end, greyed. The search box matches every typed word against title, venue and chain without diacritics, 200 ms after the last key. Category chips count what the other filters let through. Bags first seen in the last three hours are marked "nou" (`first_seen_at` in `live_offers`). If the browser already has geolocation permission, distances are measured from the visitor on load; otherwise from the city centre or the zone, and a zone picker sits next to the location button. When a radius leaves fewer than three offers, a button offers the first larger radius that adds any.
 
-The map uses Leaflet with OpenStreetMap tiles and loads lazily after hydration. Each venue is one pin showing its lowest price and offer count. Below zoom 16 pins shrink to dots so the city view stays readable; a selected venue keeps its price tag. Clicking a pin filters the list to that venue.
+Filters live in the URL (`?tip=anti-risipa&km=oras&buget=25&ordine=pret&livrare=nu&local=<venue>&q=ciorba`), so a reload or a pasted link shows the same list. Defaults stay out of the URL. `?oferta=<id>` shows one offer on top and gives the page a title and Open Graph tags naming that deal, so a link pasted into WhatsApp previews the price. The Trimite button on each offer opens the system share sheet and falls back to copying the link; "Trimite lista" does the same for the current view.
+
+`/og` draws link preview images with satori and resvg: today's count and three deep walk-in deals by default, one offer with `?oferta=<id>`, offers within 1 km of a zone with `?zona=<slug>`, one kind with `?categorie=<slug>`, and one venue with `?local=<id>`. Each page points `og:image` at the matching variant. The images are computed from the same cached snapshot, so `/api/snapshot` is the only database reader in the web app.
+
+`/feed.xml` is an RSS feed of the 40 most recently seen anti-waste bags still on offer, with price, place and pickup window, for feed readers and RSS-to-chat bots.
+
+Vercel Web Analytics and Speed Insights are mounted in the root layout. Both are cookieless. Web Analytics has to be switched on in the Vercel project before its script answers.
+
+The map uses Leaflet with OpenStreetMap tiles and loads lazily after hydration. Each place is one pin showing its lowest price and offer count. Venues from different apps with the same name (ignoring case, diacritics and punctuation) within 150 m count as one place (`samePlaceIds` in `explore.ts`). Below zoom 16 pins shrink to dots so the city view stays readable; a selected venue keeps its price tag. Clicking a pin filters the list to that venue.
 
 National chain deals appear once per store in the data. The list keeps the nearest copy and shows "și în alte N locații". Cards show the price tag, original price, discount, schedule (weekdays and hours), pickup window with a countdown in the last hour, conditions, and a link to the source.
+
+## Tests
+
+Unit tests run with Vitest in each package. End-to-end tests live in `apps/web/e2e`. Playwright builds nothing itself. It starts the production server from `.output`, resets a `fentezfoamea_e2e` database (bootstrap, every migration, then `e2e/seed.sql`, whose times are relative to `now()`), and runs every spec on a desktop and a Pixel 7 viewport. CI runs them against a PostGIS service container. `e2e-live` holds a two-test smoke check of the deployed site, which the hourly `health` workflow runs next to a per-source freshness check (`packages/scrapers/src/health.ts`).
+
+Glovo addresses go through `addressCandidates` in `packages/scrapers/src/address.ts` before Nominatim. It strips wrong county names, "romania", stray zeros and mall names, expands short forms like "bld" and "str.", and falls back to the street line alone and then to the first number of a range.
 
 ## Key decisions
 
@@ -191,13 +205,13 @@ National chain deals appear once per store in the data. The list keeps the neare
 - Pizza Hut picks the restaurant through a session cookie, so store-specific deals (like a 1+1 at one mall) are missed and every store gets the generic list.
 - The City Grill group restaurants are a fixed list in code. Openings and closures need a code change.
 - The same restaurant on Bonapp, Wolt and Glovo shows as separate venues. `match_key` is stored but not used yet.
-- Blocking from GitHub Actions datacenter IPs has not been tested for any source.
+- KFC answers 403 to GitHub Actions runners and 200 from a home connection. The other sources work from Actions.
 - Most small restaurants post daily menus only on Instagram or Facebook, which this project does not scrape.
 - Bonapp, Wolt and Glovo terms restrict reuse without consent. The maintainer is asking for permission.
 
 ## Next steps
 
-- Run one scrape from GitHub Actions to confirm none of the sites block its IPs.
+- Find another way to run KFC, or ask KFC to allow the bot.
 - Add a seasonal Bucharest Food Week source for May 2027.
 - Merge duplicate venues across sources using `match_key`.
 - Alerts ("bags near me in the next 2 hours") using `offers_near`.

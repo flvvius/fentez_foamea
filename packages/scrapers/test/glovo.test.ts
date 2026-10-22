@@ -74,6 +74,12 @@ describe("glovo items", () => {
     ]);
   });
 
+  it("skips sides and sauces that cost under 15 lei before the discount", () => {
+    const ketchup = { id: 3, name: "Ketchup 40g", price: 3, promotions: [{ type: "PERCENTAGE_DISCOUNT", price: 2.1 }] };
+    const wrap = { id: 4, name: "Wrap", price: 30, promotions: [{ type: "PERCENTAGE_DISCOUNT", price: 21 }] };
+    expect(cheapestDiscountedItems([ketchup, wrap], 5).map(({ row }) => row.name)).toEqual(["Wrap"]);
+  });
+
   it("ignores Prime-only, 1+1 and out-of-stock items", () => {
     const prime = { id: 1, name: "Prime", price: 40, promotions: [{ type: "PERCENTAGE_DISCOUNT", price: 20, isPrime: true }] };
     const gone = { id: 2, name: "Gone", price: 40, outOfStock: true, promotions: [{ type: "PERCENTAGE_DISCOUNT", price: 20 }] };

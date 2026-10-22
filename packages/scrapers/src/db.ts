@@ -7,6 +7,7 @@ export type Sql = postgres.Sql;
 export function connect(): Sql {
   return postgres(env.databaseUrl(), {
     max: 4,
+    idle_timeout: 20,
     prepare: false,
     onnotice: () => {},
     connection: { search_path: "public, extensions" },
