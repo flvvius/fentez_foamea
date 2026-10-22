@@ -61,6 +61,7 @@ export type Outlet = {
   slug: string;
   title: string;
   promotions: WallPromotion[];
+  seenFrom?: LatLon;
 };
 
 export const glovo: Source = {
@@ -76,7 +77,7 @@ export const glovo: Source = {
     for (const point of points) {
       for (const entry of await crawlWall(http, point, maxPages)) {
         const outlet = toOutlet(entry);
-        if (outlet) outlets.set(outletKey(outlet), outlet);
+        if (outlet) outlets.set(outletKey(outlet), { ...outlet, seenFrom: point });
       }
       log.info("glovo wall", { point, outlets: outlets.size });
     }
@@ -126,7 +127,7 @@ async function crawlWall(http: PoliteHttp, point: LatLon, maxPages: number): Pro
 
 async function lookupOutlet(ctx: SourceContext, outlet: Outlet): Promise<{ address?: string; minimumBasket?: number } | undefined> {
   try {
-    const details = await ctx.http.json<StoreDetails>(`${API}/v3/stores/${outlet.storeId}`, { headers: glovoHeaders() });
+    const details = await ctx.http.json<StoreDetails>(`${API}/v3/stores/${outlet.storeId}`, { headers: glovoHeaders(outlet.seenFrom) });
     const minimumBasket = minimumBasketFor(details);
     if (details.addressId === outlet.addressId && details.address) {
       return { address: formatGlovoAddress(details.address), minimumBasket };
