@@ -82,3 +82,13 @@ test("the sitemap lists zone and category pages", async ({ request }) => {
   expect(sitemap).toContain("<loc>https://fentez-foamea.vercel.app/zona/titan/meniul-zilei</loc>");
   expect(sitemap).not.toContain("/zona/titan/happy-hour");
 });
+
+test("the zone picker opens a zone page and goes back to the whole city", async ({ page }) => {
+  await page.goto("/");
+  await waitForHydration(page);
+  await page.getByLabel("Zonă").selectOption({ label: "Titan" });
+  await expect(page).toHaveURL(/\/zona\/titan$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mâncare ieftină lângă Titan, acum.");
+  await page.getByLabel("Zonă").selectOption({ label: "Tot Bucureștiul" });
+  await expect(page).toHaveURL(/\/$/);
+});

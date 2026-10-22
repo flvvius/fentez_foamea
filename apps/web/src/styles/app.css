@@ -128,6 +128,17 @@ body {
   gap: 8px;
 }
 
+.zone-pick select {
+  min-height: 40px;
+  font: inherit;
+  font-weight: 500;
+  color: var(--foreground);
+  background: var(--background);
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  padding: 8px 12px;
+}
+
 .share-view {
   min-height: 40px;
   font-weight: 500;
@@ -596,6 +607,15 @@ body {
 
   .masthead-actions {
     margin-top: 12px;
+    gap: 6px;
+  }
+
+  .masthead-actions .locate,
+  .masthead-actions .share-view,
+  .zone-pick select {
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: var(--type-small);
   }
 
   .filters {

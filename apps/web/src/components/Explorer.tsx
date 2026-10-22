@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
 import { countOffers, formatRelative } from "@/lib/format";
@@ -40,6 +40,7 @@ const QUERY_DEBOUNCE_MS = 200;
 
 export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
   const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query } = state;
+  const navigate = useNavigate();
   const [draftQuery, setDraftQuery] = useState(query);
   const sentQuery = useRef(query);
   useEffect(() => {
@@ -164,9 +165,25 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
               label="Trimite lista"
               share={() => shareCurrentView(`${headline} ${countOffers(listed.length)} pe fentez foamea.`)}
             />
+            <label className="zone-pick">
+              <span className="sr-only">Zonă</span>
+              <select
+                value={center?.slug ?? ""}
+                onChange={(e) =>
+                  e.target.value ? navigate({ to: "/zona/$zona", params: { zona: e.target.value } }) : navigate({ to: "/" })
+                }
+              >
+                <option value="">{center?.slug ? "Tot Bucureștiul" : "Alege zona"}</option>
+                {ZONES.map((zone) => (
+                  <option key={zone.slug} value={zone.slug}>
+                    {zone.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
           {locate === "denied" && (
-            <p className="hint">Nu am primit locația. Permite accesul în browser sau mută harta; distanțele sunt calculate din {center ? `zona ${center.name}` : "centru"}.</p>
+            <p className="hint">Nu am primit locația. Permite accesul în browser sau alege o zonă; distanțele sunt calculate din {center ? `zona ${center.name}` : "centru"}.</p>
           )}
         </header>
 
