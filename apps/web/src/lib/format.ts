@@ -1,11 +1,12 @@
 const TZ = "Europe/Bucharest";
 
-const priceFormat = new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+const wholePriceFormat = new Intl.NumberFormat("ro-RO", { maximumFractionDigits: 0 });
+const centsPriceFormat = new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const timeFormat = new Intl.DateTimeFormat("ro-RO", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
 const dayFormat = new Intl.DateTimeFormat("ro-RO", { timeZone: TZ, weekday: "short", day: "numeric", month: "short" });
 
 export function formatPrice(value: number): string {
-  return priceFormat.format(value);
+  return (Number.isInteger(value) ? wholePriceFormat : centsPriceFormat).format(value);
 }
 
 export function countOffers(count: number): string {

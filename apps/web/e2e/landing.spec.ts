@@ -36,3 +36,11 @@ test("robots.txt points at a sitemap listing the category pages", async ({ reque
   const sitemap = await (await request.get("/sitemap.xml")).text();
   expect(sitemap).toContain("<loc>https://fentez-foamea.vercel.app/pachete-anti-risipa</loc>");
 });
+
+test("a category page previews with its own image", async ({ page, request }) => {
+  await page.goto("/meniul-zilei");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\?categorie=meniul-zilei$/);
+  const image = await request.get("/og?categorie=meniul-zilei");
+  expect(image.headers()["content-type"]).toBe("image/png");
+  expect((await request.get("/og?categorie=nimic", { maxRedirects: 0 })).status()).toBe(302);
+});

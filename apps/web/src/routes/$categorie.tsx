@@ -20,6 +20,7 @@ export const Route = createFileRoute("/$categorie")({
     const landing = findLanding(params.categorie);
     if (!landing) return {};
     const url = `${SITE_URL}/${landing.slug}`;
+    const image = `${SITE_URL}/og?categorie=${landing.slug}`;
     return {
       meta: [
         { title: `${landing.title} · fentez foamea` },
@@ -29,6 +30,8 @@ export const Route = createFileRoute("/$categorie")({
         { property: "og:url", content: url },
         { name: "twitter:title", content: landing.title },
         { name: "twitter:description", content: landing.description },
+        { property: "og:image", content: image },
+        { name: "twitter:image", content: image },
       ],
       links: [{ rel: "canonical", href: url }],
     };

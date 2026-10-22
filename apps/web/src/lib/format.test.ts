@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { countOffers, formatRelative } from "./format";
+import { countOffers, formatPrice, formatRelative } from "./format";
+
+describe("formatPrice", () => {
+  it.each([
+    [15, "15"],
+    [9.9, "9,90"],
+    [40.9, "40,90"],
+    [2.99, "2,99"],
+    [1250, "1.250"],
+  ])("writes %s lei as %s", (value, text) => {
+    expect(formatPrice(value)).toBe(text);
+  });
+});
 
 describe("countOffers", () => {
   it.each([
