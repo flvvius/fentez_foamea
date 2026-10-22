@@ -89,6 +89,7 @@ test("the sitemap lists zone and category pages", async ({ request }) => {
   const sitemap = await response.text();
   expect(sitemap).toContain("<loc>https://fentez-foamea.vercel.app/zona/titan/meniul-zilei</loc>");
   expect(sitemap).not.toContain("/zona/titan/happy-hour");
+  expect(sitemap).toContain("<loc>https://fentez-foamea.vercel.app/?local=00000000-0000-0000-0000-00000000a002</loc>");
 });
 
 test("the zone picker opens a zone page and goes back to the whole city", async ({ page }) => {

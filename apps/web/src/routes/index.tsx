@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
       : match.search.local
         ? venueMeta(loaderData, match.search.local)
         : searchMeta(match.search.q),
-    links: [{ rel: "canonical", href: SITE_URL }],
+    links: [{ rel: "canonical", href: canonicalFor(loaderData, match.search.local) }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(WEBSITE_JSON_LD) }],
   }),
   component: Home,
@@ -55,7 +55,18 @@ function Home() {
   );
 
   const query = state.query.trim();
-  return <ExplorePage wire={wire} state={state} headline={query ? `${searchTitle(query)}, acum.` : undefined} onChange={onChange} />;
+  const venue = state.venueId ? venueName(wire, state.venueId) : undefined;
+  const headline = venue ? `Oferte la ${venue}, acum.` : query ? `${searchTitle(query)}, acum.` : undefined;
+  return <ExplorePage wire={wire} state={state} headline={headline} onChange={onChange} />;
+}
+
+function venueName(wire: SnapshotWire | undefined, venueId: string): string | undefined {
+  const index = wire?.venues.id.indexOf(venueId) ?? -1;
+  return index < 0 ? undefined : wire!.venues.name[index];
+}
+
+function canonicalFor(wire: SnapshotWire | undefined, venueId: string | undefined): string {
+  return venueId && venueName(wire, venueId) ? `${SITE_URL}/?local=${encodeURIComponent(venueId)}` : SITE_URL;
 }
 
 function searchTitle(query: string): string {
@@ -63,10 +74,9 @@ function searchTitle(query: string): string {
 }
 
 function venueMeta(wire: SnapshotWire | undefined, venueId: string) {
-  if (!wire) return [];
+  const name = venueName(wire, venueId);
+  if (!wire || !name) return [];
   const index = wire.venues.id.indexOf(venueId);
-  if (index < 0) return [];
-  const name = wire.venues.name[index]!;
   const count = wire.offers.venue.filter((venue) => venue === index).length;
   const title = `Oferte la ${name}`;
   const description = `${countOffers(count)} la ${name} acum: prețuri, reduceri și program, pe fentez foamea.`;

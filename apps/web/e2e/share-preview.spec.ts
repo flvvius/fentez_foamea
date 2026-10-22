@@ -54,6 +54,11 @@ test("names the venue in a shared venue link", async ({ page }) => {
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\?local=00000000-0000-0000-0000-00000000a002$/);
   const image = await page.request.get("/og?local=00000000-0000-0000-0000-00000000a002");
   expect(image.headers()["content-type"]).toBe("image/png");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://fentez-foamea.vercel.app/?local=00000000-0000-0000-0000-00000000a002",
+  );
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oferte la City Grill Centru, acum.");
 });
 
 test("serves the offer snapshot as a CDN-cacheable document", async ({ request }) => {
