@@ -124,6 +124,18 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
       .catch(() => undefined);
   }, [center, findVisitor]);
 
+  const searchBox = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || target.closest("input, textarea, select, [contenteditable]")) return;
+      event.preventDefault();
+      searchBox.current?.focus();
+    };
+    window.addEventListener("keydown", focusSearch);
+    return () => window.removeEventListener("keydown", focusSearch);
+  }, []);
+
   const queryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(queryTimer.current), []);
   const typeQuery = (value: string) => {
@@ -206,8 +218,10 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
         <fieldset className="filters">
           <legend className="sr-only">Filtre</legend>
           <input
+            ref={searchBox}
             type="search"
             className="search"
+            aria-keyshortcuts="/"
             aria-label="Caută"
             placeholder="Caută un local sau un produs"
             value={draftQuery}

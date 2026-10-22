@@ -94,6 +94,13 @@ test.describe("explorer", () => {
     await expect(page).toHaveURL(/q=brutaria(\+|%20)colt/);
   });
 
+  test("focuses the search box on /", async ({ page }) => {
+    await page.keyboard.press("/");
+    await expect(page.getByRole("searchbox", { name: "Caută" })).toBeFocused();
+    await page.keyboard.type("pizza/");
+    await expect(page.getByRole("searchbox", { name: "Caută" })).toHaveValue("pizza/");
+  });
+
   test("hides delivery-only offers when asked", async ({ page }) => {
     await expect(offerRow(page, "Burger dublu cu cartofi")).toContainText("doar livrare");
     await page.getByLabel("și livrări").uncheck();
