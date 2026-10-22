@@ -55,6 +55,7 @@ test.describe("a shared offer link", () => {
       );
       await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", new RegExp(`\\?oferta=${BAG}$`));
       await expect(page.locator('meta[property="og:image"]')).toHaveCount(1);
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", new RegExp(`/og\\?oferta=${BAG}$`));
     });
   });
 });
@@ -88,5 +89,22 @@ test.describe("share button", () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       `15 lei −67% · Pachet surpriză patiserie la Brutăria din Colț ${baseURL}/?oferta=${BAG}`,
     );
+  });
+});
+
+test.describe("offer image", () => {
+  test("renders the deal as a 1200x630 PNG", async ({ request }) => {
+    const response = await request.get(`/og?oferta=${BAG}`);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toBe("image/png");
+    const png = await response.body();
+    expect(png.readUInt32BE(16)).toBe(1200);
+    expect(png.readUInt32BE(20)).toBe(630);
+  });
+
+  test("falls back to the site image for unknown offers", async ({ request }) => {
+    const response = await request.get("/og?oferta=nu-exista", { maxRedirects: 0 });
+    expect(response.status()).toBe(302);
+    expect(response.headers().location).toMatch(/\/og\.png$/);
   });
 });

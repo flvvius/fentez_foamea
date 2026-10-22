@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategorieRouteImport } from './routes/$categorie'
+import { Route as OgRouteImport } from './routes/og'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const CategorieRoute = CategorieRouteImport.update({
   path: '/$categorie',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OgRoute = OgRouteImport.update({
+  id: '/og',
+  path: '/og',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
+  '/og': typeof OgRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
+  '/og': typeof OgRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
+  '/og': typeof OgRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$categorie'
+  fullPaths: '/' | '/$categorie' | '/og'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$categorie'
-  id: '__root__' | '/' | '/$categorie'
+  to: '/' | '/$categorie' | '/og'
+  id: '__root__' | '/' | '/$categorie' | '/og'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategorieRoute: typeof CategorieRoute
+  OgRoute: typeof OgRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorieRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/og': {
+      id: '/og'
+      path: '/og'
+      fullPath: '/og'
+      preLoaderRoute: typeof OgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategorieRoute: CategorieRoute,
+  OgRoute: OgRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

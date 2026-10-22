@@ -11,5 +11,6 @@ export default defineConfig({
   plugins: [tailwindcss(), tanstackStart(), nitro(), viteReact()],
   ssr: {
     noExternal: true,
+    external: ["@resvg/resvg-js"],
   },
 });

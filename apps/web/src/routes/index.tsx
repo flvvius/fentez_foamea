@@ -62,5 +62,7 @@ function sharedOfferMeta(wire: SnapshotWire | undefined, offerId: string | undef
     { property: "og:url", content: offerLink(SITE_URL, offerId) },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
+    { property: "og:image", content: `${SITE_URL}/og?oferta=${encodeURIComponent(offerId)}` },
+    { name: "twitter:image", content: `${SITE_URL}/og?oferta=${encodeURIComponent(offerId)}` },
   ];
 }
