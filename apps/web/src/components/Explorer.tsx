@@ -4,17 +4,11 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
 import { bucharestWeekday, countOffers, formatRelative } from "@/lib/format";
 import type { OfferSnapshot } from "@/lib/offers";
+import { BUDGET_OPTIONS, RADIUS_OPTIONS, type ExploreState, type SortKey } from "@/lib/search";
 import { OfferCard } from "./OfferCard";
-import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, venuePins, type SortKey } from "./explore";
+import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const OfferMap = lazy(() => import("./OfferMap"));
-
-const RADII: { label: string; km: number | null }[] = [
-  { label: "1 km", km: 1 },
-  { label: "3 km", km: 3 },
-  { label: "10 km", km: 10 },
-  { label: "tot orașul", km: null },
-];
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "distance", label: "cele mai aproape" },
@@ -27,16 +21,18 @@ const PAGE = 60;
 type Origin = LatLon & { mine: boolean };
 type LocateState = "idle" | "locating" | "denied";
 
-export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
+type Props = {
+  snapshot: OfferSnapshot;
+  state: ExploreState;
+  onChange: (next: Partial<ExploreState>) => void;
+};
+
+export function Explorer({ snapshot, state, onChange }: Readonly<Props>) {
+  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId } = state;
   const [now, setNow] = useState(() => new Date(snapshot.generatedAt));
   const [mounted, setMounted] = useState(false);
   const [origin, setOrigin] = useState<Origin>({ ...BUCHAREST_CENTER, mine: false });
   const [locate, setLocate] = useState<LocateState>("idle");
-  const [kinds, setKinds] = useState<OfferKind[]>([]);
-  const [radiusKm, setRadiusKm] = useState<number | null>(3);
-  const [includeDelivery, setIncludeDelivery] = useState(true);
-  const [sort, setSort] = useState<SortKey>("distance");
-  const [venueId, setVenueId] = useState<string | null>(null);
   const [visible, setVisible] = useState(PAGE);
 
   useEffect(() => {
@@ -48,16 +44,22 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
 
   const placed = useMemo(() => placeOffers(snapshot.offers, origin, now), [snapshot.offers, origin, now]);
   const filtered = useMemo(
-    () => applyFilters(placed, { kinds, radiusKm, includeDelivery }),
-    [placed, kinds, radiusKm, includeDelivery],
+    () => applyFilters(placed, { kinds, radiusKm: venueId ? null : radiusKm, maxPrice, includeDelivery }),
+    [placed, kinds, radiusKm, maxPrice, includeDelivery, venueId],
   );
   const pins = useMemo(() => venuePins(filtered), [filtered]);
+  const shared = offerId ? placed.find((offer) => offer.id === offerId) : undefined;
   const listed = useMemo(() => {
-    const scoped = venueId ? filtered.filter((offer) => offer.venueId === venueId) : filtered;
+    const scoped = filtered.filter((offer) => (!venueId || offer.venueId === venueId) && offer.id !== offerId);
     return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), bucharestWeekday(now));
-  }, [filtered, venueId, sort, now]);
+  }, [filtered, venueId, offerId, sort, now]);
   const kindCounts = useMemo(() => countKinds(placed), [placed]);
-  const selectedVenue = venueId ? pins.find((pin) => pin.venueId === venueId) : undefined;
+  const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
+
+  const change = (next: Partial<ExploreState>) => {
+    setVisible(PAGE);
+    onChange(next);
+  };
 
   const locateMe = useCallback(() => {
     if (!("geolocation" in navigator)) return setLocate("denied");
@@ -65,22 +67,19 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setOrigin({ lat: position.coords.latitude, lon: position.coords.longitude, mine: true });
-        setSort("distance");
+        onChange({ sort: "distance" });
         setLocate("idle");
       },
       () => setLocate("denied"),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
     );
-  }, []);
+  }, [onChange]);
 
-  const toggleKind = (kind: OfferKind) => {
-    setVisible(PAGE);
-    setKinds((current) => (current.includes(kind) ? current.filter((k) => k !== kind) : [...current, kind]));
-  };
+  const toggleKind = (kind: OfferKind) =>
+    change({ kinds: kinds.includes(kind) ? kinds.filter((k) => k !== kind) : [...kinds, kind] });
 
   const showVenue = (id: string | null) => {
-    setVenueId(id);
-    setVisible(PAGE);
+    change({ venueId: id, offerId: null });
     if (id) document.getElementById("oferte")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -89,9 +88,7 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
       <section className="panel" aria-label="Oferte">
         <header className="masthead">
           <p className="brand">fentez foamea</p>
-          <h1 className="headline">
-            Mâncare ieftină în București, acum.
-          </h1>
+          <h1 className="headline">Mâncare ieftină în București, acum.</h1>
           <p className="lede">
             {countOffers(placed.length)} de la restaurante, fast-food-uri și cofetării: pachete salvate de la aruncat, meniuri
             de prânz, reduceri.
@@ -104,6 +101,22 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
             <p className="hint">Nu am primit locația. Permite accesul în browser sau mută harta; distanțele sunt calculate din centru.</p>
           )}
         </header>
+
+        {offerId && (
+          <section className="shared" aria-label="Oferta primită">
+            {shared ? (
+              <>
+                <p className="shared-note">Ți-a trimis cineva oferta asta</p>
+                <OfferCard offer={shared} now={now} onShowVenue={showVenue} />
+              </>
+            ) : (
+              <p className="shared-note">Oferta primită nu mai e disponibilă. Uite ce mai e acum prin oraș.</p>
+            )}
+            <button type="button" className="link-quiet" onClick={() => change({ offerId: null })}>
+              Închide
+            </button>
+          </section>
+        )}
 
         <fieldset className="filters">
           <legend className="sr-only">Filtre</legend>
@@ -124,17 +137,27 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
           <div className="filter-line">
             <label>
               <span className="filter-label">Distanță</span>
-              <select value={radiusKm ?? ""} onChange={(e) => setRadiusKm(e.target.value ? Number(e.target.value) : null)}>
-                {RADII.map((r) => (
-                  <option key={r.label} value={r.km ?? ""}>
-                    {r.km === null ? r.label : `până la ${r.label}`}
+              <select value={radiusKm ?? ""} onChange={(e) => change({ radiusKm: e.target.value ? Number(e.target.value) : null })}>
+                {RADIUS_OPTIONS.map((km) => (
+                  <option key={km ?? "all"} value={km ?? ""}>
+                    {km === null ? "tot orașul" : `până la ${km} km`}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span className="filter-label">Buget</span>
+              <select value={maxPrice ?? ""} onChange={(e) => change({ maxPrice: e.target.value ? Number(e.target.value) : null })}>
+                {BUDGET_OPTIONS.map((lei) => (
+                  <option key={lei ?? "any"} value={lei ?? ""}>
+                    {lei === null ? "oricât" : `sub ${lei} lei`}
                   </option>
                 ))}
               </select>
             </label>
             <label>
               <span className="filter-label">Ordine</span>
-              <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+              <select value={sort} onChange={(e) => change({ sort: e.target.value as SortKey })}>
                 {SORTS.map((s) => (
                   <option key={s.key} value={s.key}>
                     {s.label}
@@ -143,17 +166,17 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
               </select>
             </label>
             <label className="toggle">
-              <input type="checkbox" checked={includeDelivery} onChange={(e) => setIncludeDelivery(e.target.checked)} />
+              <input type="checkbox" checked={includeDelivery} onChange={(e) => change({ includeDelivery: e.target.checked })} />
               <span>și livrări</span>
             </label>
           </div>
         </fieldset>
 
         <div id="oferte" className="list">
-          {selectedVenue && (
+          {venueId && (
             <div className="venue-scope">
               <span>
-                <strong>{selectedVenue.name}</strong> · {countOffers(listed.length)}
+                <strong>{venueName ?? "Localul ales"}</strong> · {countOffers(listed.length)}
               </span>
               <button type="button" className="link-quiet" onClick={() => showVenue(null)}>
                 Toate ofertele
@@ -163,24 +186,16 @@ export function Explorer({ snapshot }: Readonly<{ snapshot: OfferSnapshot }>) {
           {listed.length === 0 ? (
             <div className="empty">
               <p>Nicio ofertă cu filtrele astea.</p>
-              <button type="button" className="link-quiet" onClick={() => { setKinds([]); setRadiusKm(null); setVenueId(null); }}>
+              <button type="button" className="link-quiet" onClick={() => change({ kinds: [], radiusKm: null, maxPrice: null, venueId: null })}>
                 Arată tot orașul
               </button>
             </div>
           ) : (
-            listed.slice(0, visible).map((offer) => (
-              <OfferCard
-                key={offer.id}
-                offer={offer}
-                now={now}
-                onShowVenue={showVenue}
-              />
-            ))
+            listed.slice(0, visible).map((offer) => <OfferCard key={offer.id} offer={offer} now={now} onShowVenue={showVenue} />)
           )}
           {listed.length > visible && (
             <button type="button" className="more" onClick={() => setVisible((v) => v + PAGE)}>
-              Arată încă {Math.min(PAGE, listed.length - visible)}{" "}
-              <span className="muted">din {listed.length - visible}</span>
+              Arată încă {Math.min(PAGE, listed.length - visible)} <span className="muted">din {listed.length - visible}</span>
             </button>
           )}
           <footer className="colophon">

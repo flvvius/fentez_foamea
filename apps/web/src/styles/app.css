@@ -593,3 +593,38 @@ body {
     border: 1px solid CanvasText;
   }
 }
+
+.shared {
+  margin: 0 24px 8px;
+  padding: 16px 16px 12px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-media);
+}
+
+.shared-note {
+  font-size: var(--type-small);
+  font-weight: 600;
+  color: var(--deal);
+}
+
+.shared .offer {
+  border-bottom: 0;
+  padding-bottom: 8px;
+}
+
+.offer-actions {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 16px;
+  align-items: baseline;
+}
+
+.offer-actions .offer-link {
+  margin-left: 0;
+}
+
+@media (max-width: 820px) {
+  .shared {
+    margin: 0 16px 8px;
+  }
+}

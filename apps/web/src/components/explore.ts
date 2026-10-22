@@ -1,15 +1,6 @@
-import { distanceMeters, type LatLon, type OfferKind } from "@fentezfoamea/core";
+import { distanceMeters, type LatLon } from "@fentezfoamea/core";
 import type { Offer } from "@/lib/offers";
-
-export type SortKey = "distance" | "discount" | "price";
-
-export type Filters = {
-  kinds: OfferKind[];
-  radiusKm: number | null;
-  includeDelivery: boolean;
-  sort: SortKey;
-  venueId: string | null;
-};
+import type { ExploreState, SortKey } from "@/lib/search";
 
 export type PlacedOffer = Offer & { distance: number | null; otherLocations?: number };
 
@@ -37,10 +28,11 @@ export function placeOffers(offers: Offer[], origin: LatLon, now: Date): PlacedO
     }));
 }
 
-export function applyFilters(offers: PlacedOffer[], filters: Omit<Filters, "venueId" | "sort">): PlacedOffer[] {
+export function applyFilters(offers: PlacedOffer[], filters: Pick<ExploreState, "kinds" | "radiusKm" | "maxPrice" | "includeDelivery">): PlacedOffer[] {
   return offers.filter((offer) => {
     if (filters.kinds.length && !filters.kinds.includes(offer.kind)) return false;
     if (!filters.includeDelivery && offer.deliveryOnly) return false;
+    if (filters.maxPrice !== null && (offer.price === null || offer.price > filters.maxPrice)) return false;
     if (filters.radiusKm !== null && offer.distance !== null && offer.distance > filters.radiusKm * 1000) return false;
     return true;
   });

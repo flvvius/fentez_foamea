@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { OFFER_KIND_LABELS, SOURCE_LABELS, WEEKDAY_SHORT } from "@fentezfoamea/core";
-import { bucharestWeekday, formatDistance, formatPickup, formatPrice, minutesUntil } from "@/lib/format";
+import { shareOffer, type ShareResult } from "@/lib/share";
+import { bucharestWeekday, formatDistance, formatPickup, formatPrice, formatRelative, minutesUntil } from "@/lib/format";
 import type { PlacedOffer } from "./explore";
 
 type Props = {
@@ -47,6 +49,7 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
           <p className="offer-detail">
             Ridici {formatPickup(offer.pickupStart, offer.pickupEnd, now)}
             {closingSoon && <span className="urgent"> · mai ai {closesIn} min</span>}
+            {checkedLongAgo(offer, now) && <span className="muted"> · verificat {formatRelative(offer.checkedAt!, now)}</span>}
           </p>
         )}
         {offer.conditions && <p className="offer-detail offer-conditions">{offer.conditions}</p>}
@@ -55,12 +58,38 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
           {offer.available !== null && offer.available <= 5 && (
             <span className="muted">{offer.available === 1 ? "ultimul" : `mai sunt ${offer.available}`}</span>
           )}
-          <a className="offer-link" href={offer.url} target="_blank" rel="noopener noreferrer">
-            Vezi pe {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>
-          </a>
+          <span className="offer-actions">
+            <ShareButton offer={offer} />
+            <a className="offer-link" href={offer.url} target="_blank" rel="noopener noreferrer">
+              Vezi pe {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>
+            </a>
+          </span>
         </div>
       </div>
     </article>
+  );
+}
+
+const SHARE_LABELS: Record<ShareResult | "idle", string> = {
+  idle: "Trimite",
+  shared: "Trimis",
+  copied: "Link copiat",
+  failed: "Trimite",
+};
+
+function ShareButton({ offer }: Readonly<{ offer: PlacedOffer }>) {
+  const [status, setStatus] = useState<ShareResult | "idle">("idle");
+
+  useEffect(() => {
+    if (status === "idle") return;
+    const timer = setTimeout(() => setStatus("idle"), 2500);
+    return () => clearTimeout(timer);
+  }, [status]);
+
+  return (
+    <button type="button" className="link-quiet share" onClick={async () => setStatus(await shareOffer(offer))}>
+      <span aria-live="polite">{SHARE_LABELS[status]}</span>
+    </button>
   );
 }
 
@@ -85,6 +114,12 @@ function PriceFigure({ offer }: Readonly<{ offer: PlacedOffer }>) {
       {offer.discountPct !== null && <span className="figure-off">−{offer.discountPct}%</span>}
     </p>
   );
+}
+
+const CHECK_AGE_WORTH_MENTIONING_MIN = 45;
+
+function checkedLongAgo(offer: PlacedOffer, now: Date): boolean {
+  return offer.checkedAt !== null && -minutesUntil(offer.checkedAt, now) > CHECK_AGE_WORTH_MENTIONING_MIN;
 }
 
 function placeNote(offer: PlacedOffer): string | null {

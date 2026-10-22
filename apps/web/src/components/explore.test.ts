@@ -7,7 +7,6 @@ const base: Offer = {
   source: "bonapp",
   kind: "surplus",
   title: "Pachet",
-  description: null,
   price: 20,
   originalPrice: 40,
   discountPct: 50,
@@ -15,12 +14,11 @@ const base: Offer = {
   pickupStart: null,
   pickupEnd: null,
   available: 2,
-  imageUrl: null,
+  checkedAt: null,
   url: "https://example.com",
   deliveryOnly: false,
   venueId: "v1",
   venueName: "Bistro",
-  venueAddress: null,
   daysOfWeek: null,
   timeStart: null,
   timeEnd: null,
@@ -43,8 +41,14 @@ describe("explore", () => {
     const far = { ...base, id: "far", lat: 44.5, lon: 26.2 };
     const national = { ...base, id: "nat", venueId: null, lat: null, lon: null };
     const placed = placeOffers([base, far, national], origin, now);
-    const kept = applyFilters(placed, { kinds: [], radiusKm: 2, includeDelivery: true });
+    const kept = applyFilters(placed, { kinds: [], radiusKm: 2, maxPrice: null, includeDelivery: true });
     expect(kept.map((o) => o.id)).toEqual(["1", "nat"]);
+  });
+
+  it("keeps offers within budget and drops ones without a price", () => {
+    const placed = placeOffers([base, { ...base, id: "pricey", price: 30 }, { ...base, id: "unknown", price: null }], origin, now);
+    const kept = applyFilters(placed, { kinds: [], radiusKm: null, maxPrice: 25, includeDelivery: true });
+    expect(kept.map((o) => o.id)).toEqual(["1"]);
   });
 
   it("sorts by price and groups pins by venue", () => {
