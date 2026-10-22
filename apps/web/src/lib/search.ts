@@ -10,6 +10,7 @@ export type ExploreState = {
   includeDelivery: boolean;
   venueId: string | null;
   offerId: string | null;
+  query: string;
 };
 
 export type ExploreSearch = {
@@ -20,6 +21,7 @@ export type ExploreSearch = {
   livrare?: string;
   local?: string;
   oferta?: string;
+  q?: string;
 };
 
 export const RADIUS_OPTIONS = [1, 3, 10, null] as const;
@@ -33,6 +35,7 @@ export const DEFAULT_STATE: ExploreState = {
   includeDelivery: true,
   venueId: null,
   offerId: null,
+  query: "",
 };
 
 const SORT_PARAMS: Record<SortKey, string> = { best: "recomandate", distance: "aproape", discount: "reducere", price: "pret" };
@@ -64,6 +67,7 @@ export function validateSearch(raw: Record<string, unknown>): ExploreSearch {
     livrare: text("livrare"),
     local: text("local"),
     oferta: text("oferta"),
+    q: text("q"),
   };
   for (const key of Object.keys(search) as (keyof ExploreSearch)[]) if (search[key] === undefined) delete search[key];
   return search;
@@ -78,6 +82,7 @@ export function stateFromSearch(search: ExploreSearch): ExploreState {
     includeDelivery: search.livrare !== "nu",
     venueId: search.local ?? null,
     offerId: search.oferta ?? null,
+    query: search.q ?? "",
   };
 }
 
@@ -90,6 +95,7 @@ export function searchFromState(state: ExploreState): ExploreSearch {
   if (!state.includeDelivery) search.livrare = "nu";
   if (state.venueId) search.local = state.venueId;
   if (state.offerId) search.oferta = state.offerId;
+  if (state.query.trim()) search.q = state.query;
   return search;
 }
 

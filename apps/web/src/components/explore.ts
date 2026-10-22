@@ -65,15 +65,15 @@ export function samePlaceIds(offers: Offer[]): Map<string, string> {
 }
 
 function comparableName(name: string): string {
-  return name
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+  return foldText(name).replace(/[^a-z0-9]/g, "");
 }
 
-export function applyFilters(offers: PlacedOffer[], filters: Pick<ExploreState, "kinds" | "radiusKm" | "maxPrice" | "includeDelivery">): PlacedOffer[] {
+type Filters = Pick<ExploreState, "kinds" | "radiusKm" | "maxPrice" | "includeDelivery"> & { query?: string };
+
+export function applyFilters(offers: PlacedOffer[], filters: Filters): PlacedOffer[] {
+  const words = searchWords(filters.query ?? "");
   return offers.filter((offer) => {
+    if (words.length && !matchesWords(offer, words)) return false;
     if (filters.kinds.length && !filters.kinds.includes(offer.kind)) return false;
     if (!filters.includeDelivery && offer.deliveryOnly) return false;
     const price = comparablePrice(offer);
@@ -81,6 +81,19 @@ export function applyFilters(offers: PlacedOffer[], filters: Pick<ExploreState, 
     if (filters.radiusKm !== null && !withinRadius(offer, filters.radiusKm)) return false;
     return true;
   });
+}
+
+function searchWords(query: string): string[] {
+  return foldText(query).split(/\s+/).filter(Boolean);
+}
+
+function matchesWords(offer: PlacedOffer, words: string[]): boolean {
+  const text = foldText(`${offer.title} ${offer.venueName ?? ""} ${offer.chain ?? ""}`);
+  return words.every((word) => text.includes(word));
+}
+
+function foldText(text: string): string {
+  return text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 }
 
 function withinRadius(offer: PlacedOffer, radiusKm: number): boolean {

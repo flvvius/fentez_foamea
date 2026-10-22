@@ -71,6 +71,17 @@ test.describe("explorer", () => {
     await expect(lunch).toHaveCount(0);
   });
 
+  test("searches titles and venues, ignoring diacritics, and keeps the search in the URL", async ({ page }) => {
+    await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
+    await page.getByRole("searchbox", { name: "Caută" }).fill("brutaria");
+    await expect(page).toHaveURL(/q=brutaria/);
+    await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Covrigi cu brânză", "Pachet pentru mâine"]);
+    await page.reload();
+    await waitForHydration(page);
+    await expect(page.getByRole("searchbox", { name: "Caută" })).toHaveValue("brutaria");
+    await expect.poll(async () => (await offerTitles(page)).length).toBe(3);
+  });
+
   test("hides delivery-only offers when asked", async ({ page }) => {
     await expect(offerRow(page, "Burger dublu cu cartofi")).toContainText("doar livrare");
     await page.getByLabel("și livrări").uncheck();

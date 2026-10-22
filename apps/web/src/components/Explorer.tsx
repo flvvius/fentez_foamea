@@ -38,7 +38,9 @@ type Props = {
 const FEW_OFFERS = 3;
 
 export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
-  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId } = state;
+  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query } = state;
+  const [draftQuery, setDraftQuery] = useState(query);
+  useEffect(() => setDraftQuery(query), [query]);
   const [now, setNow] = useState(() => new Date(snapshot.generatedAt));
   const [mounted, setMounted] = useState(false);
   const [origin, setOrigin] = useState<Origin>({ lat: (center ?? BUCHAREST_CENTER).lat, lon: (center ?? BUCHAREST_CENTER).lon, mine: false });
@@ -54,8 +56,8 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
 
   const placed = useMemo(() => placeOffers(snapshot.offers, origin, now), [snapshot.offers, origin, now]);
   const filtered = useMemo(
-    () => applyFilters(placed, { kinds, radiusKm: venueId ? null : radiusKm, maxPrice, includeDelivery }),
-    [placed, kinds, radiusKm, maxPrice, includeDelivery, venueId],
+    () => applyFilters(placed, { kinds, radiusKm: venueId ? null : radiusKm, maxPrice, includeDelivery, query }),
+    [placed, kinds, radiusKm, maxPrice, includeDelivery, venueId, query],
   );
   const pins = useMemo(() => venuePins(filtered), [filtered]);
   const shared = offerId ? placed.find((offer) => offer.id === offerId) : undefined;
@@ -68,11 +70,11 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     if (venueId || radiusKm === null || listed.length >= FEW_OFFERS) return null;
     const larger = RADIUS_OPTIONS.slice(RADIUS_OPTIONS.indexOf(radiusKm as (typeof RADIUS_OPTIONS)[number]) + 1);
     for (const km of larger) {
-      const extra = applyFilters(placed, { kinds, radiusKm: km, maxPrice, includeDelivery }).length - filtered.length;
+      const extra = applyFilters(placed, { kinds, radiusKm: km, maxPrice, includeDelivery, query }).length - filtered.length;
       if (extra > 0) return { km, extra };
     }
     return null;
-  }, [venueId, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, filtered.length]);
+  }, [venueId, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, query, filtered.length]);
   const nearbyCount = useMemo(
     () => (center && radiusKm !== null ? applyFilters(placed, { kinds: [], radiusKm, maxPrice: null, includeDelivery: true }).length : null),
     [center, placed, radiusKm],
@@ -153,6 +155,17 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
 
         <fieldset className="filters">
           <legend className="sr-only">Filtre</legend>
+          <input
+            type="search"
+            className="search"
+            aria-label="Caută"
+            placeholder="Caută un local sau un produs"
+            value={draftQuery}
+            onChange={(e) => {
+              setDraftQuery(e.target.value);
+              change({ query: e.target.value });
+            }}
+          />
           <div className="chip-row">
             {OFFER_KINDS.filter((kind) => kindCounts[kind]).map((kind) => (
               <button
@@ -219,7 +232,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           {listed.length === 0 ? (
             <div className="empty">
               <p>Nicio ofertă cu filtrele astea.</p>
-              <button type="button" className="link-quiet" onClick={() => change({ kinds: [], radiusKm: null, maxPrice: null, venueId: null })}>
+              <button type="button" className="link-quiet" onClick={() => change({ kinds: [], radiusKm: null, maxPrice: null, venueId: null, query: "" })}>
                 Arată tot orașul
               </button>
             </div>

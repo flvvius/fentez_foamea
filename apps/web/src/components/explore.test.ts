@@ -46,6 +46,21 @@ describe("explore", () => {
     expect(kept.map((o) => o.id)).toEqual(["1", "nat"]);
   });
 
+  it("matches every searched word in the title, venue or chain, ignoring diacritics", () => {
+    const placed = placeOffers(
+      [
+        { ...base, id: "ciorba", title: "Ciorbă de burtă", venueName: "La Mama Universitate" },
+        { ...base, id: "pizza", title: "Pizza", venueName: "Zest" },
+      ],
+      origin,
+      now,
+    );
+    const search = (query: string) => applyFilters(placed, { kinds: [], radiusKm: null, maxPrice: null, includeDelivery: true, query }).map((o) => o.id);
+    expect(search("ciorba mama")).toEqual(["ciorba"]);
+    expect(search("  ")).toEqual(["ciorba", "pizza"]);
+    expect(search("burger")).toEqual([]);
+  });
+
   it("keeps offers within budget and drops ones without a price", () => {
     const placed = placeOffers([base, { ...base, id: "pricey", price: 30 }, { ...base, id: "unknown", price: null }], origin, now);
     const kept = applyFilters(placed, { kinds: [], radiusKm: null, maxPrice: 25, includeDelivery: true });

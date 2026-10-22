@@ -173,6 +173,23 @@ body {
   padding: 12px 24px;
 }
 
+.search {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  background: var(--background);
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  padding: 6px 10px;
+  min-height: 36px;
+  color: var(--foreground);
+  font: inherit;
+}
+
+.search::placeholder {
+  color: var(--muted-foreground);
+}
+
 .chip-row {
   display: flex;
   gap: 6px;
@@ -579,6 +596,11 @@ body {
   .filters {
     top: 0;
     padding: 10px 0;
+  }
+
+  .search {
+    width: calc(100% - 32px);
+    margin: 0 16px 8px;
   }
 
   .chip-row {
