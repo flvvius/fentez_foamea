@@ -37,3 +37,10 @@ test("the offer snapshot is served from the CDN cache", async ({ request }) => {
   expect(response.ok()).toBe(true);
   expect(response.headers()["x-vercel-cache"]).toMatch(/HIT|STALE/);
 });
+
+test("the bags feed lists bags with a pickup window", async ({ request }) => {
+  const feed = await (await request.get("/feed.xml")).text();
+  const items = feed.match(/<item>/g)?.length ?? 0;
+  expect(items).toBeGreaterThan(5);
+  expect(feed).toMatch(/<title>[^<]+, ridici [^<]+<\/title>/);
+});
