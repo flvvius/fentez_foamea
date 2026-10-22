@@ -16,7 +16,7 @@ export function venueMatchKey(name: string, lat?: number, lon?: number): string 
   return `${base}@${lat.toFixed(3)},${lon.toFixed(3)}`;
 }
 
-const INVISIBLE = /[\u00AD\u200B-\u200D\u2060\uFEFF]/g;
+const INVISIBLE = /[\u00AD\u200B-\u200D\u2060\uFEFF\uFFFD]/g;
 
 export function collapseWhitespace(text: string): string {
   return text.replace(INVISIBLE, "").replace(/\s+/g, " ").trim();
