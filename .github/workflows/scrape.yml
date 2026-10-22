@@ -18,7 +18,7 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 240
     concurrency:
       group: scrape-${{ github.event.schedule || inputs.sources }}
       cancel-in-progress: false
@@ -36,7 +36,7 @@ jobs:
             *) sources="${MANUAL:-all}" ;;
           esac
           echo "sources=$sources" >> "$GITHUB_OUTPUT"
-          if [ "$sources" = "bonapp" ]; then echo "passes=6" >> "$GITHUB_OUTPUT"; else echo "passes=1" >> "$GITHUB_OUTPUT"; fi
+          if [ "$sources" = "bonapp" ]; then echo "passes=20" >> "$GITHUB_OUTPUT"; else echo "passes=1" >> "$GITHUB_OUTPUT"; fi
 
       - uses: actions/checkout@v4
 
@@ -59,6 +59,7 @@ jobs:
           status=0
           for pass in $(seq 1 "$PASSES"); do
             bun run src/cli.ts $SOURCES || status=1
-            if [ "$pass" -lt "$PASSES" ]; then sleep 540; fi
+            if [ "$pass" -ge "$PASSES" ] || [ "$(date -u +%H)" -ge 20 ]; then break; fi
+            sleep 540
           done
           exit $status
