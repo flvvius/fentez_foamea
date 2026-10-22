@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategorieRouteImport } from './routes/$categorie'
 import { Route as OgRouteImport } from './routes/og'
+import { Route as ZonaZonaRouteImport } from './routes/zona.$zona'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const OgRoute = OgRouteImport.update({
   path: '/og',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZonaZonaRoute = ZonaZonaRouteImport.update({
+  id: '/zona/$zona',
+  path: '/zona/$zona',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
+  '/zona/$zona': typeof ZonaZonaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
+  '/zona/$zona': typeof ZonaZonaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
+  '/zona/$zona': typeof ZonaZonaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$categorie' | '/og'
+  fullPaths: '/' | '/$categorie' | '/og' | '/zona/$zona'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$categorie' | '/og'
-  id: '__root__' | '/' | '/$categorie' | '/og'
+  to: '/' | '/$categorie' | '/og' | '/zona/$zona'
+  id: '__root__' | '/' | '/$categorie' | '/og' | '/zona/$zona'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategorieRoute: typeof CategorieRoute
   OgRoute: typeof OgRoute
+  ZonaZonaRoute: typeof ZonaZonaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zona/$zona': {
+      id: '/zona/$zona'
+      path: '/zona/$zona'
+      fullPath: '/zona/$zona'
+      preLoaderRoute: typeof ZonaZonaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategorieRoute: CategorieRoute,
   OgRoute: OgRoute,
+  ZonaZonaRoute: ZonaZonaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

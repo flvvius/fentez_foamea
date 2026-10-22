@@ -5,6 +5,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
 import { countOffers, formatRelative } from "@/lib/format";
 import { LANDINGS } from "@/lib/landing";
+import { ZONES } from "@/lib/zones";
 import type { OfferSnapshot } from "@/lib/offers";
 import { BUDGET_OPTIONS, RADIUS_OPTIONS, type ExploreState, type SortKey } from "@/lib/search";
 import { OfferCard } from "./OfferCard";
@@ -28,14 +29,15 @@ type Props = {
   snapshot: OfferSnapshot;
   state: ExploreState;
   headline?: string;
+  center?: LatLon & { name: string };
   onChange: (next: Partial<ExploreState>) => void;
 };
 
-export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", onChange }: Readonly<Props>) {
+export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
   const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId } = state;
   const [now, setNow] = useState(() => new Date(snapshot.generatedAt));
   const [mounted, setMounted] = useState(false);
-  const [origin, setOrigin] = useState<Origin>({ ...BUCHAREST_CENTER, mine: false });
+  const [origin, setOrigin] = useState<Origin>({ lat: (center ?? BUCHAREST_CENTER).lat, lon: (center ?? BUCHAREST_CENTER).lon, mine: false });
   const [locate, setLocate] = useState<LocateState>("idle");
   const [visible, setVisible] = useState(PAGE);
 
@@ -102,7 +104,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             {locateLabel(locate, origin.mine)}
           </button>
           {locate === "denied" && (
-            <p className="hint">Nu am primit locația. Permite accesul în browser sau mută harta; distanțele sunt calculate din centru.</p>
+            <p className="hint">Nu am primit locația. Permite accesul în browser sau mută harta; distanțele sunt calculate din {center ? `zona ${center.name}` : "centru"}.</p>
           )}
         </header>
 
@@ -209,6 +211,13 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
               {LANDINGS.map((landing) => (
                 <Link key={landing.slug} to="/$categorie" params={{ categorie: landing.slug }} className="link-quiet">
                   {OFFER_KIND_LABELS[landing.kind]}
+                </Link>
+              ))}
+            </nav>
+            <nav aria-label="Zone" className="categories">
+              {ZONES.map((zone) => (
+                <Link key={zone.slug} to="/zona/$zona" params={{ zona: zone.slug }} className="link-quiet">
+                  {zone.name}
                 </Link>
               ))}
             </nav>
