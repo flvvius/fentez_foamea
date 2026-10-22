@@ -8,7 +8,7 @@ type Props = {
   wire: SnapshotWire;
   state: ExploreState;
   headline?: string;
-  center?: LatLon & { name: string };
+  center?: LatLon & { name: string; slug?: string };
   onChange: (next: Partial<ExploreState>) => void;
 };
 

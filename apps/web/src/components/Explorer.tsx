@@ -31,7 +31,7 @@ type Props = {
   snapshot: OfferSnapshot;
   state: ExploreState;
   headline?: string;
-  center?: LatLon & { name: string };
+  center?: LatLon & { name: string; slug?: string };
   onChange: (next: Partial<ExploreState>) => void;
 };
 
@@ -224,11 +224,22 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             Datele vin din aplicațiile și site-urile partenerilor; prețul și disponibilitatea finală sunt cele de acolo.
             Fiecare ofertă duce la sursa ei.
             <nav aria-label="Categorii" className="categories">
-              {LANDINGS.map((landing) => (
-                <Link key={landing.slug} to="/$categorie" params={{ categorie: landing.slug }} className="link-quiet">
-                  {OFFER_KIND_LABELS[landing.kind]}
-                </Link>
-              ))}
+              {center?.slug
+                ? LANDINGS.filter((landing) => landing.inZones).map((landing) => (
+                    <Link
+                      key={landing.slug}
+                      to="/zona/$zona/$categorie"
+                      params={{ zona: center.slug!, categorie: landing.slug }}
+                      className="link-quiet"
+                    >
+                      {OFFER_KIND_LABELS[landing.kind]} lângă {center.name}
+                    </Link>
+                  ))
+                : LANDINGS.map((landing) => (
+                    <Link key={landing.slug} to="/$categorie" params={{ categorie: landing.slug }} className="link-quiet">
+                      {OFFER_KIND_LABELS[landing.kind]}
+                    </Link>
+                  ))}
             </nav>
             <nav aria-label="Zone" className="categories">
               {ZONES.map((zone) => (

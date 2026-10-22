@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategorieRouteImport } from './routes/$categorie'
 import { Route as OgRouteImport } from './routes/og'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ZonaZonaRouteImport } from './routes/zona.$zona'
+import { Route as ZonaZonaCategorieRouteImport } from './routes/zona.$zona_.$categorie'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,9 +31,19 @@ const OgRoute = OgRouteImport.update({
   path: '/og',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ZonaZonaRoute = ZonaZonaRouteImport.update({
   id: '/zona/$zona',
   path: '/zona/$zona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZonaZonaCategorieRoute = ZonaZonaCategorieRouteImport.update({
+  id: '/zona/$zona_/$categorie',
+  path: '/zona/$zona/$categorie',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -39,34 +51,61 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/zona/$zona': typeof ZonaZonaRoute
+  '/zona/$zona/$categorie': typeof ZonaZonaCategorieRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/zona/$zona': typeof ZonaZonaRoute
+  '/zona/$zona/$categorie': typeof ZonaZonaCategorieRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$categorie': typeof CategorieRoute
   '/og': typeof OgRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/zona/$zona': typeof ZonaZonaRoute
+  '/zona/$zona_/$categorie': typeof ZonaZonaCategorieRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$categorie' | '/og' | '/zona/$zona'
+  fullPaths:
+    | '/'
+    | '/$categorie'
+    | '/og'
+    | '/sitemap.xml'
+    | '/zona/$zona'
+    | '/zona/$zona/$categorie'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$categorie' | '/og' | '/zona/$zona'
-  id: '__root__' | '/' | '/$categorie' | '/og' | '/zona/$zona'
+  to:
+    | '/'
+    | '/$categorie'
+    | '/og'
+    | '/sitemap.xml'
+    | '/zona/$zona'
+    | '/zona/$zona/$categorie'
+  id:
+    | '__root__'
+    | '/'
+    | '/$categorie'
+    | '/og'
+    | '/sitemap.xml'
+    | '/zona/$zona'
+    | '/zona/$zona_/$categorie'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategorieRoute: typeof CategorieRoute
   OgRoute: typeof OgRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ZonaZonaRoute: typeof ZonaZonaRoute
+  ZonaZonaCategorieRoute: typeof ZonaZonaCategorieRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,11 +131,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/zona/$zona': {
       id: '/zona/$zona'
       path: '/zona/$zona'
       fullPath: '/zona/$zona'
       preLoaderRoute: typeof ZonaZonaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zona/$zona_/$categorie': {
+      id: '/zona/$zona_/$categorie'
+      path: '/zona/$zona/$categorie'
+      fullPath: '/zona/$zona/$categorie'
+      preLoaderRoute: typeof ZonaZonaCategorieRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -106,7 +159,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategorieRoute: CategorieRoute,
   OgRoute: OgRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ZonaZonaRoute: ZonaZonaRoute,
+  ZonaZonaCategorieRoute: ZonaZonaCategorieRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -49,7 +49,7 @@ function ZonePage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const state = useExploreState(search, DEFAULTS);
-  const center = useMemo(() => ({ lat: zone.lat, lon: zone.lon, name: zone.name }), [zone]);
+  const center = useMemo(() => ({ lat: zone.lat, lon: zone.lon, name: zone.name, slug: zone.slug }), [zone]);
 
   const onChange = useCallback(
     (next: Partial<ExploreState>) =>

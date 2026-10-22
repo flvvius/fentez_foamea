@@ -45,3 +45,29 @@ test.describe("zone preview", () => {
     expect(unknown.headers().location).toMatch(/\/og$/);
   });
 });
+
+test("a zone can be narrowed to one category, with its own page", async ({ page, request }) => {
+  await page.goto("/zona/titan");
+  await waitForHydration(page);
+  await page.getByRole("navigation", { name: "Categorii" }).getByRole("link", { name: "Pachet anti-risipă lângă Titan" }).click();
+  await expect(page).toHaveURL(/\/zona\/titan\/pachete-anti-risipa$/);
+  await expect(page).toHaveTitle("Pachete anti-risipă lângă Titan · fentez foamea");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pachete anti-risipă lângă Titan, acum.");
+  await expect.poll(() => offerTitles(page)).toEqual(["Pachet de seară Titan"]);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\?zona=titan&categorie=pachete-anti-risipa$/);
+
+  await page.getByRole("button", { name: /Pachet anti-risipă/ }).click();
+  await expect(page).toHaveURL(/\/zona\/titan$/);
+
+  expect((await request.get("/zona/titan/happy-hour")).status()).toBe(404);
+  const image = await request.get("/og?zona=titan&categorie=pachete-anti-risipa");
+  expect(image.headers()["content-type"]).toBe("image/png");
+});
+
+test("the sitemap lists zone and category pages", async ({ request }) => {
+  const response = await request.get("/sitemap.xml");
+  expect(response.headers()["content-type"]).toContain("application/xml");
+  const sitemap = await response.text();
+  expect(sitemap).toContain("<loc>https://fentez-foamea.vercel.app/zona/titan/meniul-zilei</loc>");
+  expect(sitemap).not.toContain("/zona/titan/happy-hour");
+});

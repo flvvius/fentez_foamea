@@ -7,12 +7,16 @@ export type Landing = {
   headline: string;
   description: string;
   countNoun: [one: string, many: string];
+  nearName: string;
+  inZones: boolean;
 };
 
 export const LANDINGS: Landing[] = [
   {
     slug: "pachete-anti-risipa",
     kind: "surplus",
+    nearName: "Pachete anti-risipă",
+    inZones: true,
     countNoun: ["pachet anti-risipă", "pachete anti-risipă"],
     title: "Pachete anti-risipă în București, azi",
     headline: "Pachete anti-risipă în București, azi.",
@@ -22,6 +26,8 @@ export const LANDINGS: Landing[] = [
   {
     slug: "meniul-zilei",
     kind: "daily_menu",
+    nearName: "Meniul zilei",
+    inZones: true,
     countNoun: ["meniu de prânz", "meniuri de prânz"],
     title: "Meniul zilei în București, pe hartă",
     headline: "Meniul zilei în București, lângă tine.",
@@ -30,6 +36,8 @@ export const LANDINGS: Landing[] = [
   {
     slug: "reduceri",
     kind: "discount",
+    nearName: "Reduceri la mâncare",
+    inZones: true,
     countNoun: ["reducere", "reduceri"],
     title: "Reduceri la mâncare în București, acum",
     headline: "Reduceri la mâncare în București, acum.",
@@ -38,6 +46,8 @@ export const LANDINGS: Landing[] = [
   {
     slug: "oferte-1-plus-1",
     kind: "combo",
+    nearName: "Oferte 1+1 și combo-uri",
+    inZones: true,
     countNoun: ["ofertă 1+1 sau combo", "oferte 1+1 și combo-uri"],
     title: "Oferte 1+1 și meniuri combo în București",
     headline: "Oferte 1+1 și combo-uri în București.",
@@ -46,6 +56,8 @@ export const LANDINGS: Landing[] = [
   {
     slug: "happy-hour",
     kind: "happy_hour",
+    nearName: "Happy hour",
+    inZones: false,
     countNoun: ["happy hour", "happy hour-uri"],
     title: "Happy hour în București",
     headline: "Happy hour în București, azi.",
@@ -55,4 +67,8 @@ export const LANDINGS: Landing[] = [
 
 export function findLanding(slug: string): Landing | undefined {
   return LANDINGS.find((landing) => landing.slug === slug);
+}
+
+export function findZoneLanding(slug: string): Landing | undefined {
+  return LANDINGS.find((landing) => landing.inZones && landing.slug === slug);
 }

@@ -9,16 +9,14 @@ export const Route = createFileRoute("/og")({
       GET: async ({ request }) => {
         const params = new URL(request.url).searchParams;
         const zoneSlug = params.get("zona");
-        if (zoneSlug !== null) {
-          const zone = findZone(zoneSlug);
-          if (!zone) return Response.redirect(new URL("/og", request.url), 302);
-          return renderTodayImage(await findTodaySummary({ zone }), new Date(), { zone });
-        }
         const landingSlug = params.get("categorie");
-        if (landingSlug !== null) {
-          const landing = findLanding(landingSlug);
-          if (!landing) return Response.redirect(new URL("/og", request.url), 302);
-          return renderTodayImage(await findTodaySummary({ landing }), new Date(), { landing });
+        if (zoneSlug !== null || landingSlug !== null) {
+          const zone = zoneSlug === null ? undefined : findZone(zoneSlug);
+          const landing = landingSlug === null ? undefined : findLanding(landingSlug);
+          if ((zoneSlug !== null && !zone) || (landingSlug !== null && !landing)) {
+            return Response.redirect(new URL("/og", request.url), 302);
+          }
+          return renderTodayImage(await findTodaySummary({ zone, landing }), new Date(), { zone, landing });
         }
         const id = params.get("oferta");
         if (id === null) return renderTodayImage(await findTodaySummary(), new Date());
