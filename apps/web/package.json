@@ -18,6 +18,8 @@
     "@resvg/resvg-js": "^2.6.2",
     "@tanstack/react-router": "^1.170.45",
     "@tanstack/react-start": "^1.169.3",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "leaflet": "^1.9.4",
     "nitro": "3.0.260903-beta",
     "postgres": "^3.4.9",

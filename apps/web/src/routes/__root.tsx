@@ -1,6 +1,8 @@
 import "@fontsource-variable/inter";
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import appCss from "../styles/app.css?url";
 
 export const Route = createRootRoute({
@@ -46,6 +48,8 @@ function RootDocument() {
       </head>
       <body>
         <Outlet />
+        <Analytics />
+        <SpeedInsights />
         <Scripts />
       </body>
     </html>
