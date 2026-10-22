@@ -482,3 +482,16 @@ describe("loadSource: pages just under the DOM limits", () => {
     expect(result.kind === "text" && result.text.includes("SECRETSCRIPT")).toBe(false);
   });
 });
+
+describe("loadSource: link-heavy pages", () => {
+  it.each([
+    ["10k linked divs", `<div><a href="/N">x, y</a></div>`.repeat(9990)],
+    ["one paragraph of 20k links", `<p>${'<a href="/x">a</a>'.repeat(19_990)}</p>`],
+    ["14k hidden divs", '<div style="display:none">x</div>'.repeat(14_000)],
+  ])("handles %s quickly", async (_name, body) => {
+    const fetch = fakeFetch(() => htmlResponse(`<html><body>${body}</body></html>`, "https://a.example/"));
+    const started = performance.now();
+    await loadSource("https://a.example/", { fetch, now });
+    expect(performance.now() - started).toBeLessThan(1500);
+  });
+});

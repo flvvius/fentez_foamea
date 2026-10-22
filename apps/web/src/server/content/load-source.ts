@@ -33,10 +33,13 @@ const TIKTOK_EPOCH_MS = Date.UTC(2016, 0, 1);
 // any fetch timeout, so hostile pages are bounded before they ever reach a DOM.
 const MAX_HTML_CHARS = 500_000;
 const MAX_NESTING_DEPTH = 150;
-// Readability's work grows with depth × element count (148 deep with 20k paragraphs took
-// 3.5 s), and its own maxElemsToParse never fires under linkedom, whose
-// getElementsByTagName("*") returns nothing. Pages over this budget use the measured text.
+// Readability's own maxElemsToParse never fires under linkedom, whose
+// getElementsByTagName("*") returns nothing, so we bound it ourselves. Its work grows with
+// depth × elements (148 deep with 20k paragraphs took 3.5 s), and link-heavy markup costs about
+// 200 µs per element even when shallow (10k linked divs took 4 s). Pages over either bound use
+// the measured text, which is all visible text: noisier for the model, but never slow.
 const READABILITY_BUDGET = 150_000;
+const READABILITY_MAX_ELEMENTS = 1000;
 // Wide pages cost real time too (500 KB of <p> took over a second end to end).
 const MAX_ELEMENTS_FOR_DOM = 20_000;
 const TIKTOK_DEADLINE_MS = 8000;
@@ -398,7 +401,7 @@ function extractHtml(rawHtml: string, finalUrl: string, now: Date): Extracted {
 
   // Readability mutates the document, so this has to come after the metadata reads.
   let text = "";
-  if (scan.maxDepth * scan.elements <= READABILITY_BUDGET) {
+  if (scan.elements <= READABILITY_MAX_ELEMENTS && scan.maxDepth * scan.elements <= READABILITY_BUDGET) {
     try {
       text = collapseWhitespace(new Readability(document as unknown as Document, { charThreshold: 100 }).parse()?.textContent ?? "");
     } catch {
