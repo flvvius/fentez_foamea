@@ -11,7 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AutentificareRouteImport } from './routes/autentificare'
+import { Route as HartaRouteImport } from './routes/harta'
+import { Route as PosteazaRouteImport } from './routes/posteaza'
+import { Route as OfertaIdRouteImport } from './routes/oferta.$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiDealImagesIndexRouteImport } from './routes/api/deal-images/index'
+import { Route as ApiDealImagesIdRouteImport } from './routes/api/deal-images/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +28,110 @@ const AutentificareRoute = AutentificareRouteImport.update({
   path: '/autentificare',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HartaRoute = HartaRouteImport.update({
+  id: '/harta',
+  path: '/harta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PosteazaRoute = PosteazaRouteImport.update({
+  id: '/posteaza',
+  path: '/posteaza',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfertaIdRoute = OfertaIdRouteImport.update({
+  id: '/oferta/$id',
+  path: '/oferta/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDealImagesIndexRoute = ApiDealImagesIndexRouteImport.update({
+  id: '/api/deal-images/',
+  path: '/api/deal-images/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDealImagesIdRoute = ApiDealImagesIdRouteImport.update({
+  id: '/api/deal-images/$id',
+  path: '/api/deal-images/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/autentificare': typeof AutentificareRoute
+  '/harta': typeof HartaRoute
+  '/posteaza': typeof PosteazaRoute
+  '/oferta/$id': typeof OfertaIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/deal-images/$id': typeof ApiDealImagesIdRoute
+  '/api/deal-images/': typeof ApiDealImagesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/autentificare': typeof AutentificareRoute
+  '/harta': typeof HartaRoute
+  '/posteaza': typeof PosteazaRoute
+  '/oferta/$id': typeof OfertaIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/deal-images/$id': typeof ApiDealImagesIdRoute
+  '/api/deal-images': typeof ApiDealImagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/autentificare': typeof AutentificareRoute
+  '/harta': typeof HartaRoute
+  '/posteaza': typeof PosteazaRoute
+  '/oferta/$id': typeof OfertaIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/deal-images/$id': typeof ApiDealImagesIdRoute
+  '/api/deal-images/': typeof ApiDealImagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/autentificare' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/autentificare'
+    | '/harta'
+    | '/posteaza'
+    | '/oferta/$id'
+    | '/api/auth/$'
+    | '/api/deal-images/$id'
+    | '/api/deal-images/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/autentificare' | '/api/auth/$'
-  id: '__root__' | '/' | '/autentificare' | '/api/auth/$'
+  to:
+    | '/'
+    | '/autentificare'
+    | '/harta'
+    | '/posteaza'
+    | '/oferta/$id'
+    | '/api/auth/$'
+    | '/api/deal-images/$id'
+    | '/api/deal-images'
+  id:
+    | '__root__'
+    | '/'
+    | '/autentificare'
+    | '/harta'
+    | '/posteaza'
+    | '/oferta/$id'
+    | '/api/auth/$'
+    | '/api/deal-images/$id'
+    | '/api/deal-images/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AutentificareRoute: typeof AutentificareRoute
+  HartaRoute: typeof HartaRoute
+  PosteazaRoute: typeof PosteazaRoute
+  OfertaIdRoute: typeof OfertaIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiDealImagesIdRoute: typeof ApiDealImagesIdRoute
+  ApiDealImagesIndexRoute: typeof ApiDealImagesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +150,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutentificareRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/harta': {
+      id: '/harta'
+      path: '/harta'
+      fullPath: '/harta'
+      preLoaderRoute: typeof HartaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posteaza': {
+      id: '/posteaza'
+      path: '/posteaza'
+      fullPath: '/posteaza'
+      preLoaderRoute: typeof PosteazaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oferta/$id': {
+      id: '/oferta/$id'
+      path: '/oferta/$id'
+      fullPath: '/oferta/$id'
+      preLoaderRoute: typeof OfertaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/deal-images/': {
+      id: '/api/deal-images/'
+      path: '/api/deal-images'
+      fullPath: '/api/deal-images/'
+      preLoaderRoute: typeof ApiDealImagesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/deal-images/$id': {
+      id: '/api/deal-images/$id'
+      path: '/api/deal-images/$id'
+      fullPath: '/api/deal-images/$id'
+      preLoaderRoute: typeof ApiDealImagesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +198,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AutentificareRoute: AutentificareRoute,
+  HartaRoute: HartaRoute,
+  PosteazaRoute: PosteazaRoute,
+  OfertaIdRoute: OfertaIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiDealImagesIdRoute: ApiDealImagesIdRoute,
+  ApiDealImagesIndexRoute: ApiDealImagesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

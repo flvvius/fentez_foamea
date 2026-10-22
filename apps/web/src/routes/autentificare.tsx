@@ -87,7 +87,7 @@ function AuthPage() {
   return (
     <main className="mx-auto w-full max-w-sm px-4 py-12">
       <a href="/" className="text-[var(--type-small)] text-[var(--muted-foreground)] underline">
-        Înapoi la hartă
+        Înapoi la oferte
       </a>
       <h1 className="mt-6 mb-6 text-[var(--type-pageTitle)] font-semibold leading-tight">
         {mode === "in" ? "Intră în cont" : "Creează un cont"}

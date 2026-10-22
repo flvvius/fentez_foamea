@@ -31,7 +31,11 @@ export function formatRelative(iso: string, now: Date): string {
   if (minutes < 1) return "chiar acum";
   if (minutes < 60) return `acum ${minutes} min`;
   const hours = Math.round(minutes / 60);
-  return hours < 24 ? `acum ${hours} h` : `acum ${Math.round(hours / 24)} zile`;
+  if (hours < 24) return `acum ${hours} h`;
+  const days = Math.round(hours / 24);
+  if (days === 1) return "acum o zi";
+  const lastTwo = days % 100;
+  return lastTwo === 0 || lastTwo >= 20 ? `acum ${days} de zile` : `acum ${days} zile`;
 }
 
 export function bucharestWeekday(now: Date): number {
