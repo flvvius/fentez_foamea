@@ -5,6 +5,7 @@ import type { Source } from "../source.ts";
 import { findLeiPrice, parseDailyWindow, parseValidity, parseWeekdays, truncate } from "../romanian.ts";
 
 const BASE = "https://www.dominos-pizza.ro";
+const ADD_ON = /\b(comanzi o pizza|al doilea|a doua)\b/i;
 
 export const dominos: Source = {
   id: "dominos",
@@ -35,12 +36,15 @@ export function parseDominosDeals(html: string): ChainDeal[] {
       const text = collapseWhitespace(box.find(".offer-txt").text());
       if (!id || !title) return undefined;
       const window = parseDailyWindow(text);
+      const price = findLeiPrice(text);
+      const addOn = price !== undefined && ADD_ON.test(text);
       return {
         dealId: id,
         kind: "combo",
         title,
         description: text ? truncate(text) : undefined,
-        priceRon: findLeiPrice(text),
+        priceRon: addOn ? undefined : price,
+        conditions: addOn ? `${formatLei(price)} lei e prețul produsului în plus, doar împreună cu o pizza la preț întreg` : undefined,
         ...parseValidity(text),
         daysOfWeek: parseWeekdays(`${title} ${text}`),
         timeStart: window?.[0],
@@ -74,6 +78,10 @@ export function parseDominosStores(html: string): ScrapedVenue[] {
     })
     .get()
     .filter((store): store is ScrapedVenue => store !== undefined);
+}
+
+function formatLei(price: number): string {
+  return price.toFixed(2).replace(".", ",").replace(/,00$/, "");
 }
 
 function titleCase(text: string): string {
