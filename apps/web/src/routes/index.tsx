@@ -4,6 +4,7 @@ import { ExplorePage, useExploreState } from "@/components/ExplorePage";
 import type { SnapshotWire } from "@/lib/offers";
 import { searchFromState, stateFromSearch, validateSearch, type ExploreState } from "@/lib/search";
 import { offerHeadline, offerLink, offerSummary } from "@/lib/share";
+import { countOffers } from "@/lib/format";
 import { SITE_URL } from "@/lib/site";
 import { fetchOfferSnapshot } from "@/server/offers";
 
@@ -30,7 +31,11 @@ export const Route = createFileRoute("/")({
   loader: () => fetchOfferSnapshot(),
   headers: () => SNAPSHOT_HEADERS,
   head: ({ loaderData, match }) => ({
-    meta: match.search.oferta ? sharedOfferMeta(loaderData, match.search.oferta) : searchMeta(match.search.q),
+    meta: match.search.oferta
+      ? sharedOfferMeta(loaderData, match.search.oferta)
+      : match.search.local
+        ? venueMeta(loaderData, match.search.local)
+        : searchMeta(match.search.q),
     links: [{ rel: "canonical", href: SITE_URL }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(WEBSITE_JSON_LD) }],
   }),
@@ -55,6 +60,24 @@ function Home() {
 
 function searchTitle(query: string): string {
   return `Oferte cu „${query}” în București`;
+}
+
+function venueMeta(wire: SnapshotWire | undefined, venueId: string) {
+  if (!wire) return [];
+  const index = wire.venues.id.indexOf(venueId);
+  if (index < 0) return [];
+  const name = wire.venues.name[index]!;
+  const count = wire.offers.venue.filter((venue) => venue === index).length;
+  const title = `Oferte la ${name}`;
+  const description = `${countOffers(count)} la ${name} acum: prețuri, reduceri și program, pe fentez foamea.`;
+  return [
+    { title: `${title} · fentez foamea` },
+    { name: "description", content: description },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+  ];
 }
 
 function searchMeta(rawQuery: string | undefined) {

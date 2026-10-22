@@ -40,3 +40,9 @@ test("names the search in a shared search link", async ({ page }) => {
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", "Oferte cu „covrigi” în București");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oferte cu „covrigi” în București, acum.");
 });
+
+test("names the venue in a shared venue link", async ({ page }) => {
+  await page.goto("/?local=00000000-0000-0000-0000-00000000a002");
+  await expect(page).toHaveTitle("Oferte la City Grill Centru · fentez foamea");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /^3 oferte la City Grill Centru acum/);
+});
