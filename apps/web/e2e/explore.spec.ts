@@ -75,6 +75,11 @@ test.describe("explorer", () => {
     await expect(offerRow(page, "-30% la shaorma")).toHaveCount(1);
   });
 
+  test("shows the percent from a store promo's title where the price would be", async ({ page }) => {
+    await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
+    await expect(offerRow(page, "-30% la shaorma").locator(".figure")).toHaveText("−30%");
+  });
+
   test("collapses chain copies to the nearest store", async ({ page }) => {
     await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
     await expect(offerRow(page, "Meniu Crispy Strips 2+1")).toHaveCount(1);

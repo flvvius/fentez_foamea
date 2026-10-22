@@ -97,9 +97,9 @@ function PriceFigure({ offer }: Readonly<{ offer: PlacedOffer }>) {
   const wasHigher = offer.originalPrice !== null && offer.price !== null && offer.originalPrice > offer.price;
   return (
     <p className="figure">
-      {offer.price === null ? (
-        <span className="figure-kind">{OFFER_KIND_LABELS[offer.kind]}</span>
-      ) : (
+      {offer.price === null && offer.headlinePct !== null && <span className="figure-price figure-deal">−{offer.headlinePct}%</span>}
+      {offer.price === null && offer.headlinePct === null && <span className="figure-kind">{OFFER_KIND_LABELS[offer.kind]}</span>}
+      {offer.price !== null && (
         <span className="figure-price">
           {formatPrice(offer.price)}
           <span className="figure-unit">lei</span>
@@ -111,7 +111,7 @@ function PriceFigure({ offer }: Readonly<{ offer: PlacedOffer }>) {
           {formatPrice(offer.originalPrice!)} lei
         </s>
       )}
-      {offer.discountPct !== null && <span className="figure-off">−{offer.discountPct}%</span>}
+      {offer.price !== null && offer.discountPct !== null && <span className="figure-off">−{offer.discountPct}%</span>}
     </p>
   );
 }

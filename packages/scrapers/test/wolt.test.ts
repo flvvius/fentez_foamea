@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { scrapedOfferSchema } from "@fentezfoamea/core";
 import { describe, expect, it } from "vitest";
 import {
+  withoutWoltPlusUpsell,
   campaignConditions,
   campaignOffer,
   isMerchantCampaign,
@@ -63,8 +64,15 @@ describe("wolt", () => {
     const offer = scrapedOfferSchema.parse(campaignOffer(papaGyros, deal!));
     expect(offer.endsAt).toBe("2026-10-31T21:59:59.999Z");
     expect(offer.conditions).toContain("doar cu Wolt+");
+    expect(offer.title).not.toContain("Wolt+");
     expect(offer.url).toBe("https://wolt.com/ro/rou/bucharest/restaurant/papa-gyros-rahova-67dad3a2db56261b0e642333");
     expect(offer.venue).toMatchObject({ lat: 44.4141, lon: 26.0681, chain: "Papa Gyros" });
+  });
+
+  it("drops the Wolt+ upsell from campaign titles", () => {
+    expect(withoutWoltPlusUpsell("20% la articolele selectate | 40% cu Wolt+")).toBe("20% la articolele selectate");
+    expect(withoutWoltPlusUpsell("20% reducere pentru toate articolele | 30% with W+")).toBe("20% reducere pentru toate articolele");
+    expect(withoutWoltPlusUpsell("-20% la tot meniul")).toBe("-20% la tot meniul");
   });
 
   it("prices discounted items from the assortment, biggest saving first", () => {

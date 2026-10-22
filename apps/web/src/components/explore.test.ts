@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, venuePins } from "./explore";
+import { applyFilters, collapseChainCopies, percentInTitle, placeOffers, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const base: Offer = {
   id: "1",
@@ -58,6 +58,16 @@ describe("explore", () => {
     const delivery = { ...base, id: "delivery", kind: "discount" as const, deliveryOnly: true };
     const placed = placeOffers([vague, far, delivery, base], origin, now);
     expect(sortOffers(placed, "best").map((o) => o.id)).toEqual(["1", "delivery", "far", "vague"]);
+  });
+
+  it.each([
+    ["-30% la tot meniul", 30],
+    ["20% reducere pentru articolele selectate", 20],
+    ["15% reducere (până la 30 RON)", 15],
+    ["Prânzul sub 40 lei", null],
+    ["1+1 la unele produse", null],
+  ])("reads the headline percent from %s", (title, pct) => {
+    expect(percentInTitle(title)).toBe(pct);
   });
 
   it("sorts by price and groups pins by venue", () => {

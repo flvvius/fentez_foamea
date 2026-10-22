@@ -68,6 +68,7 @@ const HEADERS = { "App-Language": "ro" };
 
 const PLATFORM_WIDE = /utilizatorii noi|new users|prima comand|first order/i;
 const WOLT_PLUS_UPSELL = /\b(cu|with) W(olt)?\+/i;
+const WOLT_PLUS_TAIL = /\s*\|[^|]*\b(cu|with) W(olt)?\+.*$/i;
 const ALL_ITEMS = /toate articolele|all items/i;
 
 const CHAINS = [
@@ -172,11 +173,15 @@ export function isMerchantCampaign(campaign: WoltCampaign): boolean {
   return !campaign.description.points.some((point) => PLATFORM_WIDE.test(point));
 }
 
+export function withoutWoltPlusUpsell(title: string): string {
+  return title.replace(WOLT_PLUS_TAIL, "") || title;
+}
+
 export function campaignOffer(venue: WoltListVenue, campaign: WoltCampaign): ScrapedOffer {
   return {
     sourceOfferId: `${campaign.id}@${venue.id}`,
     kind: campaignKind(campaign),
-    title: collapseWhitespace(campaign.description.title),
+    title: withoutWoltPlusUpsell(collapseWhitespace(campaign.description.title)),
     endsAt: endDate(campaign),
     ...weeklySchedule(campaign.conditions.weekly_time_restrictions),
     conditions: campaignConditions(campaign),

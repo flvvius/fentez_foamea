@@ -3,7 +3,7 @@ import { bucharestWeekday, sameBucharestDay } from "@/lib/format";
 import type { Offer } from "@/lib/offers";
 import type { ExploreState, SortKey } from "@/lib/search";
 
-export type PlacedOffer = Offer & { distance: number | null; otherLocations?: number };
+export type PlacedOffer = Offer & { distance: number | null; headlinePct: number | null; otherLocations?: number };
 
 export type VenuePin = {
   venueId: string;
@@ -25,6 +25,7 @@ export function placeOffers(offers: Offer[], origin: LatLon, now: Date): PlacedO
     .filter((offer) => isStillAvailable(offer, now))
     .map((offer) => ({
       ...offer,
+      headlinePct: offer.discountPct ?? percentInTitle(offer.title),
       distance: offer.lat !== null && offer.lon !== null ? distanceMeters(origin, { lat: offer.lat, lon: offer.lon }) : null,
     }));
 }
@@ -47,9 +48,16 @@ function withinRadius(offer: PlacedOffer, radiusKm: number): boolean {
 const POINTS_LOST_PER_KM = 8;
 const UNKNOWN_DISTANCE_M = 5000;
 
+const TITLE_PERCENT = /(?:^|[\s-−])(\d{1,2})\s*%/;
+
+export function percentInTitle(title: string): number | null {
+  const match = TITLE_PERCENT.exec(title);
+  return match ? Number(match[1]) : null;
+}
+
 export function dealScore(offer: PlacedOffer): number {
-  const discount = offer.discountPct ?? 0;
-  const priceKnown = offer.price === null ? -40 : 0;
+  const discount = offer.headlinePct ?? 0;
+  const priceKnown = offer.price === null ? -20 : 0;
   const rescuedBag = offer.kind === "surplus" ? 20 : 0;
   const deliveryOnly = offer.deliveryOnly ? -15 : 0;
   const km = (offer.distance ?? UNKNOWN_DISTANCE_M) / 1000;
@@ -59,7 +67,7 @@ export function dealScore(offer: PlacedOffer): number {
 const comparators: Record<SortKey, (a: PlacedOffer, b: PlacedOffer) => number> = {
   best: (a, b) => dealScore(b) - dealScore(a),
   distance: (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity),
-  discount: (a, b) => (b.discountPct ?? -1) - (a.discountPct ?? -1),
+  discount: (a, b) => (b.headlinePct ?? -1) - (a.headlinePct ?? -1),
   price: (a, b) => (a.price ?? Infinity) - (b.price ?? Infinity),
 };
 
