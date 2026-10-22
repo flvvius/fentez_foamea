@@ -35,8 +35,13 @@ test("describes the site search to search engines", async ({ page }) => {
   expect(data.potentialAction.target.urlTemplate).toBe("https://fentez-foamea.vercel.app/?q={search_term_string}&km=oras");
 });
 
-test("names the search in a shared search link", async ({ page }) => {
+test("names the search in a shared search link", async ({ page, request }) => {
   await page.goto("/?q=covrigi");
+  await expect(page.locator('meta[property="og:image"]')).toHaveCount(1);
+  const image = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect(image).toMatch(/\/og\?q=covrigi$/);
+  const png = await request.get(new URL(image!).pathname + new URL(image!).search);
+  expect(png.headers()["content-type"]).toBe("image/png");
   await expect(page).toHaveTitle("Oferte cu „covrigi” în București · fentez foamea");
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", "Oferte cu „covrigi” în București");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oferte cu „covrigi” în București, acum.");

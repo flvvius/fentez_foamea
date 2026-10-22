@@ -88,7 +88,11 @@ function searchWords(query: string): string[] {
   return foldText(query).split(/\s+/).filter(Boolean);
 }
 
-function matchesWords(offer: PlacedOffer, words: string[]): boolean {
+export function matchesQuery(offer: Pick<Offer, "title" | "venueName" | "chain">, query: string): boolean {
+  return matchesWords(offer, searchWords(query));
+}
+
+function matchesWords(offer: Pick<Offer, "title" | "venueName" | "chain">, words: string[]): boolean {
   const text = foldText(`${offer.title} ${offer.venueName ?? ""} ${offer.chain ?? ""}`);
   return words.every((word) => text.includes(word));
 }

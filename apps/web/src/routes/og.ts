@@ -14,6 +14,8 @@ export const Route = createFileRoute("/og")({
           if (!venue) return Response.redirect(new URL("/og", request.url), 302);
           return renderTodayImage(await findTodaySummary({ venue }), new Date(), { venue });
         }
+        const query = params.get("q")?.trim().slice(0, 60);
+        if (query) return renderTodayImage(await findTodaySummary({ query }), new Date(), { query });
         const zoneSlug = params.get("zona");
         const landingSlug = params.get("categorie");
         if (zoneSlug !== null || landingSlug !== null) {

@@ -94,6 +94,8 @@ function searchMeta(rawQuery: string | undefined) {
     { property: "og:description", content: description },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
+    { property: "og:image", content: `${SITE_URL}/og?q=${encodeURIComponent(query)}` },
+    { name: "twitter:image", content: `${SITE_URL}/og?q=${encodeURIComponent(query)}` },
   ];
 }
 

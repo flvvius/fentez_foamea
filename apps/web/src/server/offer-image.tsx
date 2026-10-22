@@ -1,7 +1,7 @@
 import { Resvg } from "@resvg/resvg-js";
 import satori from "satori";
 import { distanceMeters, OFFER_KIND_LABELS, type OfferKind } from "@fentezfoamea/core";
-import { isStillAvailable, percentInTitle, priceCapInTitle } from "@/components/explore";
+import { isStillAvailable, matchesQuery, percentInTitle, priceCapInTitle } from "@/components/explore";
 import { formatPrice, sameBucharestDay } from "@/lib/format";
 import type { Landing } from "@/lib/landing";
 import type { Offer } from "@/lib/offers";
@@ -95,33 +95,38 @@ function headlineFigure(offer: OfferCardRow): { text: string; unit?: string; dea
 export type TodaySummary = { total: number; bags: number; highlights: OfferCardRow[] };
 
 export type VenueRef = { id: string; name: string };
-export type SummaryScope = { zone?: Zone; landing?: Landing; venue?: VenueRef };
+export type SummaryScope = { zone?: Zone; landing?: Landing; venue?: VenueRef; query?: string };
 
 export async function findVenue(id: string): Promise<VenueRef | undefined> {
   const offer = (await sharedSnapshot()).offers.find((candidate) => candidate.venueId === id);
   return offer?.venueId && offer.venueName ? { id: offer.venueId, name: offer.venueName } : undefined;
 }
 
-export async function findTodaySummary({ zone, landing, venue }: SummaryScope = {}, now = new Date()): Promise<TodaySummary> {
+export async function findTodaySummary({ zone, landing, venue, query }: SummaryScope = {}, now = new Date()): Promise<TodaySummary> {
   const inScope = (await sharedSnapshot()).offers.filter(
     (offer) =>
       isStillAvailable(offer, now) &&
       (!landing || offer.kind === landing.kind) &&
       (!venue || offer.venueId === venue.id) &&
+      (!query || matchesQuery(offer, query)) &&
       (!zone || (offer.lat !== null && offer.lon !== null && distanceMeters(zone, { lat: offer.lat, lon: offer.lon }) <= ZONE_RADIUS_KM * 1000)),
   );
   const showcase = inScope.filter(
     (offer) =>
       offer.price !== null &&
-      (landing || venue || (offer.discountPct ?? 0) >= 40) &&
+      (landing || venue || query || (offer.discountPct ?? 0) >= 40) &&
       !offer.deliveryOnly &&
       offer.lat !== null &&
       (!offer.pickupStart || new Date(offer.pickupStart) <= now || sameBucharestDay(new Date(offer.pickupStart), now)),
   );
   const bestPerPlace = new Map<string, Offer>();
+  const shownDeals = new Set<string>();
   for (const offer of showcase.sort(byShowcaseOrder)) {
     const place = offer.chain ?? offer.venueName ?? offer.title;
-    if (!bestPerPlace.has(place)) bestPerPlace.set(place, offer);
+    const deal = `${offer.title}|${offer.price}`;
+    if (bestPerPlace.has(place) || shownDeals.has(deal)) continue;
+    bestPerPlace.set(place, offer);
+    shownDeals.add(deal);
   }
   return {
     total: inScope.length,
@@ -136,7 +141,8 @@ function byShowcaseOrder(a: Offer, b: Offer): number {
 
 const dayFormat = new Intl.DateTimeFormat("ro-RO", { timeZone: "Europe/Bucharest", weekday: "long", day: "numeric", month: "long" });
 
-export async function renderTodayImage(today: TodaySummary, now: Date, { zone, landing, venue }: SummaryScope = {}): Promise<Response> {
+export async function renderTodayImage(today: TodaySummary, now: Date, { zone, landing, venue, query }: SummaryScope = {}): Promise<Response> {
+  const narrowed = zone || landing || venue || query;
   const counted = landing ? countLabel(today.total, ...landing.countNoun) : countLabel(today.total, "ofertă", "oferte");
   const svg = await satori(
     <div style={{ width: WIDTH, height: HEIGHT, boxSizing: "border-box", display: "flex", padding: "64px 80px", background: "#fcfbf8", color: "#1d1a16", fontFamily: "Inter" }}>
@@ -144,11 +150,11 @@ export async function renderTodayImage(today: TodaySummary, now: Date, { zone, l
         <span style={{ fontSize: 30, fontWeight: 700 }}>fentez foamea</span>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span style={{ fontSize: 30, fontWeight: 500, color: "#6b645b" }}>Azi, {dayFormat.format(now)}</span>
-          <span style={{ fontSize: zone || landing || venue ? 64 : 76, fontWeight: 700, letterSpacing: -2, lineHeight: 1.05, marginTop: 12 }}>
-            {counted} {venue ? `la ${clip(venue.name, 40)}` : zone ? `lângă ${zone.name}` : "în București"}
+          <span style={{ fontSize: narrowed ? 64 : 76, fontWeight: 700, letterSpacing: -2, lineHeight: 1.05, marginTop: 12 }}>
+            {counted} {venue ? `la ${clip(venue.name, 40)}` : zone ? `lângă ${zone.name}` : query ? `cu „${clip(query, 24)}”` : "în București"}
           </span>
           <span style={{ fontSize: 30, fontWeight: 500, color: "#6b645b", marginTop: 20 }}>
-            {landing || venue
+            {landing || venue || query
               ? "Pe o hartă, ordonate după cât de aproape sunt de tine."
               : `${countLabel(today.bags, "pachet anti-risipă", "pachete anti-risipă")}, meniuri de prânz și reduceri, pe o hartă.`}
           </span>
