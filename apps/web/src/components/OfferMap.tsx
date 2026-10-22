@@ -39,19 +39,27 @@ function PricePin({ pin, selected, onSelect }: Readonly<{ pin: VenuePin; selecte
     const more = pin.count > 1 ? `<span class="pin-count">${pin.count}</span>` : "";
     return L.divIcon({
       className: "",
-      html: `<button type="button" class="pin${selected ? " pin-selected" : ""}" aria-label="${escapeHtml(pin.name)}">${price}${more}</button>`,
+      html: `<span class="pin${selected ? " pin-selected" : ""}">${price}${more}</span>`,
       iconSize: undefined,
       iconAnchor: [0, 0],
     });
   }, [pin, selected]);
+
+  const toggle = () => onSelect(selected ? null : pin.venueId);
 
   return (
     <Marker
       position={[pin.lat, pin.lon]}
       icon={icon}
       zIndexOffset={selected ? 1000 : Math.round(pin.bestDiscount ?? 0)}
-      eventHandlers={{ click: () => onSelect(selected ? null : pin.venueId) }}
+      eventHandlers={{
+        click: toggle,
+        keypress: (event) => {
+          if (event.originalEvent.key === "Enter" || event.originalEvent.key === " ") toggle();
+        },
+      }}
       title={pin.name}
+      alt={`${pin.name}, ${pin.minPrice === null ? "ofertă" : `de la ${formatPrice(pin.minPrice)} lei`}`}
     />
   );
 }
@@ -76,8 +84,4 @@ function ZoomClass() {
     apply();
   });
   return null;
-}
-
-function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, (char) => `&#${char.codePointAt(0)};`);
 }

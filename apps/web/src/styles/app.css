@@ -523,10 +523,8 @@ body {
   }
 
   .map {
-    height: 42dvh;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    height: 34dvh;
+    z-index: 0;
   }
 
   .panel {
@@ -535,15 +533,29 @@ body {
   }
 
   .masthead {
-    padding: 24px 16px 20px;
+    padding: 16px 16px 14px;
+  }
+
+  .brand {
+    display: none;
   }
 
   .headline {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+    margin-top: 0;
+  }
+
+  .lede {
+    font-size: var(--type-small);
+    margin-top: 4px;
+  }
+
+  .locate {
+    margin-top: 12px;
   }
 
   .filters {
-    top: 42dvh;
+    top: 0;
     padding: 10px 0;
   }
 
