@@ -13,6 +13,7 @@ const MAX_WALL_PAGES = 45;
 const MAX_ADDRESS_LOOKUPS = 500;
 const MAX_ITEM_STORES = 150;
 const ITEMS_PER_STORE = 5;
+const MIN_ITEM_PRICE_RON = 15;
 
 const WALL_POINTS: LatLon[] = [
   BUCHAREST_CENTER,
@@ -247,6 +248,7 @@ export function cheapestDiscountedItems(rows: ProductRow[], count: number): { ro
       if (!promo?.price) return [];
       const price = roundRon(promo.price);
       const original = roundRon(row.price);
+      if (original < MIN_ITEM_PRICE_RON) return [];
       return isGenuineDiscount(price, original, 5) ? [{ row, price }] : [];
     })
     .sort((a, b) => a.price - b.price)
