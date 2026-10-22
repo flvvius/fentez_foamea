@@ -30,3 +30,10 @@ test("zone pages, the sitemap and search work", async ({ page, request }) => {
   await page.goto("/?q=pizza&km=oras");
   await expect(page.locator("#oferte article").first()).toContainText(/pizza/i);
 });
+
+test("the offer snapshot is served from the CDN cache", async ({ request }) => {
+  await request.get("/api/snapshot");
+  const response = await request.get("/api/snapshot");
+  expect(response.ok()).toBe(true);
+  expect(response.headers()["x-vercel-cache"]).toMatch(/HIT|STALE/);
+});
