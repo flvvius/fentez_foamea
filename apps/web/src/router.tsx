@@ -1,11 +1,12 @@
 import { createRouter } from "@tanstack/react-router";
+import { NotFound } from "./components/NotFound";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () =>
   createRouter({
     routeTree,
     scrollRestoration: true,
-    defaultNotFoundComponent: () => <p className="p-6">Pagina nu există.</p>,
+    defaultNotFoundComponent: NotFound,
   });
 
 declare module "@tanstack/react-router" {

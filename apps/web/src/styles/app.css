@@ -99,6 +99,10 @@ body {
   padding: 32px 24px 24px;
 }
 
+.not-found {
+  max-width: 560px;
+}
+
 .brand {
   font-weight: 600;
   letter-spacing: -0.01em;

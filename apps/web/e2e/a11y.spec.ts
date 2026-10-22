@@ -24,5 +24,12 @@ for (const colorScheme of ["light", "dark"] as const) {
         expect(violations).toEqual([]);
       });
     }
+
+    test("the not-found page has no accessibility violations", async ({ page }) => {
+      await page.goto("/zona/atlantis");
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      const results = await new AxeBuilder({ page }).analyze();
+      expect(results.violations.map((violation) => violation.id)).toEqual([]);
+    });
   });
 }
