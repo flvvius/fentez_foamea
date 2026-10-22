@@ -92,6 +92,13 @@ describe("wolt", () => {
     expect(offer.venue).toMatchObject({ lat: 44.4141, lon: 26.0681, chain: "Papa Gyros" });
   });
 
+  it("skips free-delivery campaigns, which are not a food deal", () => {
+    const deal = campaigns("dynamic-papa-gyros.json").find(isMerchantCampaign)!;
+    for (const title of ["0 RON taxă de livrare", "Livrare gratuită"]) {
+      expect(isMerchantCampaign({ ...deal, description: { ...deal.description, title } })).toBe(false);
+    }
+  });
+
   it("drops the Wolt+ upsell from campaign titles", () => {
     expect(withoutWoltPlusUpsell("20% la articolele selectate | 40% cu Wolt+")).toBe("20% la articolele selectate");
     expect(withoutWoltPlusUpsell("20% reducere pentru toate articolele | 30% with W+")).toBe("20% reducere pentru toate articolele");

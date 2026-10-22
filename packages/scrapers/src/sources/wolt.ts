@@ -69,6 +69,7 @@ const RATE_LIMIT_COOLDOWNS_MS = [20_000, 45_000, 90_000];
 const HEADERS = { "App-Language": "ro" };
 
 const PLATFORM_WIDE = /utilizatorii noi|new users|prima comand|first order/i;
+const DELIVERY_FEE_ONLY = /^(?:0 (?:RON|lei) taxă de livrare|livrare gratuită|free delivery)$/i;
 const WOLT_PLUS_UPSELL = /\b(cu|with) W(olt)?\+/i;
 const WOLT_PLUS_TAIL = /\s*\|[^|]*\b(cu|with) W(olt)?\+.*$/i;
 const ALL_ITEMS = /toate articolele|all items/i;
@@ -180,6 +181,7 @@ export function rotationWindow<T>(items: T[], size: number, slot: number): T[] {
 
 export function isMerchantCampaign(campaign: WoltCampaign): boolean {
   if (campaign.conditions.has_wolt_plus === true) return false;
+  if (DELIVERY_FEE_ONLY.test(campaign.description.title.trim())) return false;
   return !campaign.description.points.some((point) => PLATFORM_WIDE.test(point));
 }
 
