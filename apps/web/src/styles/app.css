@@ -714,7 +714,7 @@ body {
     transition: transform var(--motion-swap) ease-out;
   }
 
-  .filters[data-tucked] {
+  .filters[data-tucked]:not(:focus-within) {
     transform: translateY(-100%);
   }
 }

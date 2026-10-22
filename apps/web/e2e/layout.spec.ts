@@ -17,6 +17,8 @@ test("keeps the filters in reach while scrolling the list", async ({ page, isMob
   const filters = page.getByRole("group", { name: "Filtre" });
   if (isMobile) {
     await expect(filters).not.toBeInViewport();
+    await page.getByRole("searchbox").focus();
+    await expect(filters).toBeInViewport();
     await page.mouse.wheel(0, -100);
   }
   await expect(filters).toBeInViewport();
