@@ -23,6 +23,18 @@ export const ZONES: Zone[] = [
   { slug: "militari", name: "Militari", lat: 44.435, lon: 26.015 },
   { slug: "crangasi", name: "Crângași", lat: 44.452, lon: 26.045 },
   { slug: "baneasa", name: "Băneasa", lat: 44.501, lon: 26.079 },
+  { slug: "cismigiu", name: "Cișmigiu și Kogălniceanu", lat: 44.436, lon: 26.09 },
+  { slug: "dorobanti", name: "Dorobanți", lat: 44.4595, lon: 26.0935 },
+  { slug: "aviatiei", name: "Aviației", lat: 44.479, lon: 26.103 },
+  { slug: "mosilor", name: "Calea Moșilor", lat: 44.443, lon: 26.115 },
+  { slug: "iancului", name: "Piața Iancului", lat: 44.4395, lon: 26.1405 },
+  { slug: "vitan", name: "Vitan", lat: 44.4205, lon: 26.1265 },
+  { slug: "timpuri-noi", name: "Timpuri Noi", lat: 44.418, lon: 26.115 },
+  { slug: "piata-sudului", name: "Piața Sudului", lat: 44.3985, lon: 26.121 },
+  { slug: "13-septembrie", name: "13 Septembrie", lat: 44.42, lon: 26.075 },
+  { slug: "rahova", name: "Rahova", lat: 44.41, lon: 26.056 },
+  { slug: "lujerului", name: "Lujerului", lat: 44.433, lon: 26.031 },
+  { slug: "bucurestii-noi", name: "Bucureștii Noi", lat: 44.483, lon: 26.042 },
 ];
 
 export const ZONE_RADIUS_KM = 1;

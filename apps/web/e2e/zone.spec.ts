@@ -39,6 +39,7 @@ test("the footer links to zones and unknown zones are a 404", async ({ page, req
   await expect(page).toHaveURL(/\/zona\/politehnica$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mâncare ieftină lângă Politehnica, acum.");
   expect((await request.get("/zona/atlantis")).status()).toBe(404);
+  expect((await request.get("/zona/cismigiu")).status()).toBe(200);
 });
 
 test("an unknown page points back to today's offers", async ({ page }) => {
