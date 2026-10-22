@@ -11,6 +11,7 @@ import { BUDGET_OPTIONS, RADIUS_OPTIONS, type ExploreState, type SortKey } from 
 import { shareCurrentView } from "@/lib/share";
 import { OfferCard } from "./OfferCard";
 import { ShareButton } from "./ShareButton";
+import { useTuckOnScrollDown } from "./useTuckOnScrollDown";
 import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const OfferMap = lazy(() => import("./OfferMap"));
@@ -125,6 +126,8 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
   }, [center, findVisitor]);
 
   const searchBox = useRef<HTMLInputElement>(null);
+  const filters = useRef<HTMLFieldSetElement>(null);
+  const filtersTucked = useTuckOnScrollDown(filters);
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;
@@ -215,7 +218,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           </section>
         )}
 
-        <fieldset className="filters">
+        <fieldset ref={filters} className="filters" data-tucked={filtersTucked || undefined}>
           <legend className="sr-only">Filtre</legend>
           <input
             ref={searchBox}

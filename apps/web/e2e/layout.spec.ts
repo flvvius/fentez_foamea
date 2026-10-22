@@ -11,10 +11,14 @@ test("shows the first offer without scrolling", async ({ page }) => {
   expect(box!.y).toBeLessThan(viewport.height - 80);
 });
 
-test("keeps the filters in reach while scrolling the list", async ({ page }) => {
+test("keeps the filters in reach while scrolling the list", async ({ page, isMobile }) => {
   await offerList(page).locator("article").nth(4).scrollIntoViewIfNeeded();
   await page.mouse.wheel(0, 600);
   const filters = page.getByRole("group", { name: "Filtre" });
+  if (isMobile) {
+    await expect(filters).not.toBeInViewport();
+    await page.mouse.wheel(0, -100);
+  }
   await expect(filters).toBeInViewport();
   const box = await offerList(page).locator("article").last().boundingBox();
   expect(box).not.toBeNull();

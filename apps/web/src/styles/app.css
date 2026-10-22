@@ -658,7 +658,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .locate,
   .chip,
-  .pin {
+  .pin,
+  .filters {
     transition: none;
   }
 }
@@ -707,6 +708,14 @@ body {
 @media (max-width: 820px) {
   .shared {
     margin: 0 16px 8px;
+  }
+
+  .filters {
+    transition: transform var(--motion-swap) ease-out;
+  }
+
+  .filters[data-tucked] {
+    transform: translateY(-100%);
   }
 }
 
