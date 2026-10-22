@@ -33,9 +33,14 @@ export function applyFilters(offers: PlacedOffer[], filters: Pick<ExploreState, 
     if (filters.kinds.length && !filters.kinds.includes(offer.kind)) return false;
     if (!filters.includeDelivery && offer.deliveryOnly) return false;
     if (filters.maxPrice !== null && (offer.price === null || offer.price > filters.maxPrice)) return false;
-    if (filters.radiusKm !== null && offer.distance !== null && offer.distance > filters.radiusKm * 1000) return false;
+    if (filters.radiusKm !== null && !withinRadius(offer, filters.radiusKm)) return false;
     return true;
   });
+}
+
+function withinRadius(offer: PlacedOffer, radiusKm: number): boolean {
+  if (offer.distance === null) return offer.venueId === null;
+  return offer.distance <= radiusKm * 1000;
 }
 
 const comparators: Record<SortKey, (a: PlacedOffer, b: PlacedOffer) => number> = {

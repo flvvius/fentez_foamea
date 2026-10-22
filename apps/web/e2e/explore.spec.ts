@@ -57,6 +57,13 @@ test.describe("explorer", () => {
     await expect(offerRow(page, "Burger dublu cu cartofi")).toHaveCount(0);
   });
 
+  test("leaves venues without a location out of distance-limited lists", async ({ page }) => {
+    await expect(offerList(page).locator("article").first()).toBeVisible();
+    await expect(offerRow(page, "-30% la shaorma")).toHaveCount(0);
+    await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
+    await expect(offerRow(page, "-30% la shaorma")).toHaveCount(1);
+  });
+
   test("collapses chain copies to the nearest store", async ({ page }) => {
     await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
     await expect(offerRow(page, "Meniu Crispy Strips 2+1")).toHaveCount(1);

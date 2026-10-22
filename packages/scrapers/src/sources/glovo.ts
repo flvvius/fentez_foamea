@@ -10,7 +10,7 @@ const SITE = "https://glovoapp.com/ro/ro/bucharest/stores";
 const FOOD_CATEGORY = 1;
 const PAGE_SIZE = 50;
 const MAX_WALL_PAGES = 45;
-const MAX_ADDRESS_LOOKUPS = 200;
+const MAX_ADDRESS_LOOKUPS = 500;
 const MAX_ITEM_STORES = 150;
 const ITEMS_PER_STORE = 5;
 

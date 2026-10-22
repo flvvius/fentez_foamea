@@ -37,10 +37,11 @@ describe("explore", () => {
     expect(placed.map((o) => o.id)).toEqual(["1"]);
   });
 
-  it("keeps offers without a location regardless of radius", () => {
+  it("keeps national offers regardless of radius but drops venues it cannot place", () => {
     const far = { ...base, id: "far", lat: 44.5, lon: 26.2 };
     const national = { ...base, id: "nat", venueId: null, lat: null, lon: null };
-    const placed = placeOffers([base, far, national], origin, now);
+    const unplaced = { ...base, id: "unplaced", venueId: "v2", lat: null, lon: null };
+    const placed = placeOffers([base, far, national, unplaced], origin, now);
     const kept = applyFilters(placed, { kinds: [], radiusKm: 2, maxPrice: null, includeDelivery: true });
     expect(kept.map((o) => o.id)).toEqual(["1", "nat"]);
   });
