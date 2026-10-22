@@ -154,7 +154,12 @@ function pngResponse(svg: string): Response {
 }
 
 function clip(text: string, max: number): string {
-  return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+  const drawable = withFontGlyphs(text);
+  return drawable.length > max ? `${drawable.slice(0, max - 1).trimEnd()}…` : drawable;
+}
+
+function withFontGlyphs(text: string): string {
+  return text.replace(/•/g, "·").replace(/™/g, "");
 }
 
 function fromDataUrl(url: string): ArrayBuffer {
