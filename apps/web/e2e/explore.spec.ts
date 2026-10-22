@@ -139,10 +139,20 @@ test.describe("explorer", () => {
 test.describe("near me", () => {
   test.use({ geolocation: { latitude: 44.4205, longitude: 26.1795 }, permissions: ["geolocation"] });
 
+  test("locates a visitor who already allowed it, without changing the order", async ({ page }) => {
+    await page.goto("/");
+    await waitForHydration(page);
+    await expect(page.getByRole("button", { name: "Actualizează locația" })).toBeVisible();
+    await expect(page.getByLabel("Ordine")).toHaveValue("best");
+    await expect(page).toHaveURL(/\/$/);
+    await expect.poll(async () => (await offerTitles(page))[0]).toBe("Pachet de seară Titan");
+  });
+
   test("re-sorts by distance from the visitor", async ({ page }) => {
     await page.goto("/");
     await waitForHydration(page);
-    await page.getByRole("button", { name: "Arată ce e lângă mine" }).click();
+    await page.getByRole("button", { name: "Actualizează locația" }).click();
+    await expect(page.getByLabel("Ordine")).toHaveValue("distance");
     await expect(page.getByRole("button", { name: "Actualizează locația" })).toBeVisible();
     await expect.poll(async () => (await offerTitles(page))[0]).toBe("Pachet de seară Titan");
   });

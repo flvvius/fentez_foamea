@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BUCHAREST_CENTER, OFFER_KINDS, OFFER_KIND_LABELS, type LatLon, type OfferKind } from "@fentezfoamea/core";
 import { countOffers, formatRelative } from "@/lib/format";
 import { LANDINGS } from "@/lib/landing";
@@ -90,19 +90,33 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     onChange(next);
   };
 
-  const locateMe = useCallback(() => {
-    if (!("geolocation" in navigator)) return setLocate("denied");
-    setLocate("locating");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setOrigin({ lat: position.coords.latitude, lon: position.coords.longitude, mine: true });
-        onChange({ sort: "distance" });
-        setLocate("idle");
-      },
-      () => setLocate("denied"),
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
-    );
-  }, [onChange]);
+  const findVisitor = useCallback(
+    (preferDistanceOrder: boolean) => {
+      if (!("geolocation" in navigator)) return setLocate("denied");
+      setLocate("locating");
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setOrigin({ lat: position.coords.latitude, lon: position.coords.longitude, mine: true });
+          if (preferDistanceOrder) onChange({ sort: "distance" });
+          setLocate("idle");
+        },
+        () => setLocate("denied"),
+        { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
+      );
+    },
+    [onChange],
+  );
+  const locateMe = useCallback(() => findVisitor(true), [findVisitor]);
+
+  const triedSilentLocate = useRef(false);
+  useEffect(() => {
+    if (triedSilentLocate.current || center || !navigator.permissions) return;
+    triedSilentLocate.current = true;
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((status) => status.state === "granted" && findVisitor(false))
+      .catch(() => undefined);
+  }, [center, findVisitor]);
 
   const toggleKind = (kind: OfferKind) =>
     change({ kinds: kinds.includes(kind) ? kinds.filter((k) => k !== kind) : [...kinds, kind] });
