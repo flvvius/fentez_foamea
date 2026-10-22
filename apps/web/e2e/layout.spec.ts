@@ -47,3 +47,11 @@ test("the best deals keep their price tag when the map is zoomed out", async ({ 
   await expect(featured.first()).toBeVisible();
   await expect(featured.first()).toContainText("lei");
 });
+
+test("a zoomed-out dot can be tapped just beside it", async ({ page }) => {
+  const marker = page.locator(".leaflet-marker-icon").filter({ has: page.locator(".pin:not(.pin-featured, .pin-selected)") }).first();
+  const name = await marker.getAttribute("title");
+  const box = (await marker.locator(".pin").boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2 + 11, box.y + box.height / 2);
+  await expect(offerList(page).locator(".venue-scope")).toContainText(name!);
+});

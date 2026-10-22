@@ -539,6 +539,13 @@ body {
   transform: translate(-50%, -50%);
 }
 
+.map-far .pin:not(.pin-selected, .pin-featured)::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+}
+
 .map-far .pin:hover {
   transform: translate(-50%, -50%) scale(1.3);
 }
