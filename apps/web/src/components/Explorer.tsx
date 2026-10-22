@@ -35,6 +35,8 @@ type Props = {
   onChange: (next: Partial<ExploreState>) => void;
 };
 
+const FEW_OFFERS = 3;
+
 export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
   const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId } = state;
   const [now, setNow] = useState(() => new Date(snapshot.generatedAt));
@@ -62,6 +64,15 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     const scoped = filtered.filter((offer) => (!scopedPlace || offer.placeId === scopedPlace) && offer.id !== offerId);
     return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), now);
   }, [filtered, scopedPlace, offerId, sort, now]);
+  const wider = useMemo(() => {
+    if (venueId || radiusKm === null || listed.length >= FEW_OFFERS) return null;
+    const larger = RADIUS_OPTIONS.slice(RADIUS_OPTIONS.indexOf(radiusKm as (typeof RADIUS_OPTIONS)[number]) + 1);
+    for (const km of larger) {
+      const extra = applyFilters(placed, { kinds, radiusKm: km, maxPrice, includeDelivery }).length - filtered.length;
+      if (extra > 0) return { km, extra };
+    }
+    return null;
+  }, [venueId, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, filtered.length]);
   const nearbyCount = useMemo(
     () => (center && radiusKm !== null ? applyFilters(placed, { kinds: [], radiusKm, maxPrice: null, includeDelivery: true }).length : null),
     [center, placed, radiusKm],
@@ -214,6 +225,11 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             </div>
           ) : (
             listed.slice(0, visible).map((offer) => <OfferCard key={offer.id} offer={offer} now={now} onShowVenue={showVenue} />)
+          )}
+          {wider && (
+            <button type="button" className="more" onClick={() => change({ radiusKm: wider.km })}>
+              Încă {countOffers(wider.extra)} {wider.km === null ? "în tot orașul" : `până la ${wider.km} km`}
+            </button>
           )}
           {listed.length > visible && (
             <button type="button" className="more" onClick={() => setVisible((v) => v + PAGE)}>

@@ -10,6 +10,15 @@ test("a zone page centres the list on the zone and keeps to 1 km", async ({ page
   await expect(page.getByLabel("Distanță")).toHaveValue("1");
 });
 
+test("offers a wider radius when a zone has few offers", async ({ page }) => {
+  await page.goto("/zona/titan");
+  await waitForHydration(page);
+  await page.getByRole("button", { name: /^Încă \d+ (ofertă|oferte) până la 10 km$/ }).click();
+  await expect(page).toHaveURL(/\/zona\/titan\?km=10$/);
+  await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
+  await expect(page.getByRole("button", { name: /^Încă/ })).toHaveCount(0);
+});
+
 test("widening the radius on a zone page stays on the page and survives a reload", async ({ page }) => {
   await page.goto("/zona/titan");
   await waitForHydration(page);
