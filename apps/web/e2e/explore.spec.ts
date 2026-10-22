@@ -18,14 +18,14 @@ test.describe("explorer", () => {
   });
 
   test("counts live offers and says when data was refreshed", async ({ page }) => {
-    await expect(page.locator(".lede")).toContainText("13 oferte");
+    await expect(page.locator(".lede")).toContainText("14 oferte");
     await expect(page.locator(".lede")).toContainText(/Actualizat acum 1\d min/);
   });
 
   test("recommends the deepest concrete deal nearby first and leaves tomorrow's bags for later", async ({ page }) => {
     await expect(page.getByLabel("Ordine")).toHaveValue("best");
     await expect.poll(async () => (await offerTitles(page)).slice(0, 2)).toEqual(["Pachet surpriză patiserie", "Burger dublu cu cartofi"]);
-    expect((await offerTitles(page)).slice(-2)).toEqual(["Pachet pentru mâine", "Ziua berii 1+1"]);
+    expect((await offerTitles(page)).slice(-3)).toEqual(["Pachet pentru mâine", "Ziua berii 1+1", "Mic dejun 1+1"]);
   });
 
   test("shows a pickup countdown on bags closing within the hour", async ({ page }) => {
@@ -97,14 +97,15 @@ test.describe("explorer", () => {
 
   test("puts deals that do not run today last, marked", async ({ page }) => {
     const titles = await offerTitles(page);
-    expect(titles.at(-1)).toBe("Ziua berii 1+1");
+    expect(titles.slice(-2)).toEqual(["Ziua berii 1+1", "Mic dejun 1+1"]);
     await expect(offerRow(page, "Ziua berii 1+1")).toContainText("nu azi");
+    await expect(offerRow(page, "Mic dejun 1+1")).toContainText("s-a terminat pe azi");
   });
 
   test("scopes the list to a venue and clears it", async ({ page }) => {
     await offerRow(page, "Meniul zilei City Grill").getByRole("button", { name: "City Grill Centru" }).click();
     await expect(offerList(page).locator(".venue-scope")).toContainText("City Grill Centru");
-    await expect.poll(() => offerTitles(page)).toEqual(["Meniul zilei City Grill", "Ziua berii 1+1"]);
+    await expect.poll(() => offerTitles(page)).toEqual(["Meniul zilei City Grill", "Ziua berii 1+1", "Mic dejun 1+1"]);
     await page.getByRole("button", { name: "Toate ofertele" }).click();
     await expect.poll(async () => (await offerTitles(page)).length).toBeGreaterThan(2);
   });

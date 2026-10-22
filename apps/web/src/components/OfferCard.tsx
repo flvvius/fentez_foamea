@@ -1,6 +1,6 @@
 import { OFFER_KIND_LABELS, SOURCE_LABELS, WEEKDAY_SHORT } from "@fentezfoamea/core";
 import { shareOffer } from "@/lib/share";
-import { bucharestWeekday, formatDistance, formatPickup, formatPrice, formatRelative, minutesUntil } from "@/lib/format";
+import { bucharestClock, bucharestWeekday, formatDistance, formatPickup, formatPrice, formatRelative, minutesUntil } from "@/lib/format";
 import type { PlacedOffer } from "./explore";
 import { ShareButton } from "./ShareButton";
 
@@ -15,11 +15,12 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
   const pickupStarted = offer.pickupStart ? new Date(offer.pickupStart) <= now : true;
   const closingSoon = closesIn !== null && closesIn <= 60 && pickupStarted;
   const notToday = offer.daysOfWeek?.length ? !offer.daysOfWeek.includes(bucharestWeekday(now)) : false;
+  const overForToday = !notToday && offer.timeEnd !== null && bucharestClock(now) >= offer.timeEnd;
   const when = schedule(offer);
   const place = placeNote(offer);
 
   return (
-    <article className={`offer ${notToday ? "offer-off-day" : ""}`}>
+    <article className={`offer ${notToday || overForToday ? "offer-off-day" : ""}`}>
       <PriceFigure offer={offer} />
 
       <div className="min-w-0">
@@ -43,6 +44,7 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
           <p className="offer-detail">
             {when}
             {notToday && <span className="muted"> · nu azi</span>}
+            {overForToday && <span className="muted"> · s-a terminat pe azi</span>}
           </p>
         )}
         {offer.pickupStart && offer.pickupEnd && (
