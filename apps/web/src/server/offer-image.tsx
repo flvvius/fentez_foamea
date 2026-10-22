@@ -2,6 +2,7 @@ import { Resvg } from "@resvg/resvg-js";
 import satori from "satori";
 import { OFFER_KIND_LABELS, type OfferKind } from "@fentezfoamea/core";
 import { formatPrice } from "@/lib/format";
+import { ZONE_RADIUS_KM, type Zone } from "@/lib/zones";
 import { getSql } from "./db";
 import interBold from "./fonts/Inter-Bold.woff?inline";
 import interMedium from "./fonts/Inter-Medium.woff?inline";
@@ -72,18 +73,22 @@ export async function renderOfferImage(offer: OfferCardRow): Promise<Response> {
 
 export type TodaySummary = { total: number; bags: number; highlights: OfferCardRow[] };
 
-export async function findTodaySummary(): Promise<TodaySummary> {
+export async function findTodaySummary(zone?: Zone): Promise<TodaySummary> {
   const sql = getSql();
+  const nearZone = zone
+    ? sql`and st_dwithin(location, st_setsrid(st_makepoint(${zone.lon}, ${zone.lat}), 4326)::geography, ${ZONE_RADIUS_KM * 1000})`
+    : sql``;
   const [[counts], highlights] = await Promise.all([
     sql<{ total: number; bags: number }[]>`
       select count(*)::int as total, (count(*) filter (where kind = 'surplus'))::int as bags from live_offers
+      where true ${nearZone}
     `,
     sql<OfferCardRow[]>`
       with picks as (
         select distinct on (coalesce(venue_name, title))
           title, kind, price_ron, original_price_ron, discount_pct, delivery_only, venue_name, venue_chain
         from live_offers
-        where price_ron is not null and discount_pct >= 40 and not delivery_only and lat is not null
+        where price_ron is not null and discount_pct >= 40 and not delivery_only and lat is not null ${nearZone}
           and (pickup_start is null
             or pickup_start < (date_trunc('day', now() at time zone 'Europe/Bucharest') + interval '1 day') at time zone 'Europe/Bucharest')
         order by coalesce(venue_name, title), discount_pct desc, price_ron
@@ -96,14 +101,16 @@ export async function findTodaySummary(): Promise<TodaySummary> {
 
 const dayFormat = new Intl.DateTimeFormat("ro-RO", { timeZone: "Europe/Bucharest", weekday: "long", day: "numeric", month: "long" });
 
-export async function renderTodayImage(today: TodaySummary, now: Date): Promise<Response> {
+export async function renderTodayImage(today: TodaySummary, now: Date, zone?: Zone): Promise<Response> {
   const svg = await satori(
     <div style={{ width: WIDTH, height: HEIGHT, boxSizing: "border-box", display: "flex", padding: "64px 80px", background: "#fcfbf8", color: "#1d1a16", fontFamily: "Inter" }}>
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: 560 }}>
         <span style={{ fontSize: 30, fontWeight: 700 }}>fentez foamea</span>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span style={{ fontSize: 30, fontWeight: 500, color: "#6b645b" }}>Azi, {dayFormat.format(now)}</span>
-          <span style={{ fontSize: 76, fontWeight: 700, letterSpacing: -2, lineHeight: 1.05, marginTop: 12 }}>{countLabel(today.total, "ofertă", "oferte")} în București</span>
+          <span style={{ fontSize: zone ? 64 : 76, fontWeight: 700, letterSpacing: -2, lineHeight: 1.05, marginTop: 12 }}>
+            {countLabel(today.total, "ofertă", "oferte")} {zone ? `lângă ${zone.name}` : "în București"}
+          </span>
           <span style={{ fontSize: 30, fontWeight: 500, color: "#6b645b", marginTop: 20 }}>
             {countLabel(today.bags, "pachet anti-risipă", "pachete anti-risipă")}, meniuri de prânz și reduceri, pe o hartă.
           </span>

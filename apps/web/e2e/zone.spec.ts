@@ -28,3 +28,19 @@ test("the footer links to zones and unknown zones are a 404", async ({ page, req
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mâncare ieftină lângă Politehnica, acum.");
   expect((await request.get("/zona/atlantis")).status()).toBe(404);
 });
+
+test.describe("zone preview", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("points link previews at an image of the zone's deals", async ({ page, request }) => {
+    await page.goto("/zona/titan");
+    await expect(page.locator('meta[property="og:image"]')).toHaveCount(1);
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\?zona=titan$/);
+
+    const image = await request.get("/og?zona=titan");
+    expect(image.headers()["content-type"]).toBe("image/png");
+    const unknown = await request.get("/og?zona=atlantis", { maxRedirects: 0 });
+    expect(unknown.status()).toBe(302);
+    expect(unknown.headers().location).toMatch(/\/og$/);
+  });
+});

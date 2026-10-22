@@ -24,6 +24,7 @@ export const Route = createFileRoute("/zona/$zona")({
     const title = `Mâncare ieftină lângă ${zone.name}`;
     const description = `Pachete anti-risipă, meniul zilei și reduceri la restaurante de lângă ${zone.name}, București. Ce poți mânca ieftin azi la câțiva pași.`;
     const url = `${SITE_URL}/zona/${zone.slug}`;
+    const image = `${SITE_URL}/og?zona=${zone.slug}`;
     return {
       meta: [
         { title: `${title} · fentez foamea` },
@@ -33,6 +34,8 @@ export const Route = createFileRoute("/zona/$zona")({
         { property: "og:url", content: url },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
+        { property: "og:image", content: image },
+        { name: "twitter:image", content: image },
       ],
       links: [{ rel: "canonical", href: url }],
     };
