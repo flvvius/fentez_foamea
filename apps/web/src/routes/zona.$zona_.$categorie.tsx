@@ -6,7 +6,7 @@ import { searchForPage, validateSearch, type ExploreState, type PageDefaults } f
 import { SITE_URL } from "@/lib/site";
 import { ZONE_RADIUS_KM, findZone } from "@/lib/zones";
 import { fetchOfferSnapshot } from "@/server/offers";
-import { SNAPSHOT_HEADERS } from "./index";
+import { SNAPSHOT_HEADERS } from "./harta";
 
 export const Route = createFileRoute("/zona/$zona_/$categorie")({
   validateSearch,

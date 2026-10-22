@@ -185,7 +185,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
               <select
                 value={center?.slug ?? ""}
                 onChange={(e) =>
-                  e.target.value ? navigate({ to: "/zona/$zona", params: { zona: e.target.value } }) : navigate({ to: "/" })
+                  e.target.value ? navigate({ to: "/zona/$zona", params: { zona: e.target.value } }) : navigate({ to: "/harta" })
                 }
               >
                 <option value="">{center?.slug ? "Tot Bucureștiul" : "Alege zona"}</option>

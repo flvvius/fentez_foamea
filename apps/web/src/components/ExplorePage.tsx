@@ -3,6 +3,7 @@ import type { LatLon } from "@fentezfoamea/core";
 import { decodeSnapshot, type SnapshotWire } from "@/lib/offers";
 import { stateForPage, type ExploreSearch, type ExploreState, type PageDefaults } from "@/lib/search";
 import { Explorer } from "./Explorer";
+import { SiteHeader } from "./SiteHeader";
 
 type Props = {
   wire: SnapshotWire;
@@ -14,7 +15,13 @@ type Props = {
 
 export function ExplorePage({ wire, ...props }: Readonly<Props>) {
   const snapshot = useMemo(() => decodeSnapshot(wire), [wire]);
-  return <Explorer snapshot={snapshot} {...props} />;
+  // Every map page (/harta, zones, categories) gets the site header that links back to the feed.
+  return (
+    <div className="harta-page">
+      <SiteHeader />
+      <Explorer snapshot={snapshot} {...props} />
+    </div>
+  );
 }
 
 export function useExploreState(search: ExploreSearch, defaults: PageDefaults = {}): ExploreState {

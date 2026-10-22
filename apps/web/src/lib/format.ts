@@ -38,7 +38,9 @@ export function formatRelative(iso: string, now: Date): string {
   if (hours < 24) return `acum ${hours} h`;
   const days = Math.round(hours / 24);
   if (days === 1) return "ieri";
-  return days >= 20 ? `acum ${days} de zile` : `acum ${days} zile`;
+  // Romanian puts "de" before counts whose last two digits are 0 or 20 and up: 20, 100, 120.
+  const lastTwo = days % 100;
+  return lastTwo === 0 || lastTwo >= 20 ? `acum ${days} de zile` : `acum ${days} zile`;
 }
 
 export function bucharestWeekday(now: Date): number {

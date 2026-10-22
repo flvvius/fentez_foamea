@@ -1,7 +1,7 @@
 import { expect, offerList, offerTitles, test, waitForHydration } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/harta");
   await waitForHydration(page);
 });
 

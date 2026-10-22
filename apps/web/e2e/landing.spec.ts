@@ -16,12 +16,12 @@ test("changing the category leaves for the main page with the filters kept", asy
   await page.goto("/meniul-zilei");
   await waitForHydration(page);
   await page.getByRole("button", { name: /Combo/ }).click();
-  await expect(page).toHaveURL(/\/\?tip=combo%2Cmeniul-zilei$|\/\?tip=combo,meniul-zilei$/);
+  await expect(page).toHaveURL(/\/harta\?tip=combo%2Cmeniul-zilei$|\/harta\?tip=combo,meniul-zilei$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mâncare ieftină în București, acum.");
 });
 
 test("the footer links to every category", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/harta");
   await page.getByRole("navigation", { name: "Categorii" }).getByRole("link", { name: "Meniul zilei" }).click();
   await expect(page).toHaveURL(/\/meniul-zilei$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Meniul zilei în București, lângă tine.");

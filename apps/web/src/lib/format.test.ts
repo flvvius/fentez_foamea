@@ -29,15 +29,23 @@ describe("countOffers", () => {
 
 describe("formatRelative", () => {
   const now = new Date("2026-10-22T12:00:00Z");
-  const ago = (hours: number) => new Date(now.getTime() - hours * 3_600_000).toISOString();
+  const ago = (minutes: number) => new Date(now.getTime() - minutes * 60_000).toISOString();
 
   it.each([
-    [0.25, "acum 15 min"],
-    [3, "acum 3 h"],
-    [26, "ieri"],
-    [72, "acum 3 zile"],
-    [24 * 21, "acum 21 de zile"],
-  ])("writes %f hours ago as %s", (hours, text) => {
-    expect(formatRelative(ago(hours), now)).toBe(text);
+    [0, "chiar acum"],
+    [5, "acum 5 min"],
+    [59, "acum 59 min"],
+    [120, "acum 2 h"],
+    [23 * 60, "acum 23 h"],
+    [24 * 60, "ieri"],
+    [47 * 60, "acum 2 zile"],
+    [2 * 24 * 60, "acum 2 zile"],
+    [19 * 24 * 60, "acum 19 zile"],
+    [20 * 24 * 60, "acum 20 de zile"],
+    [21 * 24 * 60, "acum 21 de zile"],
+    [101 * 24 * 60, "acum 101 zile"],
+    [120 * 24 * 60, "acum 120 de zile"],
+  ])("writes %i minutes ago as %s", (minutes, text) => {
+    expect(formatRelative(ago(minutes), now)).toBe(text);
   });
 });

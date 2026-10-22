@@ -12,7 +12,7 @@ export function NotFound() {
         <h1 className="headline">Pagina asta nu există.</h1>
         <p className="lede">Poate linkul e vechi sau greșit. Ofertele de azi sunt în continuare aici.</p>
         <div className="masthead-actions">
-          <Link to="/" className="locate">
+          <Link to="/harta" className="locate">
             Vezi ofertele de acum
           </Link>
         </div>

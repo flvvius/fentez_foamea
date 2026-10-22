@@ -27,13 +27,14 @@ async function venuesWithOffers(): Promise<string[]> {
 function sitemap(venueIds: string[]): string {
   const paths = [
     "/",
+    "/harta",
     ...LANDINGS.map((landing) => `/${landing.slug}`),
     ...ZONES.flatMap((zone) => [
       `/zona/${zone.slug}`,
       ...LANDINGS.filter((landing) => landing.inZones).map((landing) => `/zona/${zone.slug}/${landing.slug}`),
     ]),
   ];
-  paths.push(...venueIds.map((id) => `/?local=${id}`));
+  paths.push(...venueIds.map((id) => `/harta?local=${id}`));
   const urls = paths.map((path) => `  <url><loc>${SITE_URL}${path}</loc><changefreq>hourly</changefreq></url>`);
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`;
 }

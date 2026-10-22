@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("the live site lists offers refreshed in the last few hours", async ({ page }) => {
-  const response = await page.goto(`/?health=${Date.now()}`);
+  const response = await page.goto(`/harta?health=${Date.now()}`);
   expect(response?.status()).toBe(200);
   const lede = page.locator(".lede");
   const count = Number((await lede.textContent())?.match(/^(\d+)/)?.[1]);
@@ -27,7 +27,7 @@ test("zone pages, the sitemap and search work", async ({ page, request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
   expect(sitemap.match(/<url>/g)?.length).toBeGreaterThan(100);
 
-  await page.goto("/?q=pizza&km=oras");
+  await page.goto("/harta?q=pizza&km=oras");
   await expect(page.locator("#oferte article").first()).toContainText(/pizza/i);
 });
 

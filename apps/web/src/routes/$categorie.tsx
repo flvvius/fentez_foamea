@@ -5,7 +5,7 @@ import { findLanding } from "@/lib/landing";
 import { searchFromState, validateSearch, type ExploreState } from "@/lib/search";
 import { SITE_URL } from "@/lib/site";
 import { fetchOfferSnapshot } from "@/server/offers";
-import { SNAPSHOT_HEADERS } from "./index";
+import { SNAPSHOT_HEADERS } from "./harta";
 
 export const Route = createFileRoute("/$categorie")({
   validateSearch,
@@ -52,7 +52,7 @@ function Landing() {
       const merged = { ...state, ...next };
       const leavesLanding = merged.kinds.length !== 1 || merged.kinds[0] !== landing.kind;
       const target = searchFromState(merged);
-      if (leavesLanding) return navigate({ to: "/", search: target, resetScroll: false });
+      if (leavesLanding) return navigate({ to: "/harta", search: target, resetScroll: false });
       delete target.tip;
       return navigate({ search: target, replace: true, resetScroll: false });
     },

@@ -24,6 +24,6 @@ describe("share text", () => {
   });
 
   it("builds a link to the offer", () => {
-    expect(offerLink("https://x.ro", "a b")).toBe("https://x.ro/?oferta=a%20b");
+    expect(offerLink("https://x.ro", "a b")).toBe("https://x.ro/harta?oferta=a%20b");
   });
 });

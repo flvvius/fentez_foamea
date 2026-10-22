@@ -79,12 +79,22 @@ bun run e2e:live
 | Variable | Used by | Notes |
 |---|---|---|
 | `DATABASE_URL` | scrapers, web | Postgres connection string |
-| `GEMINI_API_KEY` | scrapers | Optional. Without it, sources that need text extraction fall back to what they can parse directly |
+| `GEMINI_API_KEY` | scrapers, web | Optional for scrapers: without it, sources that need text extraction fall back to what they can parse directly. The web app needs it to read submitted deal links (model: `DEALS_LLM_MODEL`) |
 | `GEMINI_MODEL` | scrapers | Default `gemini-2.5-flash-lite` |
 | `GEMINI_RPM` | scrapers | Requests per minute, default 10 |
 | `GEMINI_DAILY_BUDGET` | scrapers | Max Gemini calls per 24 hours, default 200 |
 | `SCRAPER_CONTACT` | scrapers | Put in the user agent so site owners can reach you. Use a real URL or address: Nominatim blocks `example.com` |
 | `WOLT_MAX_VENUES` | scrapers | Wolt venues checked per run, default 600 |
+| `BETTER_AUTH_SECRET` | web | Signs sessions, at least 32 characters. Generate one with `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | web | Public URL of the site, `http://localhost:3001` locally. Required when `VERCEL_ENV` is `production`. On Vercel previews any `*.vercel.app` host is accepted and this value is the fallback |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | web | Optional. Enables "Continuă cu Google". The OAuth callback is `<BETTER_AUTH_URL>/api/auth/callback/google` |
+| `DEALS_LLM_PROVIDER` | web | Which model service reads submitted deal links. Only `gemini` is supported, which is the default. Unset or empty means `gemini` |
+| `DEALS_LLM_MODEL` | web | Gemini model that reads submitted deal links, default `gemini-3.1-flash-lite` |
+| `DEALS_LLM_FALLBACK_MODEL` | web | Tried when the main model is overloaded (429/5xx), default `gemini-3.5-flash-lite`; `none` turns it off |
+| `DEALS_HIDE_SCORE` | web | Community deals at or below this score are hidden, default -5 |
+| `DEALS_EXTRACT_PER_HOUR` | web | Link or image reads per user per hour, default 10 |
+| `DEALS_SUBMIT_PER_DAY` | web | Deals a user can post per day, default 5 |
+| `DEALS_EXTRACT_DAILY_BUDGET` | web | Max reads for all users per 24 hours, default 300 |
 
 ## Deploying
 
@@ -92,7 +102,9 @@ The project runs on free tiers: Supabase for Postgres, Vercel for the site, GitH
 
 **Database (Supabase).** Create a project and run the SQL files in `supabase/migrations` in filename order, either in the SQL editor or with `supabase db push`. PostGIS is enabled by the first migration. Copy the session pooler connection string (port 5432); that is your `DATABASE_URL`. The transaction pooler on port 6543 accepted connections but never answered the Postgres handshake in testing, so use 5432 unless you have checked 6543 yourself.
 
-**Website (Vercel).** Import this repository. `vercel.json` points Vercel at `apps/web` with the TanStack Start preset and installs dependencies from the repo root with Bun. Set `DATABASE_URL` in the project's environment variables.
+**Website (Vercel).** Import this repository. `vercel.json` points Vercel at `apps/web` with the TanStack Start preset and installs dependencies from the repo root with Bun. Set these environment variables: `DATABASE_URL`, `BETTER_AUTH_SECRET` (at least 32 characters, from `openssl rand -base64 32`), `BETTER_AUTH_URL` (the public https URL of the site, required in production), `GEMINI_API_KEY`, and optionally `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to enable Google sign-in. In the Google Cloud OAuth client, add the authorized redirect URI `<BETTER_AUTH_URL>/api/auth/callback/google`. Google sign-in only works on the production URL, not on preview deployments, because the redirect URI must be registered in advance.
+
+Password accounts are not email-verified until the site can send email. For that reason Google sign-in does not auto-link to an existing password account with the same email address; the person would have to sign in with their password.
 
 **Scrapers (GitHub Actions).** Add these repository secrets: `DATABASE_URL`, `GEMINI_API_KEY`, `SCRAPER_CONTACT`. The scheduled workflow in `.github/workflows/scrape.yml` starts a Bonapp job every 30 minutes in the daytime. Each job scrapes up to 20 times, 9 minutes apart, stopping at 20:00 UTC, and the next trigger waits in the concurrency queue behind it, so one trigger that does fire keeps Bonapp fresh for about three hours even when GitHub drops the rest. It scrapes Wolt and Glovo three times a day and the chain sites once a day. You can also start it by hand from the Actions tab with a list of sources. GitHub turns off scheduled workflows in public repositories after 60 days without commits. The hourly `health` workflow re-enables them, checks that every source had a successful run within its schedule (2 hours for Bonapp in the daytime, 12 for Wolt and Glovo, 30 for the chains) and smoke-tests the live site. It fails when either check does, and GitHub emails you about failed scheduled runs.
 

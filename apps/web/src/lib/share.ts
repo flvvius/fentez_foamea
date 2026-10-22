@@ -27,7 +27,7 @@ export function offerSummary(offer: Pick<Offer, "kind" | "deliveryOnly">): strin
 }
 
 export function offerLink(origin: string, offerId: string): string {
-  return `${origin}/?oferta=${encodeURIComponent(offerId)}`;
+  return `${origin}/harta?oferta=${encodeURIComponent(offerId)}`;
 }
 
 export function shareOffer(offer: Offer): Promise<ShareResult> {
