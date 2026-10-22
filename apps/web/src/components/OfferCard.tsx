@@ -75,7 +75,14 @@ function PriceFigure({ offer }: Readonly<{ offer: PlacedOffer }>) {
   return (
     <p className="figure">
       {offer.price === null && offer.headlinePct !== null && <span className="figure-price figure-deal">−{offer.headlinePct}%</span>}
-      {offer.price === null && offer.headlinePct === null && <span className="figure-kind">{OFFER_KIND_LABELS[offer.kind]}</span>}
+      {offer.price === null && offer.headlinePct === null && offer.priceCap !== null && (
+        <span className="figure-price">
+          <span className="figure-unit figure-prefix">sub</span>
+          {formatPrice(offer.priceCap)}
+          <span className="figure-unit">lei</span>
+        </span>
+      )}
+      {offer.price === null && offer.headlinePct === null && offer.priceCap === null && <span className="figure-kind">{OFFER_KIND_LABELS[offer.kind]}</span>}
       {offer.price !== null && (
         <span className="figure-price">
           {formatPrice(offer.price)}

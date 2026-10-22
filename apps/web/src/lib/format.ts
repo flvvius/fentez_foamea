@@ -42,6 +42,10 @@ export function bucharestWeekday(now: Date): number {
   return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(name) + 1;
 }
 
+export function bucharestClock(now: Date): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(now);
+}
+
 export function minutesUntil(iso: string, now: Date): number {
   return Math.round((new Date(iso).getTime() - now.getTime()) / 60_000);
 }

@@ -11,7 +11,7 @@ insert into venues (id, source, source_venue_id, name, address, chain, url, matc
 
 insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ron, original_price_ron, pickup_start, pickup_end, available_count, url, delivery_only, days_of_week, time_start, time_end, conditions) values
   ('00000000-0000-0000-0000-00000000b001', 'bonapp', 'bag-1', '00000000-0000-0000-0000-00000000a001', 'surplus', 'Pachet surpriză patiserie', 15, 45, now() - interval '30 minutes', now() + interval '40 minutes', 2, 'https://bonapp.eco/p/bag-1', false, null, null, null, null),
-  ('00000000-0000-0000-0000-00000000b002', 'citygrill', 'menu-1', '00000000-0000-0000-0000-00000000a002', 'daily_menu', 'Meniul zilei City Grill', 40.9, null, null, null, null, 'https://citygrill.ro/meniul-zilei', false, '{1,2,3,4,5,6,7}', '12:00', '16:00', 'doar în restaurant'),
+  ('00000000-0000-0000-0000-00000000b002', 'citygrill', 'menu-1', '00000000-0000-0000-0000-00000000a002', 'daily_menu', 'Meniul zilei City Grill', 40.9, null, null, null, null, 'https://citygrill.ro/meniul-zilei', false, '{1,2,3,4,5,6,7}', '00:00', '23:59', 'doar în restaurant'),
   ('00000000-0000-0000-0000-00000000b003', 'glovo', 'g-burger:item:1', '00000000-0000-0000-0000-00000000a003', 'discount', 'Burger dublu cu cartofi', 24, 40, null, null, null, 'https://glovoapp.com/ro/ro/bucuresti/burger-rapid', true, null, null, null, null),
   ('00000000-0000-0000-0000-00000000b004', 'kfc', 'kfc-unirii:deal', '00000000-0000-0000-0000-00000000a004', 'combo', 'Meniu Crispy Strips 2+1', 19.9, null, null, null, null, 'https://kfc.ro/oferte', false, null, null, null, null),
   ('00000000-0000-0000-0000-00000000b005', 'kfc', 'kfc-baneasa:deal', '00000000-0000-0000-0000-00000000a005', 'combo', 'Meniu Crispy Strips 2+1', 19.9, null, null, null, null, 'https://kfc.ro/oferte', false, null, null, null, null),
@@ -33,6 +33,9 @@ insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ro
 
 insert into offers (id, source, source_offer_id, venue_id, kind, title, price_ron, url, last_seen_at) values
   ('00000000-0000-0000-0000-00000000b013', 'kfc', 'kfc-unirii:old', '00000000-0000-0000-0000-00000000a004', 'combo', 'Ofertă KFC de acum 4 zile', 25, 'https://kfc.ro/oferte', now() - interval '4 days');
+
+insert into offers (id, source, source_offer_id, venue_id, kind, title, url, delivery_only) values
+  ('00000000-0000-0000-0000-00000000b015', 'glovo', 'g-burger:lunch', '00000000-0000-0000-0000-00000000a003', 'daily_menu', 'Prânzul sub 25 lei', 'https://glovoapp.com/ro/ro/bucuresti/burger-rapid', true);
 
 insert into scrape_runs (source, started_at, finished_at, status, offers_seen)
 values ('bonapp', now() - interval '12 minutes', now() - interval '10 minutes', 'ok', 3);

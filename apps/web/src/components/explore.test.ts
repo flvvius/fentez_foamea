@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { applyFilters, collapseChainCopies, percentInTitle, placeOffers, sortOffers, validTodayFirst, venuePins } from "./explore";
+import { applyFilters, collapseChainCopies, percentInTitle, placeOffers, priceCapInTitle, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const base: Offer = {
   id: "1",
@@ -70,6 +70,15 @@ describe("explore", () => {
     expect(percentInTitle(title)).toBe(pct);
   });
 
+  it("treats a price ceiling in the title as the price for budget and sorting", () => {
+    expect(priceCapInTitle("Prânzul sub 40 lei")).toBe(40);
+    expect(priceCapInTitle("20% reducere")).toBeNull();
+    const lunch = { ...base, id: "lunch", price: null, originalPrice: null, discountPct: null, title: "Prânzul sub 40 lei" };
+    const placed = placeOffers([{ ...base, price: 45 }, lunch], origin, now);
+    expect(applyFilters(placed, { kinds: [], radiusKm: null, maxPrice: 40, includeDelivery: true }).map((o) => o.id)).toEqual(["lunch"]);
+    expect(sortOffers(placed, "price").map((o) => o.id)).toEqual(["lunch", "1"]);
+  });
+
   it("sorts by price and groups pins by venue", () => {
     const cheap = { ...base, id: "cheap", price: 9, discountPct: 70 };
     const placed = placeOffers([base, cheap], origin, now);
@@ -101,10 +110,20 @@ describe("explore", () => {
         { ...base, id: "wednesday", daysOfWeek: [3] },
         { ...base, id: "tomorrow-bag", pickupStart: "2026-10-22T09:00:00Z", pickupEnd: "2026-10-22T11:00:00Z" },
         { ...base, id: "today-bag", pickupStart: "2026-10-21T15:00:00Z", pickupEnd: "2026-10-21T17:00:00Z" },
+        { ...base, id: "lunch-over", timeStart: "10:00", timeEnd: "14:00" },
+        { ...base, id: "lunch-on", timeStart: "10:00", timeEnd: "16:00" },
       ],
       origin,
       now,
     );
-    expect(validTodayFirst(placed, now).map((o) => o.id)).toEqual(["always", "wednesday", "today-bag", "monday", "tomorrow-bag"]);
+    expect(validTodayFirst(placed, now).map((o) => o.id)).toEqual([
+      "always",
+      "wednesday",
+      "today-bag",
+      "lunch-on",
+      "monday",
+      "tomorrow-bag",
+      "lunch-over",
+    ]);
   });
 });

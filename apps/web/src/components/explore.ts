@@ -1,9 +1,14 @@
 import { distanceMeters, type LatLon } from "@fentezfoamea/core";
-import { bucharestWeekday, sameBucharestDay } from "@/lib/format";
+import { bucharestClock, bucharestWeekday, sameBucharestDay } from "@/lib/format";
 import type { Offer } from "@/lib/offers";
 import type { ExploreState, SortKey } from "@/lib/search";
 
-export type PlacedOffer = Offer & { distance: number | null; headlinePct: number | null; otherLocations?: number };
+export type PlacedOffer = Offer & {
+  distance: number | null;
+  headlinePct: number | null;
+  priceCap: number | null;
+  otherLocations?: number;
+};
 
 export type VenuePin = {
   venueId: string;
@@ -26,6 +31,7 @@ export function placeOffers(offers: Offer[], origin: LatLon, now: Date): PlacedO
     .map((offer) => ({
       ...offer,
       headlinePct: offer.discountPct ?? percentInTitle(offer.title),
+      priceCap: offer.price === null ? priceCapInTitle(offer.title) : null,
       distance: offer.lat !== null && offer.lon !== null ? distanceMeters(origin, { lat: offer.lat, lon: offer.lon }) : null,
     }));
 }
@@ -34,7 +40,8 @@ export function applyFilters(offers: PlacedOffer[], filters: Pick<ExploreState, 
   return offers.filter((offer) => {
     if (filters.kinds.length && !filters.kinds.includes(offer.kind)) return false;
     if (!filters.includeDelivery && offer.deliveryOnly) return false;
-    if (filters.maxPrice !== null && (offer.price === null || offer.price > filters.maxPrice)) return false;
+    const price = comparablePrice(offer);
+    if (filters.maxPrice !== null && (price === null || price > filters.maxPrice)) return false;
     if (filters.radiusKm !== null && !withinRadius(offer, filters.radiusKm)) return false;
     return true;
   });
@@ -49,10 +56,20 @@ const POINTS_LOST_PER_KM = 8;
 const UNKNOWN_DISTANCE_M = 5000;
 
 const TITLE_PERCENT = /(?:^|[\s-−])(\d{1,2})\s*%/;
+const TITLE_PRICE_CAP = /\bsub\s+(\d{1,3})\s*lei\b/i;
 
 export function percentInTitle(title: string): number | null {
   const match = TITLE_PERCENT.exec(title);
   return match ? Number(match[1]) : null;
+}
+
+export function priceCapInTitle(title: string): number | null {
+  const match = TITLE_PRICE_CAP.exec(title);
+  return match ? Number(match[1]) : null;
+}
+
+function comparablePrice(offer: PlacedOffer): number | null {
+  return offer.price ?? offer.priceCap;
 }
 
 export function dealScore(offer: PlacedOffer): number {
@@ -68,7 +85,7 @@ const comparators: Record<SortKey, (a: PlacedOffer, b: PlacedOffer) => number> =
   best: (a, b) => dealScore(b) - dealScore(a),
   distance: (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity),
   discount: (a, b) => (b.headlinePct ?? -1) - (a.headlinePct ?? -1),
-  price: (a, b) => (a.price ?? Infinity) - (b.price ?? Infinity),
+  price: (a, b) => (comparablePrice(a) ?? Infinity) - (comparablePrice(b) ?? Infinity),
 };
 
 export function sortOffers(offers: PlacedOffer[], sort: SortKey): PlacedOffer[] {
@@ -119,8 +136,10 @@ export function collapseChainCopies(sorted: PlacedOffer[]): PlacedOffer[] {
 
 export function validTodayFirst(offers: PlacedOffer[], now: Date): PlacedOffer[] {
   const weekday = bucharestWeekday(now);
+  const clock = bucharestClock(now);
   const appliesToday = (offer: PlacedOffer) =>
     (!offer.daysOfWeek?.length || offer.daysOfWeek.includes(weekday)) &&
+    (!offer.timeEnd || clock < offer.timeEnd) &&
     (!offer.pickupStart || sameBucharestDay(new Date(offer.pickupStart), now));
   return [...offers.filter(appliesToday), ...offers.filter((offer) => !appliesToday(offer))];
 }

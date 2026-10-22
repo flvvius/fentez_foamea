@@ -18,7 +18,7 @@ test.describe("explorer", () => {
   });
 
   test("counts live offers and says when data was refreshed", async ({ page }) => {
-    await expect(page.locator(".lede")).toContainText("11 oferte");
+    await expect(page.locator(".lede")).toContainText("12 oferte");
     await expect(page.locator(".lede")).toContainText(/Actualizat acum 1\d min/);
   });
 
@@ -60,6 +60,15 @@ test.describe("explorer", () => {
     await page.getByLabel("Buget").selectOption({ label: "sub 15 lei" });
     await expect(page).toHaveURL(/buget=15/);
     await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet de seară Titan", "Pachet verificat acum 2 ore", "Pachet pentru mâine", "Ziua berii 1+1"]);
+  });
+
+  test("reads a price ceiling from the title", async ({ page }) => {
+    const lunch = offerRow(page, "Prânzul sub 25 lei");
+    await expect(lunch.locator(".figure")).toHaveText("sub25lei");
+    await page.getByLabel("Buget").selectOption({ label: "sub 25 lei" });
+    await expect(lunch).toHaveCount(1);
+    await page.getByLabel("Buget").selectOption({ label: "sub 15 lei" });
+    await expect(lunch).toHaveCount(0);
   });
 
   test("hides delivery-only offers when asked", async ({ page }) => {
