@@ -87,6 +87,11 @@ test.describe("explorer", () => {
     await waitForHydration(page);
     await expect(page.getByRole("searchbox", { name: "Caută" })).toHaveValue("brutaria");
     await expect.poll(async () => (await offerTitles(page)).length).toBe(3);
+
+    await page.getByRole("searchbox", { name: "Caută" }).press("End");
+    await page.getByRole("searchbox", { name: "Caută" }).pressSequentially(" colt", { delay: 120 });
+    await expect(page.getByRole("searchbox", { name: "Caută" })).toHaveValue("brutaria colt");
+    await expect(page).toHaveURL(/q=brutaria(\+|%20)colt/);
   });
 
   test("hides delivery-only offers when asked", async ({ page }) => {

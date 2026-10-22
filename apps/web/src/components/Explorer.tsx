@@ -41,7 +41,11 @@ const QUERY_DEBOUNCE_MS = 200;
 export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
   const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query } = state;
   const [draftQuery, setDraftQuery] = useState(query);
-  useEffect(() => setDraftQuery(query), [query]);
+  const sentQuery = useRef(query);
+  useEffect(() => {
+    if (query !== sentQuery.current) setDraftQuery(query);
+    sentQuery.current = query;
+  }, [query]);
   const [now, setNow] = useState(() => new Date(snapshot.generatedAt));
   const [mounted, setMounted] = useState(false);
   const [origin, setOrigin] = useState<Origin>({ lat: (center ?? BUCHAREST_CENTER).lat, lon: (center ?? BUCHAREST_CENTER).lon, mine: false });
@@ -124,7 +128,10 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
   const typeQuery = (value: string) => {
     setDraftQuery(value);
     clearTimeout(queryTimer.current);
-    queryTimer.current = setTimeout(() => change({ query: value }), QUERY_DEBOUNCE_MS);
+    queryTimer.current = setTimeout(() => {
+      sentQuery.current = value;
+      change({ query: value });
+    }, QUERY_DEBOUNCE_MS);
   };
 
   const toggleKind = (kind: OfferKind) =>
