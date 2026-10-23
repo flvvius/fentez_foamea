@@ -51,3 +51,8 @@ test("the community feed and sign-in are up", async ({ page, request }) => {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oferte de mâncare, de la oameni");
   expect((await request.get("/api/auth/get-session")).status()).toBe(200);
 });
+
+test("Vercel Web Analytics and Speed Insights scripts are served", async ({ request }) => {
+  expect((await request.get("/_vercel/insights/script.js")).status()).toBe(200);
+  expect((await request.get("/_vercel/speed-insights/script.js")).status()).toBe(200);
+});
