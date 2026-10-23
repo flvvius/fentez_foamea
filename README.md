@@ -86,7 +86,7 @@ bun run e2e:live
 | `SCRAPER_CONTACT` | scrapers | Put in the user agent so site owners can reach you. Use a real URL or address: Nominatim blocks `example.com` |
 | `WOLT_MAX_VENUES` | scrapers | Wolt venues checked per run, default 600 |
 | `BETTER_AUTH_SECRET` | web | Signs sessions, at least 32 characters. Generate one with `openssl rand -base64 32` |
-| `BETTER_AUTH_URL` | web | Public URL of the site, `http://localhost:3001` locally. Required when `VERCEL_ENV` is `production`. On Vercel previews any `*.vercel.app` host is accepted and this value is the fallback |
+| `BETTER_AUTH_URL` | web | Public URL of the site, `http://localhost:3001` locally. Defaults to https://fentez-foamea.vercel.app in production. On Vercel previews any `*.vercel.app` host is accepted and this value is the fallback |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | web | Optional. Enables "Continuă cu Google". The OAuth callback is `<BETTER_AUTH_URL>/api/auth/callback/google` |
 | `DEALS_LLM_PROVIDER` | web | Which model service reads submitted deal links. Only `gemini` is supported, which is the default. Unset or empty means `gemini` |
 | `DEALS_LLM_MODEL` | web | Gemini model that reads submitted deal links, default `gemini-3.1-flash-lite` |
@@ -102,7 +102,7 @@ The project runs on free tiers: Supabase for Postgres, Vercel for the site, GitH
 
 **Database (Supabase).** Create a project and run the SQL files in `supabase/migrations` in filename order, either in the SQL editor or with `supabase db push`. PostGIS is enabled by the first migration. Copy the session pooler connection string (port 5432); that is your `DATABASE_URL`. The transaction pooler on port 6543 accepted connections but never answered the Postgres handshake in testing, so use 5432 unless you have checked 6543 yourself.
 
-**Website (Vercel).** Import this repository. `vercel.json` points Vercel at `apps/web` with the TanStack Start preset and installs dependencies from the repo root with Bun. Set these environment variables: `DATABASE_URL`, `BETTER_AUTH_SECRET` (at least 32 characters, from `openssl rand -base64 32`), `BETTER_AUTH_URL` (the public https URL of the site, required in production), `GEMINI_API_KEY`, and optionally `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to enable Google sign-in. In the Google Cloud OAuth client, add the authorized redirect URI `<BETTER_AUTH_URL>/api/auth/callback/google`. Google sign-in only works on the production URL, not on preview deployments, because the redirect URI must be registered in advance.
+**Website (Vercel).** Import this repository. `vercel.json` points Vercel at `apps/web` with the TanStack Start preset and installs dependencies from the repo root with Bun. Set these environment variables: `DATABASE_URL`, `BETTER_AUTH_SECRET` (at least 32 characters, from `openssl rand -base64 32`), `BETTER_AUTH_URL` (the public https URL of the site, only if it differs from https://fentez-foamea.vercel.app), `GEMINI_API_KEY`, and optionally `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to enable Google sign-in. In the Google Cloud OAuth client, add the authorized redirect URI `<BETTER_AUTH_URL>/api/auth/callback/google`. Google sign-in only works on the production URL, not on preview deployments, because the redirect URI must be registered in advance.
 
 Password accounts are not email-verified until the site can send email. For that reason Google sign-in does not auto-link to an existing password account with the same email address; the person would have to sign in with their password.
 
