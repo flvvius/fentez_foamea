@@ -709,3 +709,45 @@ describe("snippets cut in the middle of a word or number", () => {
     expect(result.draft.dealPrice).toBe(12);
   });
 });
+
+describe("dates the model put in last year", () => {
+  const OCTOBER = new Date("2026-10-24T11:00:00Z");
+  const source = "Meniul zilei la 29 lei, valabil până pe 31 decembrie.";
+  const run = (overrides: Record<string, unknown>, text = source) =>
+    validateExtraction(raw({ evidence_snippet: null, deal_price: null, regular_price: null, ...overrides }), {
+      source: "text",
+      sourceText: text,
+      now: OCTOBER,
+    });
+
+  it("moves an unstated past year to this year", () => {
+    const result = run({ valid_until: "2025-12-31" });
+    expect(result.draft.validUntil?.startsWith("2026-12-31")).toBe(true);
+    expect(result.warnings).toContain("year_corrected");
+    expect(result.warnings).not.toContain("already_expired");
+  });
+
+  it("uses next year for a day and month already well behind us", () => {
+    const result = run({ valid_from: "2025-01-10", valid_until: "2025-01-20" }, "Reducere 10-20 ianuarie.");
+    expect(result.draft.validFrom?.startsWith("2027-01-")).toBe(true);
+    expect(result.draft.validUntil?.startsWith("2027-01-20")).toBe(true);
+  });
+
+  it("keeps a recent date in this year even if it already passed", () => {
+    const result = run({ valid_until: "2025-10-20" }, "Oferta a fost valabilă până pe 20 octombrie.");
+    expect(result.draft.validUntil?.startsWith("2026-10-20")).toBe(true);
+    expect(result.warnings).toContain("already_expired");
+  });
+
+  it("keeps a year the post actually writes", () => {
+    const result = run({ valid_until: "2025-12-31" }, "Oferta a fost valabilă până pe 31 decembrie 2025.");
+    expect(result.draft.validUntil?.startsWith("2025-12-31")).toBe(true);
+    expect(result.warnings).not.toContain("year_corrected");
+    expect(result.warnings).toContain("already_expired");
+  });
+
+  it("leaves current and future years alone", () => {
+    expect(run({ valid_until: "2026-12-31" }).warnings).not.toContain("year_corrected");
+    expect(run({ valid_until: "2027-03-01" }).warnings).not.toContain("year_corrected");
+  });
+});

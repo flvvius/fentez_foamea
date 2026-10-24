@@ -54,6 +54,8 @@ export function warningMessage(warning: ExtractionWarning): string {
       return "Data de final părea prea îndepărtată, așa că am scurtat-o. Verific-o.";
     case "already_expired":
       return "Sursa pare să spună că oferta a expirat.";
+    case "year_corrected":
+      return "Sursa nu scrie anul, așa că am pus anul în curs la date. Verifică-le.";
     case "not_a_deal":
       return "Nu pare să fie o ofertă; verifică datele.";
     case "percent_mismatch":

@@ -45,8 +45,12 @@ export function isOvernight(timeStart: string | null, timeEnd: string | null): b
   return timeStart !== null && timeEnd !== null && timeStart > timeEnd;
 }
 
+const WEEKDAY_FULL = ["Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă", "Duminică"];
+
 function formatDays(days: readonly number[]): string {
   const sorted = [...new Set(days)].sort((a, b) => a - b);
+  // A lone "J" is cryptic; one day reads better spelled out.
+  if (sorted.length === 1) return WEEKDAY_FULL[sorted[0]! - 1]!;
   const contiguous = sorted.every((day, index) => index === 0 || day === sorted[index - 1]! + 1);
   if (contiguous && sorted.length > 2) return `${WEEKDAY_SHORT[sorted[0]! - 1]}–${WEEKDAY_SHORT[sorted.at(-1)! - 1]}`;
   return sorted.map((day) => WEEKDAY_SHORT[day - 1]).join(", ");
@@ -66,17 +70,19 @@ export function formatSchedule(deal: Pick<DealCard, "daysOfWeek" | "timeStart" |
   return [days, hours].filter(Boolean).join(", ");
 }
 
-export function formatShortDate(iso: string): string {
-  return dateFormat.format(new Date(iso));
+const yearFormat = new Intl.DateTimeFormat("ro-RO", { timeZone: TZ, year: "numeric" });
+
+/** "29 oct.", with the year when it isn't the current one ("15 ian. 2027"), so a wrong year never hides. */
+export function formatShortDate(iso: string, now: Date = new Date()): string {
+  const date = new Date(iso);
+  const sameYear = yearFormat.format(date) === yearFormat.format(now);
+  return sameYear ? dateFormat.format(date) : `${dateFormat.format(date)} ${yearFormat.format(date)}`;
 }
 
-/** "până pe 29 oct.", or "din 25 oct. până pe 29 oct." when it has not started yet. */
+/** "Valabilă 1 nov. – 15 dec.", or "Valabilă până pe 15 dec." when the deal has no start date. */
 export function formatValidity(deal: Pick<DealCard, "validFrom" | "validUntil">, now: Date): string {
-  const until = `până pe ${formatShortDate(deal.validUntil)}`;
-  if (deal.validFrom && new Date(deal.validFrom).getTime() > now.getTime()) {
-    return `din ${formatShortDate(deal.validFrom)} ${until}`;
-  }
-  return until;
+  const until = formatShortDate(deal.validUntil, now);
+  return deal.validFrom ? `Valabilă ${formatShortDate(deal.validFrom, now)} – ${until}` : `Valabilă până pe ${until}`;
 }
 
 /** The host to label a source link with, or null when the url is not a plain http(s) link. */

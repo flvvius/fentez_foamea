@@ -109,6 +109,33 @@ function isRealDate(date: string): boolean {
   return utc.getUTCFullYear() === y && utc.getUTCMonth() === m - 1 && utc.getUTCDate() === d;
 }
 
+// A date this far before today, once moved to the current year, means the next year was meant:
+// "15 ianuarie" read in December.
+const STALE_YEAR_GRACE_DAYS = 31;
+
+/**
+ * Posts rarely write the year ("până pe 31 decembrie"), and the model sometimes fills in last
+ * year. A year earlier than today's that the source text never states is replaced with the next
+ * occurrence of that day and month. A year the post really writes is kept (and then flagged
+ * "already_expired").
+ */
+function correctStaleYear(value: string, now: Date, normalizedSource: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})(.*)$/.exec(value);
+  if (!match) return value;
+  const [, yearText, month, day, rest] = match as unknown as [string, string, string, string, string];
+  const today = bucharestToday(now);
+  const currentYear = Number(today.slice(0, 4));
+  if (Number(yearText) >= currentYear || normalizedSource.includes(yearText)) return value;
+
+  for (const year of [currentYear, currentYear + 1]) {
+    const date = `${year}-${month}-${day}`;
+    if (!isRealDate(date)) continue;
+    const daysBehind = (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${date}T00:00:00Z`)) / 86_400_000;
+    if (daysBehind <= STALE_YEAR_GRACE_DAYS) return `${date}${rest}`;
+  }
+  return value;
+}
+
 // Keeps a date-only value, or a datetime with or without an offset, and drops anything else.
 function isoDate(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -441,6 +468,7 @@ export type ExtractionWarning =
   | "expiry_defaulted"
   | "expiry_clamped"
   | "already_expired"
+  | "year_corrected"
   | `invalid_field:${keyof ExtractionDraft}`;
 
 /**
@@ -768,8 +796,17 @@ export function validateExtraction(raw: unknown, ctx: ExtractionContext): Extrac
   }
   if (percentDropped && draft.percentOff === null) priceDiscarded = true;
 
-  if (extracted.valid_from !== null) draft.validFrom = toIso(extracted.valid_from, "start") ?? null;
-  if (extracted.valid_until !== null) draft.validUntil = toIso(extracted.valid_until, "end") ?? null;
+  const datedText = normalizeForEvidence(ctx.sourceText ?? "");
+  const currentYear = (value: string | null) => {
+    if (value === null) return null;
+    const fixed = correctStaleYear(value, now, datedText);
+    if (fixed !== value) warn("year_corrected");
+    return fixed;
+  };
+  const validFrom = currentYear(extracted.valid_from);
+  const validUntil = currentYear(extracted.valid_until);
+  if (validFrom !== null) draft.validFrom = toIso(validFrom, "start") ?? null;
+  if (validUntil !== null) draft.validUntil = toIso(validUntil, "end") ?? null;
 
   let expiryDefaulted = false;
   if (draft.validUntil === null) {

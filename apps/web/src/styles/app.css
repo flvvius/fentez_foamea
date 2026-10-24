@@ -385,6 +385,17 @@ body {
   margin-top: 2px;
 }
 
+/* When a deal runs: status as words, the running state just in full foreground weight. */
+.deal-opening {
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.deal-opening-now {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
 .offer-conditions {
   color: var(--muted-foreground);
   max-width: var(--type-descriptionMeasure);
