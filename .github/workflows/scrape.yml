@@ -14,13 +14,14 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 240
     concurrency:
-      group: scrape-${{ github.event.schedule || inputs.sources }}
+      group: scrape-${{ github.event.schedule == '7,37 4-19 * * *' && 'bonapp' || github.event.schedule || inputs.sources }}
       cancel-in-progress: false
     steps:
       - name: Pick sources
@@ -63,3 +64,12 @@ jobs:
             sleep 540
           done
           exit $status
+
+      - name: Queue the next Bonapp job
+        if: ${{ !cancelled() && steps.pick.outputs.sources == 'bonapp' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(date -u +%H)" -lt 20 ]; then
+            gh workflow run scrape.yml --repo "${{ github.repository }}" -f sources=bonapp
+          fi

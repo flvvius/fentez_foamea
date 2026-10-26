@@ -1,16 +1,24 @@
-import { expect, test } from "@playwright/test";
+import { type APIRequestContext, expect, test } from "@playwright/test";
+
+const LONGEST_SCRAPE_GAP_HOURS = 15;
+
+async function hoursSinceLastScrape(request: APIRequestContext): Promise<number> {
+  const { updatedAt } = (await (await request.get("/api/snapshot")).json()) as { updatedAt: string | null };
+  return updatedAt ? (Date.now() - Date.parse(updatedAt)) / 3_600_000 : Infinity;
+}
 
 test.beforeEach(async ({ page }) => {
   await page.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ status: 204 }));
 });
 
-test("the live site lists offers refreshed in the last few hours", async ({ page }) => {
+test("the live site lists offers from the latest scrapes", async ({ page, request }) => {
   const response = await page.goto(`/harta?health=${Date.now()}`);
   expect(response?.status()).toBe(200);
   const lede = page.locator(".lede");
   const count = Number((await lede.textContent())?.match(/^(\d+)/)?.[1]);
   expect(count).toBeGreaterThan(1000);
-  await expect(lede).toContainText(/Actualizat (chiar acum|acum \d+ min|acum [1-3] h)\./);
+  await expect(lede).toContainText(/Actualizat (chiar acum|acum \d+ (min|h))\./);
+  expect(await hoursSinceLastScrape(request)).toBeLessThan(LONGEST_SCRAPE_GAP_HOURS);
   await expect(page.locator("#oferte article").first()).toBeVisible();
 });
 
@@ -40,6 +48,8 @@ test("the offer snapshot is served from the CDN cache", async ({ request }) => {
 
 test("the bags feed lists bags with a pickup window", async ({ request }) => {
   const feed = await (await request.get("/feed.xml")).text();
+  expect(feed).toContain("<channel>");
+  test.skip(await hoursSinceLastScrape(request) > 3, "Bags from the last scrape may all have expired");
   const items = feed.match(/<item>/g)?.length ?? 0;
   expect(items).toBeGreaterThan(5);
   expect(feed).toMatch(/<title>[^<]+, ridici [^<]+<\/title>/);

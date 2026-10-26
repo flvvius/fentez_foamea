@@ -19,6 +19,23 @@ describe("checkHealth", () => {
     ]);
   });
 
+  it("tells a missed schedule apart from a failing scraper", () => {
+    const runs = [
+      { source: "bonapp", lastOk: hoursAgo(noon, 3), lastStatus: "ok", lastError: null },
+      { source: "wolt", lastOk: hoursAgo(noon, 13), lastStatus: "running", lastError: null },
+      { source: "glovo", lastOk: hoursAgo(noon, 13), lastStatus: "failed", lastError: "HTTP 500" },
+      { source: "kfc", lastOk: hoursAgo(noon, 3), lastStatus: "failed", lastError: "HTTP 403" },
+    ];
+    const health = checkHealth(runs, ["bonapp", "wolt", "glovo", "kfc", "paul"], noon);
+    expect(health.map((row) => [row.source, row.verdict])).toEqual([
+      ["bonapp", "missed"],
+      ["wolt", "running"],
+      ["glovo", "broken"],
+      ["kfc", "fresh"],
+      ["paul", "broken"],
+    ]);
+  });
+
   it("allows Bonapp a night without runs", () => {
     const night = new Date("2026-10-22T02:00:00Z");
     const runs = [{ source: "bonapp", lastOk: hoursAgo(night, 6), lastStatus: "ok", lastError: null }];
