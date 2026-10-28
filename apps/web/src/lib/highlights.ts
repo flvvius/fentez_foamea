@@ -1,0 +1,62 @@
+import { BUCHAREST_CENTER, type OfferKind } from "@fentezfoamea/core";
+import { collapseChainCopies, placeOffers, sortOffers, validTodayFirst, type PlacedOffer } from "@/components/explore";
+import { bucharestClock, bucharestWeekday, sameBucharestDay } from "@/lib/format";
+import { LANDINGS } from "@/lib/landing";
+import type { Offer } from "@/lib/offers";
+
+export type Highlight = Pick<
+  Offer,
+  "id" | "kind" | "title" | "price" | "originalPrice" | "discountPct" | "pickupStart" | "pickupEnd" | "timeStart" | "timeEnd" | "available" | "venueId" | "venueName" | "chain"
+>;
+
+export type KindCount = { slug: string; kind: OfferKind; label: string; count: number };
+
+export type Highlights = { picks: Highlight[]; total: number; kinds: KindCount[] };
+
+const PICKS = 5;
+
+export function pickHighlights(offers: Offer[], now: Date, limit = PICKS): Highlights {
+  const placed = placeOffers(offers, BUCHAREST_CENTER, now);
+  const today = placed.filter((offer) => runsToday(offer, now));
+  const worthShowing = today.filter((offer) => !offer.deliveryOnly && offer.price !== null && offer.available !== 0 && hasSaving(offer));
+  const picks = collapseChainCopies(sortOffers(worthShowing, "best")).slice(0, limit);
+  return {
+    picks: picks.map(toHighlight),
+    total: collapseChainCopies(validTodayFirst(placed, now)).length,
+    kinds: LANDINGS.map((landing) => ({
+      slug: landing.slug,
+      kind: landing.kind,
+      label: landing.nearName,
+      count: today.filter((offer) => offer.kind === landing.kind).length,
+    })).filter((entry) => entry.count > 0),
+  };
+}
+
+function runsToday(offer: PlacedOffer, now: Date): boolean {
+  if (offer.daysOfWeek?.length && !offer.daysOfWeek.includes(bucharestWeekday(now))) return false;
+  if (offer.timeEnd && bucharestClock(now) >= offer.timeEnd) return false;
+  return !offer.pickupStart || sameBucharestDay(new Date(offer.pickupStart), now);
+}
+
+function hasSaving(offer: PlacedOffer): boolean {
+  return offer.kind === "surplus" || offer.headlinePct !== null || (offer.originalPrice ?? 0) > (offer.price ?? 0);
+}
+
+function toHighlight(offer: PlacedOffer): Highlight {
+  return {
+    id: offer.id,
+    kind: offer.kind,
+    title: offer.title,
+    price: offer.price,
+    originalPrice: offer.originalPrice,
+    discountPct: offer.discountPct,
+    pickupStart: offer.pickupStart,
+    pickupEnd: offer.pickupEnd,
+    timeStart: offer.timeStart,
+    timeEnd: offer.timeEnd,
+    available: offer.available,
+    venueId: offer.venueId,
+    venueName: offer.venueName,
+    chain: offer.chain,
+  };
+}

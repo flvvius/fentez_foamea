@@ -1,8 +1,10 @@
 import { Link, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { DealFeed } from "@/components/deals/DealFeed";
+import { HomeHighlights } from "@/components/HomeHighlights";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useSession } from "@/lib/auth-client";
 import { fetchDealFeed } from "@/server/deals/feed";
+import { fetchHighlights } from "@/server/highlights";
 import type { FeedSort } from "@/server/deals/feed-select";
 import { UUID_RE } from "@/server/deals/uuid";
 
@@ -24,7 +26,10 @@ export const Route = createFileRoute("/")({
     if (Object.keys(legacy).length) throw redirect({ to: "/harta", search: legacy, statusCode: 301 });
   },
   loaderDeps: ({ search }) => ({ sort: search.sort ?? "popular" }),
-  loader: ({ deps }) => fetchDealFeed({ data: { sort: deps.sort } }),
+  loader: async ({ deps }) => {
+    const [page, highlights] = await Promise.all([fetchDealFeed({ data: { sort: deps.sort } }), fetchHighlights()]);
+    return { page, highlights };
+  },
   // Header precedence: during SSR the loader's server fn (fetchDealFeed) sets its own
   // cache-control, and that value replaces these route headers on the page response (curl on
   // "/" shows "public, max-age=30" and s-maxage=60, stale-while-revalidate=300). These values
@@ -35,10 +40,10 @@ export const Route = createFileRoute("/")({
   }),
   head: () => ({
     meta: [
-      { title: "Oferte din comunitate · fentez foamea" },
+      { title: "Mâncare ieftină în București, azi · fentez foamea" },
       {
         name: "description",
-        content: "Oferte de mâncare din București postate de oameni ca tine, votate și sortate după cât de bune sunt.",
+        content: "Cele mai bune oferte de mâncare din București de azi: pachete anti-risipă, meniuri de prânz, reduceri și oferte postate de comunitate.",
       },
     ],
   }),
@@ -51,7 +56,7 @@ const SORTS: { key: FeedSort; label: string }[] = [
 ];
 
 function Home() {
-  const page = Route.useLoaderData();
+  const { page, highlights } = Route.useLoaderData();
   const { sort: sortParam, posted } = Route.useSearch();
   const sort = sortParam ?? "popular";
   const navigate = useNavigate();
@@ -64,8 +69,8 @@ function Home() {
       <main className="page">
         <div className="page-head">
           <div>
-            <h1 className="headline">Oferte de mâncare, de la oameni</h1>
-            <p className="lede">Ai dat peste o ofertă bună? Postează-o, iar comunitatea votează ce merită.</p>
+            <h1 className="headline">Mâncare ieftină în București, azi</h1>
+            <p className="lede">Pachete anti-risipă, meniuri de prânz și reduceri de la restaurante, plus ofertele găsite de oameni ca tine.</p>
           </div>
           {signedOut ? (
             <Link to="/autentificare" search={{ redirect: "/posteaza" }} className="btn-primary">
@@ -78,6 +83,9 @@ function Home() {
           )}
         </div>
 
+        <HomeHighlights highlights={highlights} />
+
+        <h2 className="section-title feed-title">De la comunitate</h2>
         <div className="sort-tabs" role="group" aria-label="Sortare">
           {SORTS.map((option) => (
             <button

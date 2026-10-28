@@ -58,7 +58,7 @@ test("the bags feed lists bags with a pickup window", async ({ request }) => {
 test("the community feed and sign-in are up", async ({ page, request }) => {
   const response = await page.goto(`/?health=${Date.now()}`);
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oferte de mâncare, de la oameni");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mâncare ieftină în București, azi");
   expect((await request.get("/api/auth/get-session")).status()).toBe(200);
 });
 

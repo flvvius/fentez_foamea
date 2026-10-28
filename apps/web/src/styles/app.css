@@ -1314,12 +1314,14 @@ body {
   .filters,
   .btn-primary,
   .btn-secondary,
+  .kind-link,
   .vote-btn {
     transition: none;
   }
 
   .btn-primary:active,
-  .btn-secondary:active {
+  .btn-secondary:active,
+  .kind-link:active {
     transform: none;
   }
 
@@ -1405,4 +1407,97 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 16px;
+}
+
+/* --- Home highlights ------------------------------------------------------------- */
+
+.highlights {
+  margin-top: 32px;
+}
+
+.highlights-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--type-small);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.highlight {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.highlight:hover .highlight-title {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.highlight-title {
+  display: block;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.highlight-meta,
+.highlight-when {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--type-small);
+}
+
+.highlight-when {
+  color: var(--muted-foreground);
+}
+
+.kind-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.kind-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  font-size: var(--type-small);
+  font-weight: 500;
+  transition: transform var(--motion-press) ease-out;
+}
+
+.kind-link:active {
+  transform: scale(var(--motion-pressScale));
+}
+
+.kind-link-map {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.feed-title {
+  margin-top: 40px;
+}
+
+.feed-title + .sort-tabs {
+  margin-top: 8px;
 }
