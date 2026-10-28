@@ -302,14 +302,21 @@ export function PostForm() {
         </Field>
 
         <Field name="file" label="Captură de ecran" error={fileError ?? undefined} hint="JPEG, PNG sau WebP. O micșorăm înainte să o trimitem.">
-          <input
-            id="f-file"
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            aria-describedby={describedBy("file", fileError ?? undefined, "x")}
-            onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
-          />
+          <div className="file-pick">
+            <input
+              id="f-file"
+              ref={fileRef}
+              type="file"
+              className="file-input"
+              accept="image/jpeg,image/png,image/webp"
+              aria-describedby={describedBy("file", fileError ?? undefined, "x")}
+              onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
+            />
+            <label htmlFor="f-file" className="btn-secondary file-button" aria-hidden>
+              {file ? "Alege alta" : "Alege o imagine"}
+            </label>
+            <span className="file-name muted">{file ? file.name : "Nicio imagine aleasă"}</span>
+          </div>
         </Field>
         {preview && (
           <div className="shot">

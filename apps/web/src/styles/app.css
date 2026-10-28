@@ -880,6 +880,7 @@ body {
 
 .field {
   display: grid;
+  align-content: start;
   gap: 4px;
   min-width: 0;
   border: 0;
@@ -907,8 +908,36 @@ body {
   font: inherit;
 }
 
-.field input[type="file"] {
-  padding: 8px;
+.file-pick {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.field .file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+.file-button {
+  cursor: pointer;
+}
+
+.file-input:focus-visible + .file-button {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.file-name {
+  min-width: 0;
+  font-size: var(--type-small);
+  overflow-wrap: anywhere;
 }
 
 .field textarea {
