@@ -1,5 +1,5 @@
 import { BUCHAREST_CENTER, type OfferKind } from "@fentezfoamea/core";
-import { collapseChainCopies, placeOffers, sortOffers, validTodayFirst, type PlacedOffer } from "@/components/explore";
+import { applyFilters, collapseChainCopies, placeOffers, sortOffers, validTodayFirst, type PlacedOffer } from "@/components/explore";
 import { bucharestClock, bucharestWeekday, sameBucharestDay } from "@/lib/format";
 import { LANDINGS } from "@/lib/landing";
 import type { Offer } from "@/lib/offers";
@@ -11,7 +11,11 @@ export type Highlight = Pick<
 
 export type KindCount = { slug: string; kind: OfferKind; label: string; count: number };
 
-export type Highlights = { picks: Highlight[]; total: number; kinds: KindCount[] };
+export type BudgetCount = { maxPrice: number; count: number };
+
+export type Highlights = { picks: Highlight[]; total: number; kinds: KindCount[]; budgets: BudgetCount[] };
+
+const HOME_BUDGETS = [15, 25] as const;
 
 const PICKS = 5;
 const MAX_PICK_PRICE = 60;
@@ -33,6 +37,10 @@ export function pickHighlights(offers: Offer[], now: Date, limit = PICKS): Highl
       kind: landing.kind,
       label: landing.nearName,
       count: distinctToday.filter((offer) => offer.kind === landing.kind).length,
+    })).filter((entry) => entry.count > 0),
+    budgets: HOME_BUDGETS.map((maxPrice) => ({
+      maxPrice,
+      count: collapseChainCopies(applyFilters(placed, { kinds: [], radiusKm: null, maxPrice, includeDelivery: false })).length,
     })).filter((entry) => entry.count > 0),
   };
 }

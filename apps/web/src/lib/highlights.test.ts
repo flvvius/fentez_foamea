@@ -80,6 +80,18 @@ describe("pickHighlights", () => {
     expect(pickHighlights([base, combo], now).picks.map((pick) => pick.id)).toEqual(["1", "combo"]);
   });
 
+  it("counts offers under each home budget that can be picked up", () => {
+    const offers = [
+      { ...base, id: "a", price: 12 },
+      { ...base, id: "b", venueId: "v2", title: "Altul", price: 22 },
+      { ...base, id: "c", venueId: "v3", title: "Livrat", price: 10, deliveryOnly: true },
+    ];
+    expect(pickHighlights(offers, now).budgets).toEqual([
+      { maxPrice: 15, count: 1 },
+      { maxPrice: 25, count: 2 },
+    ]);
+  });
+
   it("caps the list", () => {
     const offers = Array.from({ length: 9 }, (_, index) => ({ ...base, id: `o${index}`, venueId: `v${index}`, venueName: `Local ${index}`, lat: 44.43 + index / 100 }));
     expect(pickHighlights(offers, now, 3).picks).toHaveLength(3);

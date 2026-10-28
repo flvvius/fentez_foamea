@@ -18,3 +18,12 @@ test("the home page links to each category with today's count", async ({ page })
   await expect(categories.getByRole("link", { name: /Pachete anti-risipă \d+/ })).toHaveAttribute("href", "/pachete-anti-risipa");
   await expect(categories.getByRole("link", { name: /Toate pe hartă/ })).toHaveAttribute("href", "/harta");
 });
+
+test("the home page links to offers under a budget, counted like the map counts them", async ({ page }) => {
+  await page.goto("/");
+  const link = page.getByRole("navigation", { name: "Pe categorii" }).getByRole("link", { name: /^Sub 15 lei \d+/ });
+  const count = Number((await link.textContent())!.match(/(\d+)$/)![1]);
+  await link.click();
+  await expect(page).toHaveURL(/buget=15/);
+  await expect(page.locator("#oferte article")).toHaveCount(count);
+});

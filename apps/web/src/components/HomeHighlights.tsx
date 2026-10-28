@@ -32,6 +32,11 @@ export function HomeHighlights({ highlights }: Readonly<{ highlights: Highlights
             {entry.label} <span className="muted">{entry.count}</span>
           </Link>
         ))}
+        {highlights.budgets.map((entry) => (
+          <Link key={entry.maxPrice} to="/harta" search={{ buget: entry.maxPrice, km: "oras", livrare: "nu" }} className="kind-link">
+            Sub {entry.maxPrice} lei <span className="muted">{entry.count}</span>
+          </Link>
+        ))}
         <Link to="/harta" className="kind-link kind-link-map">
           Toate pe hartă <span aria-hidden>→</span>
         </Link>

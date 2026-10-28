@@ -15,7 +15,7 @@ export const fetchHighlights = createServerFn({ method: "GET" }).handler(async (
     return highlights;
   } catch (error) {
     console.error("highlights:", error);
-    return { picks: [], total: 0, kinds: [] };
+    return { picks: [], total: 0, kinds: [], budgets: [] };
   }
 });
 
