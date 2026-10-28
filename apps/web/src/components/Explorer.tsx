@@ -41,7 +41,7 @@ const FEW_OFFERS = 3;
 const QUERY_DEBOUNCE_MS = 200;
 
 export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
-  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query, savedOnly } = state;
+  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query, savedOnly, nowOnly } = state;
   const { ids: savedIds, toggle: toggleSaved } = useSavedVenues();
   const navigate = useNavigate();
   const [draftQuery, setDraftQuery] = useState(query);
@@ -67,9 +67,10 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
   const savedPlaced = useMemo(() => allPlaced.filter((offer) => offer.placeId !== null && savedIds.includes(offer.placeId)), [allPlaced, savedIds]);
   const placed = savedOnly ? savedPlaced : allPlaced;
   const ignoreRadius = Boolean(venueId) || savedOnly;
+  const withinHourOf = nowOnly ? now : null;
   const filtered = useMemo(
-    () => applyFilters(placed, { kinds, radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query }),
-    [placed, kinds, radiusKm, maxPrice, includeDelivery, ignoreRadius, query],
+    () => applyFilters(placed, { kinds, radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query, withinHourOf }),
+    [placed, kinds, radiusKm, maxPrice, includeDelivery, ignoreRadius, query, withinHourOf],
   );
   const pins = useMemo(() => venuePins(filtered), [filtered]);
   const shared = offerId ? placed.find((offer) => offer.id === offerId) : undefined;
@@ -82,19 +83,19 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     if (ignoreRadius || radiusKm === null || listed.length >= FEW_OFFERS) return null;
     const larger = RADIUS_OPTIONS.slice(RADIUS_OPTIONS.indexOf(radiusKm as (typeof RADIUS_OPTIONS)[number]) + 1);
     for (const km of larger) {
-      const extra = applyFilters(placed, { kinds, radiusKm: km, maxPrice, includeDelivery, query }).length - filtered.length;
+      const extra = applyFilters(placed, { kinds, radiusKm: km, maxPrice, includeDelivery, query, withinHourOf }).length - filtered.length;
       if (extra > 0) return { km, extra };
     }
     return null;
-  }, [ignoreRadius, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, query, filtered.length]);
+  }, [ignoreRadius, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, query, withinHourOf, filtered.length]);
   const nearbyCount = useMemo(
     () => (center && radiusKm !== null ? applyFilters(placed, { kinds: [], radiusKm, maxPrice: null, includeDelivery: true }).length : null),
     [center, placed, radiusKm],
   );
   const kindCounts = useMemo(() => {
-    const anyKind = applyFilters(placed, { kinds: [], radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query });
+    const anyKind = applyFilters(placed, { kinds: [], radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query, withinHourOf });
     return countKinds(collapseChainCopies(sortOffers(anyKind, "distance")));
-  }, [placed, ignoreRadius, radiusKm, maxPrice, includeDelivery, query]);
+  }, [placed, ignoreRadius, radiusKm, maxPrice, includeDelivery, query, withinHourOf]);
   const savedCount = useMemo(() => collapseChainCopies(savedPlaced).length, [savedPlaced]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
 
@@ -242,6 +243,9 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             onChange={(e) => typeQuery(e.target.value)}
           />
           <div className="chip-row">
+            <button type="button" className="chip" aria-pressed={nowOnly} onClick={() => change({ nowOnly: !nowOnly })}>
+              Acum<span className="sr-only"> sau în următoarea oră</span>
+            </button>
             {(savedIds.length > 0 || savedOnly) && (
               <button type="button" className="chip" aria-pressed={savedOnly} onClick={() => change({ savedOnly: !savedOnly })}>
                 Salvate <span className="chip-count">{savedCount}</span>
@@ -295,6 +299,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
               <input type="checkbox" checked={includeDelivery} onChange={(e) => change({ includeDelivery: e.target.checked })} />
               <span>și livrări</span>
             </label>
+
           </div>
         </fieldset>
 

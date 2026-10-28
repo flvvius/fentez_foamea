@@ -1,5 +1,5 @@
 import { distanceMeters, OFFER_KIND_LABELS, type LatLon } from "@fentezfoamea/core";
-import { bucharestClock, bucharestWeekday, sameBucharestDay } from "@/lib/format";
+import { bucharestClock, bucharestWeekday, minutesUntil, sameBucharestDay } from "@/lib/format";
 import type { Offer } from "@/lib/offers";
 import type { ExploreState, SortKey } from "@/lib/search";
 
@@ -69,7 +69,7 @@ function comparableName(name: string): string {
   return foldText(name).replace(/[^a-z0-9]/g, "");
 }
 
-type Filters = Pick<ExploreState, "kinds" | "radiusKm" | "maxPrice" | "includeDelivery"> & { query?: string };
+type Filters = Pick<ExploreState, "kinds" | "radiusKm" | "maxPrice" | "includeDelivery"> & { query?: string; withinHourOf?: Date | null };
 
 export function applyFilters(offers: PlacedOffer[], filters: Filters): PlacedOffer[] {
   const words = searchWords(filters.query ?? "");
@@ -80,8 +80,29 @@ export function applyFilters(offers: PlacedOffer[], filters: Filters): PlacedOff
     const price = comparablePrice(offer);
     if (filters.maxPrice !== null && (price === null || price > filters.maxPrice)) return false;
     if (filters.radiusKm !== null && !withinRadius(offer, filters.radiusKm)) return false;
+    if (filters.withinHourOf && !availableWithinHour(offer, filters.withinHourOf)) return false;
     return true;
   });
+}
+
+const SOON_MINUTES = 60;
+
+export function availableWithinHour(offer: Offer, now: Date): boolean {
+  if (offer.daysOfWeek?.length && !offer.daysOfWeek.includes(bucharestWeekday(now))) return false;
+  if (offer.pickupStart && minutesUntil(offer.pickupStart, now) > SOON_MINUTES) return false;
+  if (offer.pickupEnd && minutesUntil(offer.pickupEnd, now) <= 0) return false;
+  const clock = clockMinutes(bucharestClock(now));
+  if (offer.timeStart && offer.timeEnd && offer.timeEnd <= offer.timeStart) {
+    return clock < clockMinutes(offer.timeEnd) || clockMinutes(offer.timeStart) - clock <= SOON_MINUTES;
+  }
+  if (offer.timeEnd && clock >= clockMinutes(offer.timeEnd)) return false;
+  if (offer.timeStart && clockMinutes(offer.timeStart) - clock > SOON_MINUTES) return false;
+  return true;
+}
+
+function clockMinutes(clock: string): number {
+  const [hours, minutes] = clock.split(":").map(Number);
+  return hours! * 60 + minutes!;
 }
 
 const SYNONYMS = [

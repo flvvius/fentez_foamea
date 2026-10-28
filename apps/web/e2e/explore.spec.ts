@@ -35,6 +35,14 @@ test.describe("explorer", () => {
     await expect(bag.getByRole("link", { name: /Rezervă în Bonapp/ })).toHaveAttribute("href", "https://bonapp.eco/p/bag-1");
   });
 
+  test("narrows to what you can get within the hour", async ({ page }) => {
+    await expect.poll(() => offerTitles(page)).toContain("Pachet pentru mâine");
+    await page.getByRole("button", { name: "Acum sau în următoarea oră" }).click();
+    await expect(page).toHaveURL(/acum=da/);
+    await expect.poll(() => offerTitles(page)).not.toContain("Pachet pentru mâine");
+    await expect.poll(() => offerTitles(page)).toContain("Pachet surpriză patiserie");
+  });
+
   test("marks bags that appeared in the last three hours as new", async ({ page }) => {
     await page.getByLabel("Distanță").selectOption({ label: "tot orașul" });
     await expect(offerRow(page, "Pachet surpriză patiserie").locator(".offer-kind")).toHaveText("Pachet anti-risipă · nou");

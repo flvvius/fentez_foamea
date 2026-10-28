@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { applyFilters, collapseChainCopies, featuredPinIds, percentInTitle, placeOffers, priceCapInTitle, samePlaceIds, sortOffers, validTodayFirst, venuePins } from "./explore";
+import { applyFilters, availableWithinHour, collapseChainCopies, featuredPinIds, percentInTitle, placeOffers, priceCapInTitle, samePlaceIds, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const base: Offer = {
   id: "1",
@@ -227,5 +227,26 @@ describe("featuredPinIds", () => {
   it("stops at ten", () => {
     const many = Array.from({ length: 30 }, (_, index) => pin(`p${index}`, 44.3 + index * 0.01, 40));
     expect(featuredPinIds(many, 400).size).toBe(10);
+  });
+});
+
+describe("availableWithinHour", () => {
+  const now = new Date("2026-10-21T10:30:00Z");
+
+  it("keeps bags whose pickup has started or starts within the hour", () => {
+    const bag = { ...base, pickupStart: "2026-10-21T11:00:00Z", pickupEnd: "2026-10-21T13:00:00Z" };
+    expect(availableWithinHour(bag, now)).toBe(true);
+    expect(availableWithinHour({ ...bag, pickupStart: "2026-10-21T12:00:00Z" }, now)).toBe(false);
+    expect(availableWithinHour({ ...bag, pickupStart: "2026-10-21T09:00:00Z", pickupEnd: "2026-10-21T10:00:00Z" }, now)).toBe(false);
+  });
+
+  it("reads deal hours and days in Bucharest time", () => {
+    const deal = { ...base, pickupStart: null, pickupEnd: null, timeStart: "14:00", timeEnd: "16:00", daysOfWeek: null };
+    expect(availableWithinHour(deal, now)).toBe(true);
+    expect(availableWithinHour({ ...deal, timeStart: "15:00" }, now)).toBe(false);
+    expect(availableWithinHour({ ...deal, timeEnd: "13:30", timeStart: "11:00" }, now)).toBe(false);
+    expect(availableWithinHour({ ...deal, daysOfWeek: [1] }, now)).toBe(false);
+    expect(availableWithinHour({ ...deal, timeStart: "22:00", timeEnd: "02:00" }, now)).toBe(false);
+    expect(availableWithinHour({ ...deal, timeStart: "14:00", timeEnd: "02:00" }, now)).toBe(true);
   });
 });
