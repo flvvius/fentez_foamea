@@ -64,7 +64,12 @@ function buildAuth() {
       googleClientId && googleClientSecret
         ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
         : {},
-    rateLimit: { enabled: true, storage: "database", modelName: "auth_rate_limit" },
+    rateLimit: {
+      enabled: true,
+      storage: "database",
+      modelName: "auth_rate_limit",
+      customRules: { "/get-session": false },
+    },
     advanced: {
       ipAddress: {
         // Only single-value headers are trusted (no trustedProxies: Vercel's proxy IPs are not
