@@ -8,6 +8,7 @@ import { LANDINGS } from "@/lib/landing";
 import { ZONES } from "@/lib/zones";
 import type { OfferSnapshot } from "@/lib/offers";
 import { BUDGET_OPTIONS, RADIUS_OPTIONS, type ExploreState, type SortKey } from "@/lib/search";
+import { useSavedVenues } from "@/lib/saved-venues";
 import { shareCurrentView } from "@/lib/share";
 import { OfferCard } from "./OfferCard";
 import { ShareButton } from "./ShareButton";
@@ -40,7 +41,8 @@ const FEW_OFFERS = 3;
 const QUERY_DEBOUNCE_MS = 200;
 
 export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
-  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query } = state;
+  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query, savedOnly } = state;
+  const { ids: savedIds, toggle: toggleSaved } = useSavedVenues();
   const navigate = useNavigate();
   const [draftQuery, setDraftQuery] = useState(query);
   const sentQuery = useRef(query);
@@ -61,10 +63,13 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     return () => clearInterval(timer);
   }, []);
 
-  const placed = useMemo(() => placeOffers(snapshot.offers, origin, now), [snapshot.offers, origin, now]);
+  const allPlaced = useMemo(() => placeOffers(snapshot.offers, origin, now), [snapshot.offers, origin, now]);
+  const savedPlaced = useMemo(() => allPlaced.filter((offer) => offer.placeId !== null && savedIds.includes(offer.placeId)), [allPlaced, savedIds]);
+  const placed = savedOnly ? savedPlaced : allPlaced;
+  const ignoreRadius = Boolean(venueId) || savedOnly;
   const filtered = useMemo(
-    () => applyFilters(placed, { kinds, radiusKm: venueId ? null : radiusKm, maxPrice, includeDelivery, query }),
-    [placed, kinds, radiusKm, maxPrice, includeDelivery, venueId, query],
+    () => applyFilters(placed, { kinds, radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query }),
+    [placed, kinds, radiusKm, maxPrice, includeDelivery, ignoreRadius, query],
   );
   const pins = useMemo(() => venuePins(filtered), [filtered]);
   const shared = offerId ? placed.find((offer) => offer.id === offerId) : undefined;
@@ -74,22 +79,23 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), now);
   }, [filtered, scopedPlace, offerId, sort, now]);
   const wider = useMemo(() => {
-    if (venueId || radiusKm === null || listed.length >= FEW_OFFERS) return null;
+    if (ignoreRadius || radiusKm === null || listed.length >= FEW_OFFERS) return null;
     const larger = RADIUS_OPTIONS.slice(RADIUS_OPTIONS.indexOf(radiusKm as (typeof RADIUS_OPTIONS)[number]) + 1);
     for (const km of larger) {
       const extra = applyFilters(placed, { kinds, radiusKm: km, maxPrice, includeDelivery, query }).length - filtered.length;
       if (extra > 0) return { km, extra };
     }
     return null;
-  }, [venueId, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, query, filtered.length]);
+  }, [ignoreRadius, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, query, filtered.length]);
   const nearbyCount = useMemo(
     () => (center && radiusKm !== null ? applyFilters(placed, { kinds: [], radiusKm, maxPrice: null, includeDelivery: true }).length : null),
     [center, placed, radiusKm],
   );
   const kindCounts = useMemo(() => {
-    const anyKind = applyFilters(placed, { kinds: [], radiusKm: venueId ? null : radiusKm, maxPrice, includeDelivery, query });
+    const anyKind = applyFilters(placed, { kinds: [], radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query });
     return countKinds(collapseChainCopies(sortOffers(anyKind, "distance")));
-  }, [placed, venueId, radiusKm, maxPrice, includeDelivery, query]);
+  }, [placed, ignoreRadius, radiusKm, maxPrice, includeDelivery, query]);
+  const savedCount = useMemo(() => collapseChainCopies(savedPlaced).length, [savedPlaced]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
 
   const change = (next: Partial<ExploreState>) => {
@@ -150,6 +156,8 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     }, QUERY_DEBOUNCE_MS);
   };
 
+  const isSaved = (offer: { placeId: string | null }) => offer.placeId !== null && savedIds.includes(offer.placeId);
+
   const toggleKind = (kind: OfferKind) =>
     change({ kinds: kinds.includes(kind) ? kinds.filter((k) => k !== kind) : [...kinds, kind] });
 
@@ -207,7 +215,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             {shared ? (
               <>
                 <p className="shared-note">Ți-a trimis cineva oferta asta</p>
-                <OfferCard offer={shared} now={now} onShowVenue={showVenue} />
+                <OfferCard offer={shared} now={now} onShowVenue={showVenue} saved={isSaved(shared)} onToggleSave={toggleSaved} />
               </>
             ) : (
               <p className="shared-note">Oferta primită nu mai e disponibilă. Uite ce mai e acum prin oraș.</p>
@@ -231,6 +239,11 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             onChange={(e) => typeQuery(e.target.value)}
           />
           <div className="chip-row">
+            {(savedIds.length > 0 || savedOnly) && (
+              <button type="button" className="chip" aria-pressed={savedOnly} onClick={() => change({ savedOnly: !savedOnly })}>
+                Salvate <span className="chip-count">{savedCount}</span>
+              </button>
+            )}
             {OFFER_KINDS.filter((kind) => kindCounts[kind] || kinds.includes(kind)).map((kind) => (
               <button
                 key={kind}
@@ -295,13 +308,19 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           )}
           {listed.length === 0 ? (
             <div className="empty">
-              <p>Nicio ofertă cu filtrele astea.</p>
-              <button type="button" className="link-quiet" onClick={() => change({ kinds: [], radiusKm: null, maxPrice: null, venueId: null, query: "" })}>
+              <p>{emptyMessage(savedOnly, savedIds.length)}</p>
+              <button
+                type="button"
+                className="link-quiet"
+                onClick={() => change({ kinds: [], radiusKm: null, maxPrice: null, venueId: null, query: "", savedOnly: false })}
+              >
                 Arată tot orașul
               </button>
             </div>
           ) : (
-            listed.slice(0, visible).map((offer) => <OfferCard key={offer.id} offer={offer} now={now} onShowVenue={showVenue} />)
+            listed.slice(0, visible).map((offer) => (
+              <OfferCard key={offer.id} offer={offer} now={now} onShowVenue={showVenue} saved={isSaved(offer)} onToggleSave={toggleSaved} />
+            ))
           )}
           {wider && (
             <button type="button" className="more" onClick={() => change({ radiusKm: wider.km })}>
@@ -356,6 +375,12 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
       </section>
     </main>
   );
+}
+
+function emptyMessage(savedOnly: boolean, savedVenues: number): string {
+  if (!savedOnly) return "Nicio ofertă cu filtrele astea.";
+  if (savedVenues === 0) return "Nu ai salvat niciun local. Apasă „Salvează” la o ofertă și îl găsești aici.";
+  return "Localurile salvate nu au oferte acum.";
 }
 
 function locateLabel(locate: LocateState, hasOwnLocation: boolean): string {

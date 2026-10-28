@@ -8,9 +8,11 @@ type Props = {
   offer: PlacedOffer;
   now: Date;
   onShowVenue: (venueId: string) => void;
+  saved: boolean;
+  onToggleSave: (placeId: string) => void;
 };
 
-export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
+export function OfferCard({ offer, now, onShowVenue, saved, onToggleSave }: Readonly<Props>) {
   const closesIn = offer.pickupEnd ? minutesUntil(offer.pickupEnd, now) : null;
   const pickupStarted = offer.pickupStart ? new Date(offer.pickupStart) <= now : true;
   const closingSoon = closesIn !== null && closesIn <= 60 && pickupStarted;
@@ -63,6 +65,11 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
             <span className={offer.available === 1 ? "urgent" : "muted"}>{offer.available === 1 ? "ultimul" : `mai sunt ${offer.available}`}</span>
           )}
           <span className="offer-actions">
+            {offer.placeId && (
+              <button type="button" className="link-quiet save" aria-pressed={saved} onClick={() => onToggleSave(offer.placeId!)}>
+                Salvează<span className="sr-only"> localul</span>
+              </button>
+            )}
             <ShareButton className="link-quiet share" label="Trimite" share={() => shareOffer(offer)} />
             <a className="offer-link" href={offer.url} target="_blank" rel="noopener noreferrer">
               Vezi pe {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>

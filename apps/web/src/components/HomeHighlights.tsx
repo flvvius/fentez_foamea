@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { countOffers, formatPickup, formatPrice } from "@/lib/format";
 import type { Highlight, Highlights } from "@/lib/highlights";
+import { useSavedVenues } from "@/lib/saved-venues";
 
 export function HomeHighlights({ highlights }: Readonly<{ highlights: Highlights }>) {
+  const { ids: savedIds } = useSavedVenues();
   if (highlights.picks.length === 0) return null;
   return (
     <section className="highlights" aria-labelledby="highlights-title">
@@ -20,6 +22,11 @@ export function HomeHighlights({ highlights }: Readonly<{ highlights: Highlights
         ))}
       </ul>
       <nav className="kind-links" aria-label="Pe categorii">
+        {savedIds.length > 0 && (
+          <Link to="/harta" search={{ salvate: "da" }} className="kind-link">
+            ★ Localurile salvate <span className="muted">{savedIds.length}</span>
+          </Link>
+        )}
         {highlights.kinds.map((entry) => (
           <Link key={entry.slug} to="/$categorie" params={{ categorie: entry.slug }} className="kind-link">
             {entry.label} <span className="muted">{entry.count}</span>

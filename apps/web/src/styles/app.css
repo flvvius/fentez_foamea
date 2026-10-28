@@ -1501,3 +1501,18 @@ body {
 .feed-title + .sort-tabs {
   margin-top: 8px;
 }
+
+.save::before {
+  content: "☆ " / "";
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 2px;
+}
+
+.save[aria-pressed="true"] {
+  color: var(--deal);
+}
+
+.save[aria-pressed="true"]::before {
+  content: "★ " / "";
+}
