@@ -83,7 +83,7 @@ export function OfferCard({ offer, now, onShowVenue, saved, onToggleSave }: Read
             )}
             <ShareButton className="link-quiet share" label="Trimite" share={() => shareOffer(offer)} />
             <a className="offer-link" href={offer.url} target="_blank" rel="noopener noreferrer">
-              Vezi pe {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>
+              {offer.kind === "surplus" ? "Rezervă în" : "Vezi pe"} {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>
             </a>
           </span>
         </div>
@@ -136,7 +136,7 @@ function directionsUrl(offer: PlacedOffer): string | null {
 
 function placeNote(offer: PlacedOffer): string | null {
   const parts = [
-    offer.distance === null ? null : formatDistance(offer.distance),
+    offer.distance === null || offer.deliveryOnly ? null : formatDistance(offer.distance),
     offer.otherLocations ? otherLocationsLabel(offer.otherLocations) : null,
     offer.alsoSoldAs?.length ? `și ca ${offer.alsoSoldAs.join(", ")}` : null,
   ];

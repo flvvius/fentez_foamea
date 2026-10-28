@@ -27,7 +27,7 @@ export type ExploreSearch = {
 };
 
 export const RADIUS_OPTIONS = [1, 3, 10, null] as const;
-export const BUDGET_OPTIONS = [15, 25, 40, null] as const;
+export const BUDGET_OPTIONS = [15, 20, 25, 40, null] as const;
 
 export const DEFAULT_STATE: ExploreState = {
   kinds: [],

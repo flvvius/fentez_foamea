@@ -95,7 +95,6 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     const anyKind = applyFilters(placed, { kinds: [], radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query });
     return countKinds(collapseChainCopies(sortOffers(anyKind, "distance")));
   }, [placed, ignoreRadius, radiusKm, maxPrice, includeDelivery, query]);
-  const inKinds = useMemo(() => (kinds.length ? placed.filter((offer) => kinds.includes(offer.kind)).length : placed.length), [placed, kinds]);
   const savedCount = useMemo(() => collapseChainCopies(savedPlaced).length, [savedPlaced]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
 
@@ -175,11 +174,14 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           <h1 className="headline">{headline}</h1>
           <p className="lede">
             {nearbyCount === null
-              ? `${countOffers(inKinds)} de la restaurante, fast-food-uri și cofetării`
+              ? `${countOffers(listed.length)} ${reachLabel(radiusKm, origin.mine, venueId !== null || savedOnly)}`
               : `${countOffers(nearbyCount)} la cel mult ${radiusKm} km de ${center!.name}`}
-            : pachete salvate de la aruncat, meniuri de prânz, reduceri.
+            {kinds.length === 0 ? ": pachete salvate de la aruncat, meniuri de prânz, reduceri." : "."}
             {snapshot.updatedAt && <> Actualizat {formatRelative(snapshot.updatedAt, now)}.</>}
           </p>
+          {kinds.length === 1 && kinds[0] === "surplus" && (
+            <p className="lede-note muted">Rezervi și plătești pachetul în aplicația Bonapp, apoi îl ridici în intervalul afișat. Ce primești afli la ridicare: e mâncarea rămasă în ziua aceea.</p>
+          )}
           <div className="masthead-actions">
             <button type="button" className="locate" onClick={locateMe} disabled={locate === "locating"}>
               {locateLabel(locate, origin.mine)}
@@ -376,6 +378,11 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
       </section>
     </main>
   );
+}
+
+function reachLabel(radiusKm: number | null, fromVisitor: boolean, scoped: boolean): string {
+  if (scoped || radiusKm === null) return "în tot orașul";
+  return `la cel mult ${radiusKm} km de ${fromVisitor ? "tine" : "centru"}`;
 }
 
 function emptyMessage(savedOnly: boolean, savedVenues: number): string {

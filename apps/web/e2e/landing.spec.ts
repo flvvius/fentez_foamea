@@ -7,7 +7,7 @@ test("a category page opens with its filter on and its own title", async ({ page
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/pachete-anti-risipa$/);
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
   await expect.poll(() => offerTitles(page)).toEqual(["Pachet surpriză patiserie", "Pachet de seară Titan", "Pachet verificat acum 2 ore", "Pachet pentru mâine"]);
-  await expect(page.locator(".lede")).toContainText("4 oferte de la restaurante");
+  await expect(page.locator(".lede")).toContainText("4 oferte în tot orașul");
 
   await waitForHydration(page);
   await expect(page.getByRole("button", { name: /Pachet anti-risipă/ })).toHaveAttribute("aria-pressed", "true");

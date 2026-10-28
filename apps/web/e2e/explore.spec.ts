@@ -18,7 +18,7 @@ test.describe("explorer", () => {
   });
 
   test("counts live offers and says when data was refreshed", async ({ page }) => {
-    await expect(page.locator(".lede")).toContainText("14 oferte");
+    await expect(page.locator(".lede")).toContainText("9 oferte la cel mult 3 km de centru");
     await expect(page.locator(".lede")).toContainText(/Actualizat acum 1\d min/);
   });
 
@@ -32,7 +32,7 @@ test.describe("explorer", () => {
     const bag = offerRow(page, "Pachet surpriză patiserie");
     await expect(bag).toContainText(/mai ai (39|40) min/);
     await expect(bag).toContainText("mai sunt 2");
-    await expect(bag.getByRole("link", { name: /Vezi pe Bonapp/ })).toHaveAttribute("href", "https://bonapp.eco/p/bag-1");
+    await expect(bag.getByRole("link", { name: /Rezervă în Bonapp/ })).toHaveAttribute("href", "https://bonapp.eco/p/bag-1");
   });
 
   test("marks bags that appeared in the last three hours as new", async ({ page }) => {
