@@ -114,14 +114,21 @@ export function decodeSnapshot(wire: SnapshotWire): OfferSnapshot {
 const AFTER_VENUE_SEPARATOR = /^\s*[•·|:\-–—]\s*/;
 
 export function titleWithoutVenue(title: string, venueName: string): string {
-  const name = venueName.normalize("NFC");
   const text = title.normalize("NFC");
-  if (foldLetters(text.slice(0, name.length)) !== foldLetters(name)) return title;
-  const rest = text.slice(name.length);
+  const words = foldLetters(venueName.normalize("NFC")).match(/[\p{L}\p{N}]+/gu);
+  if (!words) return title;
+  const venuePrefix = new RegExp(`^${words.map(escapeRegExp).join("[^\\p{L}\\p{N}]+")}[!?.'’]*`, "u");
+  const match = venuePrefix.exec(foldLetters(text));
+  if (!match) return title;
+  const rest = text.slice(match[0].length);
   const separator = AFTER_VENUE_SEPARATOR.exec(rest);
   if (!separator) return title;
   const product = rest.slice(separator[0].length);
   return product ? product.charAt(0).toLocaleUpperCase("ro") + product.slice(1) : title;
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function foldLetters(text: string): string {

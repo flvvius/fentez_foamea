@@ -56,6 +56,7 @@ describe("titleWithoutVenue", () => {
     expect(titleWithoutVenue("Carrefour Express București Green Court • pachet surpriză", "Carrefour Express Bucuresti Green Court")).toBe(
       "Pachet surpriză",
     );
+    expect(titleWithoutVenue("Gregory's Piața Romană • surprise box", "Gregory's • Piața Romană")).toBe("Surprise box");
   });
 
   it("keeps titles where the venue name is part of the product", () => {
