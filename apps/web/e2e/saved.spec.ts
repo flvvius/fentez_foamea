@@ -25,3 +25,12 @@ test("explains the saved list before anything is saved", async ({ page }) => {
   await waitForHydration(page);
   await expect(offerList(page)).toContainText("Nu ai salvat niciun local");
 });
+
+test("links an offer with a pickup place to directions, but not a delivery-only one", async ({ page }) => {
+  await page.goto("/harta");
+  await expect(offerRow(page, "Pachet surpriză patiserie").getByRole("link", { name: /^Traseu/ })).toHaveAttribute(
+    "href",
+    /google\.com\/maps\/dir\/\?api=1&destination=44\.\d+,26\.\d+/,
+  );
+  await expect(offerRow(page, "Burger dublu cu cartofi").getByRole("link", { name: /^Traseu/ })).toHaveCount(0);
+});

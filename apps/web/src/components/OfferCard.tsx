@@ -21,6 +21,7 @@ export function OfferCard({ offer, now, onShowVenue, saved, onToggleSave }: Read
   const isNew = offer.firstSeenAt !== null && -minutesUntil(offer.firstSeenAt, now) < NEW_FOR_MINUTES;
   const when = schedule(offer);
   const place = placeNote(offer);
+  const directions = directionsUrl(offer);
 
   return (
     <article className={`offer ${notToday || overForToday ? "offer-off-day" : ""}`}>
@@ -42,7 +43,17 @@ export function OfferCard({ offer, now, onShowVenue, saved, onToggleSave }: Read
             <span>{offer.chain ?? "În toate locațiile"}</span>
           )}
         </p>
-        {place && <p className="offer-detail muted">{place}</p>}
+        {(place || directions) && (
+          <p className="offer-detail muted">
+            {place}
+            {place && directions && " · "}
+            {directions && (
+              <a className="link-quiet" href={directions} target="_blank" rel="noopener noreferrer">
+                Traseu<span className="sr-only"> până la {offer.venueName ?? "local"} (se deschide într-o filă nouă)</span>
+              </a>
+            )}
+          </p>
+        )}
 
         {when && (
           <p className="offer-detail">
@@ -116,6 +127,11 @@ const NEW_FOR_MINUTES = 180;
 
 function checkedLongAgo(offer: PlacedOffer, now: Date): boolean {
   return offer.checkedAt !== null && -minutesUntil(offer.checkedAt, now) > CHECK_AGE_WORTH_MENTIONING_MIN;
+}
+
+function directionsUrl(offer: PlacedOffer): string | null {
+  if (offer.deliveryOnly || offer.lat === null || offer.lon === null) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${offer.lat},${offer.lon}`;
 }
 
 function placeNote(offer: PlacedOffer): string | null {
