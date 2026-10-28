@@ -27,3 +27,9 @@ test("the home page links to offers under a budget, counted like the map counts 
   await expect(page).toHaveURL(/buget=15/);
   await expect(page.locator("#oferte article")).toHaveCount(count);
 });
+
+test("the home page's main action opens what can be picked up now", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: "Ce poți lua acum" })).toHaveAttribute("href", "/harta?acum=da");
+  await expect(page.getByRole("link", { name: "Postează o ofertă" })).toHaveAttribute("href", /\/autentificare\?redirect=%2Fposteaza|\/posteaza/);
+});

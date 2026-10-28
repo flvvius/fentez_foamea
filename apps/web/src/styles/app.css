@@ -694,6 +694,12 @@ body {
   transition: transform var(--motion-press) ease-out;
 }
 
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .btn-primary {
   background: var(--primary);
   color: var(--primary-foreground);

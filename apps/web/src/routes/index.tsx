@@ -76,15 +76,14 @@ function Home() {
             <h1 className="headline">Mâncare ieftină în București, azi</h1>
             <p className="lede">Pachete anti-risipă, meniuri de prânz și reduceri de la restaurante, plus ofertele găsite de oameni ca tine.</p>
           </div>
-          {signedOut ? (
-            <Link to="/autentificare" search={{ redirect: "/posteaza" }} className="btn-primary">
+          <div className="page-actions">
+            <Link to="/harta" search={{ acum: "da" }} className="btn-primary">
+              Ce poți lua acum
+            </Link>
+            <Link to={signedOut ? "/autentificare" : "/posteaza"} search={signedOut ? { redirect: "/posteaza" } : undefined} className="btn-secondary">
               Postează o ofertă
             </Link>
-          ) : (
-            <Link to="/posteaza" className="btn-primary">
-              Postează o ofertă
-            </Link>
-          )}
+          </div>
         </div>
 
         <SavedPicks />
