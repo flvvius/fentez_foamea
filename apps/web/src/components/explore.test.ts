@@ -62,6 +62,21 @@ describe("explore", () => {
     expect(search("burger")).toEqual([]);
   });
 
+  it("finds other spellings of a dish and offers by their category", () => {
+    const placed = placeOffers(
+      [
+        { ...base, id: "shawarma", title: "Shawarma de pui", venueName: "Dahab" },
+        { ...base, id: "saorma", title: "Șaorma mare", venueName: "Calif" },
+        { ...base, id: "menu", kind: "daily_menu", title: "Ciorbă + fel principal", venueName: "Bistro" },
+      ],
+      origin,
+      now,
+    );
+    const search = (query: string) => applyFilters(placed, { kinds: [], radiusKm: null, maxPrice: null, includeDelivery: true, query }).map((o) => o.id);
+    expect(search("shaorma")).toEqual(["shawarma", "saorma"]);
+    expect(search("meniul zilei")).toEqual(["menu"]);
+  });
+
   it("keeps offers within budget and drops ones without a price", () => {
     const placed = placeOffers([base, { ...base, id: "pricey", price: 30 }, { ...base, id: "unknown", price: null }], origin, now);
     const kept = applyFilters(placed, { kinds: [], radiusKm: null, maxPrice: 25, includeDelivery: true });

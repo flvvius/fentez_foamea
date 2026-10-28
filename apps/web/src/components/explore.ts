@@ -1,4 +1,4 @@
-import { distanceMeters, type LatLon } from "@fentezfoamea/core";
+import { distanceMeters, OFFER_KIND_LABELS, type LatLon } from "@fentezfoamea/core";
 import { bucharestClock, bucharestWeekday, sameBucharestDay } from "@/lib/format";
 import type { Offer } from "@/lib/offers";
 import type { ExploreState, SortKey } from "@/lib/search";
@@ -84,21 +84,35 @@ export function applyFilters(offers: PlacedOffer[], filters: Filters): PlacedOff
   });
 }
 
-function searchWords(query: string): string[] {
-  return foldText(query).split(/\s+/).filter(Boolean);
+const SYNONYMS = [
+  ["shaorma", "shawarma", "saorma", "sawarma"],
+  ["cafea", "coffee", "cappuccino", "espresso", "latte"],
+  ["paste", "pasta"],
+  ["cartofi", "fries"],
+  ["inghetata", "gelato"],
+];
+
+function searchWords(query: string): string[][] {
+  return foldText(query)
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => SYNONYMS.find((group) => group.includes(word)) ?? [word]);
 }
 
-export function matchesQuery(offer: Pick<Offer, "title" | "venueName" | "chain">, query: string): boolean {
+type Searchable = Pick<Offer, "title" | "venueName" | "chain"> & Partial<Pick<Offer, "kind">>;
+
+export function matchesQuery(offer: Searchable, query: string): boolean {
   return matchesWords(offer, searchWords(query));
 }
 
-function matchesWords(offer: Pick<Offer, "title" | "venueName" | "chain">, words: string[]): boolean {
-  const text = foldText(`${offer.title} ${offer.venueName ?? ""} ${offer.chain ?? ""}`);
-  return words.every((word) => text.includes(word));
+function matchesWords(offer: Searchable, words: string[][]): boolean {
+  const kind = offer.kind ? OFFER_KIND_LABELS[offer.kind] : "";
+  const text = foldText(`${offer.title} ${offer.venueName ?? ""} ${offer.chain ?? ""} ${kind}`);
+  return words.every((alternatives) => alternatives.some((word) => text.includes(word)));
 }
 
 function foldText(text: string): string {
-  return text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 function withinRadius(offer: PlacedOffer, radiusKm: number): boolean {
