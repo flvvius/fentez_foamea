@@ -79,7 +79,7 @@ export function OfferCard({ offer, now, fromVisitor, onShowVenue, saved, onToggl
           <span className="offer-actions">
             {offer.placeId && (
               <button type="button" className="link-quiet save" aria-pressed={saved} onClick={() => onToggleSave(offer.placeId!)}>
-                Salvează<span className="sr-only"> localul</span>
+                {saved ? "Salvat" : "Salvează"}<span className="sr-only"> localul</span>
               </button>
             )}
             <ShareButton className="link-quiet share" label="Trimite" share={() => shareOffer(offer)} />

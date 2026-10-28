@@ -4,9 +4,8 @@ test("saves a venue and lists only saved venues, even after a reload", async ({ 
   await page.goto("/harta");
   await waitForHydration(page);
   const bag = offerRow(page, "Pachet surpriză patiserie");
-  const save = bag.getByRole("button", { name: /^Salvează/ });
-  await save.click();
-  await expect(save).toHaveAttribute("aria-pressed", "true");
+  await bag.getByRole("button", { name: /^Salvează/ }).click();
+  await expect(bag.getByRole("button", { name: /^Salvat/ })).toHaveAttribute("aria-pressed", "true");
 
   await page.reload();
   await waitForHydration(page);
