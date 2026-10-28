@@ -219,7 +219,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             {shared ? (
               <>
                 <p className="shared-note">Ți-a trimis cineva oferta asta</p>
-                <OfferCard offer={shared} now={now} onShowVenue={showVenue} saved={isSaved(shared)} onToggleSave={toggleSaved} />
+                <OfferCard offer={shared} now={now} fromVisitor={origin.mine} onShowVenue={showVenue} saved={isSaved(shared)} onToggleSave={toggleSaved} />
               </>
             ) : (
               <p className="shared-note">Oferta primită nu mai e disponibilă. Uite ce mai e acum prin oraș.</p>
@@ -327,7 +327,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             </div>
           ) : (
             listed.slice(0, visible).map((offer) => (
-              <OfferCard key={offer.id} offer={offer} now={now} onShowVenue={showVenue} saved={isSaved(offer)} onToggleSave={toggleSaved} />
+              <OfferCard key={offer.id} offer={offer} now={now} fromVisitor={origin.mine} onShowVenue={showVenue} saved={isSaved(offer)} onToggleSave={toggleSaved} />
             ))
           )}
           {wider && (

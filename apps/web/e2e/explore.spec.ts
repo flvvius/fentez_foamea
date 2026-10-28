@@ -32,6 +32,7 @@ test.describe("explorer", () => {
     const bag = offerRow(page, "Pachet surpriză patiserie");
     await expect(bag).toContainText(/mai ai (39|40) min/);
     await expect(bag).toContainText("mai sunt 2");
+    await expect(bag).not.toContainText("pe jos");
     await expect(bag.getByRole("link", { name: /Rezervă în Bonapp/ })).toHaveAttribute("href", "https://bonapp.eco/p/bag-1");
   });
 
@@ -166,6 +167,7 @@ test.describe("near me", () => {
     await expect(page.getByLabel("Ordine")).toHaveValue("best");
     await expect(page).toHaveURL(/\/harta$/);
     await expect.poll(async () => (await offerTitles(page))[0]).toBe("Pachet de seară Titan");
+    await expect(offerRow(page, "Pachet de seară Titan")).toContainText(/\d+ min pe jos/);
   });
 
   test("re-sorts by distance from the visitor", async ({ page }) => {

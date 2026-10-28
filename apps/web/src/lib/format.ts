@@ -23,6 +23,15 @@ export function formatDistance(meters: number): string {
   return `${(meters / 1000).toFixed(meters < 10_000 ? 1 : 0).replace(".", ",")} km`;
 }
 
+const WALKING_METERS_PER_MINUTE = 80;
+const STREET_DETOUR = 1.3;
+const LONGEST_WALK_MINUTES = 30;
+
+export function formatWalk(straightMeters: number): string | null {
+  const minutes = Math.max(1, Math.round((straightMeters * STREET_DETOUR) / WALKING_METERS_PER_MINUTE));
+  return minutes > LONGEST_WALK_MINUTES ? null : `${minutes} min pe jos`;
+}
+
 export function formatPickup(start: string, end: string, now: Date): string {
   const startDate = new Date(start);
   const endDate = new Date(end);

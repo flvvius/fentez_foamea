@@ -1,18 +1,19 @@
 import { OFFER_KIND_LABELS, SOURCE_LABELS, WEEKDAY_SHORT } from "@fentezfoamea/core";
 import { shareOffer } from "@/lib/share";
-import { bucharestClock, bucharestWeekday, formatDistance, formatPickup, formatPrice, formatRelative, minutesUntil } from "@/lib/format";
+import { bucharestClock, bucharestWeekday, formatDistance, formatWalk, formatPickup, formatPrice, formatRelative, minutesUntil } from "@/lib/format";
 import type { PlacedOffer } from "./explore";
 import { ShareButton } from "./ShareButton";
 
 type Props = {
   offer: PlacedOffer;
   now: Date;
+  fromVisitor: boolean;
   onShowVenue: (venueId: string) => void;
   saved: boolean;
   onToggleSave: (placeId: string) => void;
 };
 
-export function OfferCard({ offer, now, onShowVenue, saved, onToggleSave }: Readonly<Props>) {
+export function OfferCard({ offer, now, fromVisitor, onShowVenue, saved, onToggleSave }: Readonly<Props>) {
   const closesIn = offer.pickupEnd ? minutesUntil(offer.pickupEnd, now) : null;
   const pickupStarted = offer.pickupStart ? new Date(offer.pickupStart) <= now : true;
   const closingSoon = closesIn !== null && closesIn <= 60 && pickupStarted;
@@ -20,7 +21,7 @@ export function OfferCard({ offer, now, onShowVenue, saved, onToggleSave }: Read
   const overForToday = !notToday && offer.timeEnd !== null && bucharestClock(now) >= offer.timeEnd;
   const isNew = offer.firstSeenAt !== null && -minutesUntil(offer.firstSeenAt, now) < NEW_FOR_MINUTES;
   const when = schedule(offer);
-  const place = placeNote(offer);
+  const place = placeNote(offer, fromVisitor);
   const directions = directionsUrl(offer);
 
   return (
@@ -134,9 +135,10 @@ function directionsUrl(offer: PlacedOffer): string | null {
   return `https://www.google.com/maps/dir/?api=1&destination=${offer.lat},${offer.lon}`;
 }
 
-function placeNote(offer: PlacedOffer): string | null {
+function placeNote(offer: PlacedOffer, fromVisitor: boolean): string | null {
   const parts = [
     offer.distance === null || offer.deliveryOnly ? null : formatDistance(offer.distance),
+    fromVisitor && offer.distance !== null && !offer.deliveryOnly ? formatWalk(offer.distance) : null,
     offer.otherLocations ? otherLocationsLabel(offer.otherLocations) : null,
     offer.alsoSoldAs?.length ? `și ca ${offer.alsoSoldAs.join(", ")}` : null,
   ];
