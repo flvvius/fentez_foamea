@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { findLanding } from "@/lib/landing";
 import { findZone } from "@/lib/zones";
-import { loadDealById } from "@/server/deals/deal-by-id";
+import { loadDealById } from "@/server/deals/deal-by-id-query";
 import { UUID_RE } from "@/server/deals/uuid";
 import { dealCardRow, findOfferForImage, findTodaySummary, findVenue, renderOfferImage, renderTodayImage } from "@/server/offer-image";
 
