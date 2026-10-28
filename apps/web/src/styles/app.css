@@ -1522,3 +1522,19 @@ body {
   font-size: var(--type-small);
   border-bottom: 1px solid var(--border);
 }
+
+.install {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  display: grid;
+  gap: 12px;
+  font-size: var(--type-small);
+}
+
+.install-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}

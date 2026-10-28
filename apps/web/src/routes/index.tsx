@@ -1,6 +1,7 @@
 import { Link, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { DealFeed } from "@/components/deals/DealFeed";
 import { HomeHighlights } from "@/components/HomeHighlights";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { SavedPicks } from "@/components/SavedPicks";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useSession } from "@/lib/auth-client";
@@ -87,6 +88,7 @@ function Home() {
         </div>
 
         <SavedPicks />
+        <InstallPrompt />
         <HomeHighlights highlights={highlights} />
 
         <h2 className="section-title feed-title">De la comunitate</h2>

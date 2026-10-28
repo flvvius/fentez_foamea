@@ -45,3 +45,25 @@ test("the home page lists today's offers at saved venues", async ({ page }) => {
   await expect(saved.getByRole("link", { name: /Pachet surpriză patiserie/ })).toBeVisible();
   await expect(saved).not.toContainText("Pachet de seară Titan");
 });
+
+test("offers to install the site once a venue is saved", async ({ page }) => {
+  await page.goto("/harta");
+  await waitForHydration(page);
+  await offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: /^Salvează/ }).click();
+
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  await page.evaluate(() => {
+    const event = Object.assign(new Event("beforeinstallprompt", { cancelable: true }), {
+      prompt: async () => {
+        (window as unknown as { prompted: boolean }).prompted = true;
+      },
+      userChoice: Promise.resolve({ outcome: "accepted" }),
+    });
+    window.dispatchEvent(event);
+  });
+  const offer = page.getByRole("complementary", { name: "Instalează aplicația" });
+  await offer.getByRole("button", { name: "Instalează" }).click();
+  expect(await page.evaluate(() => (window as unknown as { prompted?: boolean }).prompted)).toBe(true);
+  await expect(offer).toBeHidden();
+});
