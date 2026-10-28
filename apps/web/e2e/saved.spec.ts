@@ -34,3 +34,14 @@ test("links an offer with a pickup place to directions, but not a delivery-only 
   );
   await expect(offerRow(page, "Burger dublu cu cartofi").getByRole("link", { name: /^Traseu/ })).toHaveCount(0);
 });
+
+test("the home page lists today's offers at saved venues", async ({ page }) => {
+  await page.goto("/harta");
+  await waitForHydration(page);
+  await offerRow(page, "Pachet surpriză patiserie").getByRole("button", { name: /^Salvează/ }).click();
+
+  await page.goto("/");
+  const saved = page.getByRole("region", { name: "La localurile tale" });
+  await expect(saved.getByRole("link", { name: /Pachet surpriză patiserie/ })).toBeVisible();
+  await expect(saved).not.toContainText("Pachet de seară Titan");
+});

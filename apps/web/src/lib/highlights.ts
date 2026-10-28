@@ -7,7 +7,7 @@ import type { Offer } from "@/lib/offers";
 export type Highlight = Pick<
   Offer,
   "id" | "kind" | "title" | "price" | "originalPrice" | "discountPct" | "pickupStart" | "pickupEnd" | "timeStart" | "timeEnd" | "available" | "venueId" | "venueName" | "chain"
->;
+> & { isNew: boolean };
 
 export type KindCount = { slug: string; kind: OfferKind; label: string; count: number };
 
@@ -22,7 +22,7 @@ export function pickHighlights(offers: Offer[], now: Date, limit = PICKS): Highl
   const picks = onePerBrand(collapseChainCopies(sortOffers(worthShowing, "best"))).slice(0, limit);
   const distinctToday = collapseChainCopies(today);
   return {
-    picks: picks.map(toHighlight),
+    picks: picks.map((offer) => toHighlight(offer, now)),
     total: collapseChainCopies(validTodayFirst(placed, now)).length,
     kinds: LANDINGS.map((landing) => ({
       slug: landing.slug,
@@ -49,6 +49,17 @@ function brandKey(offer: PlacedOffer): string {
   return words.slice(0, 2).join(" ");
 }
 
+export type SavedPicks = { picks: Highlight[]; total: number };
+
+export function pickSaved(offers: Offer[], savedIds: readonly string[], now: Date, limit = PICKS): SavedPicks {
+  const wanted = new Set(savedIds);
+  const atSaved = placeOffers(offers, BUCHAREST_CENTER, now).filter(
+    (offer) => (offer.placeId !== null && wanted.has(offer.placeId)) || (offer.venueId !== null && wanted.has(offer.venueId)),
+  );
+  const today = collapseChainCopies(sortOffers(atSaved.filter((offer) => runsToday(offer, now) && offer.available !== 0), "best"));
+  return { picks: today.slice(0, limit).map((offer) => toHighlight(offer, now)), total: today.length };
+}
+
 function runsToday(offer: PlacedOffer, now: Date): boolean {
   if (offer.daysOfWeek?.length && !offer.daysOfWeek.includes(bucharestWeekday(now))) return false;
   if (offer.timeEnd && bucharestClock(now) >= offer.timeEnd) return false;
@@ -59,7 +70,9 @@ function hasSaving(offer: PlacedOffer): boolean {
   return offer.kind === "surplus" || offer.headlinePct !== null || (offer.originalPrice ?? 0) > (offer.price ?? 0);
 }
 
-function toHighlight(offer: PlacedOffer): Highlight {
+const NEW_FOR_MS = 3 * 60 * 60 * 1000;
+
+function toHighlight(offer: PlacedOffer, now: Date): Highlight {
   return {
     id: offer.id,
     kind: offer.kind,
@@ -73,6 +86,7 @@ function toHighlight(offer: PlacedOffer): Highlight {
     timeEnd: offer.timeEnd,
     available: offer.available,
     venueId: offer.venueId,
+    isNew: offer.firstSeenAt !== null && now.getTime() - new Date(offer.firstSeenAt).getTime() < NEW_FOR_MS,
     venueName: offer.venueName,
     chain: offer.chain,
   };

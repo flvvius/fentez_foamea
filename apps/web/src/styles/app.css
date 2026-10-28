@@ -1516,3 +1516,9 @@ body {
 .save[aria-pressed="true"]::before {
   content: "★ " / "";
 }
+
+.saved-empty {
+  padding: 14px 0;
+  font-size: var(--type-small);
+  border-bottom: 1px solid var(--border);
+}

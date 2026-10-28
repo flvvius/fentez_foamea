@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { pickHighlights } from "./highlights";
+import { pickHighlights, pickSaved } from "./highlights";
 
 const base: Offer = {
   id: "1",
@@ -74,5 +74,19 @@ describe("pickHighlights", () => {
   it("caps the list", () => {
     const offers = Array.from({ length: 9 }, (_, index) => ({ ...base, id: `o${index}`, venueId: `v${index}`, venueName: `Local ${index}`, lat: 44.43 + index / 100 }));
     expect(pickHighlights(offers, now, 3).picks).toHaveLength(3);
+  });
+});
+
+describe("pickSaved", () => {
+  it("lists today's offers at saved venues, including the same place under another source", () => {
+    const offers: Offer[] = [
+      { ...base, id: "bag", venueId: "v1", venueName: "Brutăria din Colț" },
+      { ...base, id: "app", source: "glovo", kind: "discount", venueId: "v1-glovo", venueName: "Brutaria din Colt", pickupStart: null, pickupEnd: null },
+      { ...base, id: "other", venueId: "v9", venueName: "Altundeva", lat: 44.45 },
+      { ...base, id: "sold", venueId: "v1", available: 0 },
+    ];
+    const saved = pickSaved(offers, ["v1"], now);
+    expect(saved.picks.map((pick) => pick.id).sort()).toEqual(["app", "bag"]);
+    expect(saved.total).toBe(2);
   });
 });

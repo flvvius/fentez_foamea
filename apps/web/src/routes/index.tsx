@@ -1,6 +1,7 @@
 import { Link, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { DealFeed } from "@/components/deals/DealFeed";
 import { HomeHighlights } from "@/components/HomeHighlights";
+import { SavedPicks } from "@/components/SavedPicks";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useSession } from "@/lib/auth-client";
 import { SITE_URL } from "@/lib/site";
@@ -85,6 +86,7 @@ function Home() {
           )}
         </div>
 
+        <SavedPicks />
         <HomeHighlights highlights={highlights} />
 
         <h2 className="section-title feed-title">De la comunitate</h2>

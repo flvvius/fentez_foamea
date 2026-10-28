@@ -40,7 +40,7 @@ export function HomeHighlights({ highlights }: Readonly<{ highlights: Highlights
   );
 }
 
-function HighlightRow({ pick }: Readonly<{ pick: Highlight }>) {
+export function HighlightRow({ pick }: Readonly<{ pick: Highlight }>) {
   const wasHigher = pick.originalPrice !== null && pick.price !== null && pick.originalPrice > pick.price;
   return (
     <Link to="/harta" search={pick.venueId ? { local: pick.venueId } : { q: pick.title, km: "oras" }} className="highlight">
@@ -57,7 +57,10 @@ function HighlightRow({ pick }: Readonly<{ pick: Highlight }>) {
         )}
       </span>
       <span className="min-w-0">
-        <span className="highlight-title">{pick.title}</span>
+        <span className="highlight-title">
+          {pick.title}
+          {pick.isNew && <span className="offer-new"> · nou</span>}
+        </span>
         <span className="highlight-meta">
           {pick.venueName ?? pick.chain}
           {pick.discountPct !== null && <span className="figure-off"> · −{pick.discountPct}%</span>}
@@ -80,3 +83,4 @@ function When({ pick }: Readonly<{ pick: Highlight }>) {
   if (pick.timeStart && pick.timeEnd) return <span className="highlight-when">Azi {pick.timeStart}–{pick.timeEnd}</span>;
   return null;
 }
+
