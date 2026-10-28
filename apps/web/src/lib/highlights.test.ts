@@ -58,12 +58,21 @@ describe("pickHighlights", () => {
     expect(result.total).toBe(2);
     expect(result.kinds.map((entry) => [entry.slug, entry.count])).toEqual([
       ["pachete-anti-risipa", 1],
-      ["oferte-1-plus-1", 2],
+      ["oferte-1-plus-1", 1],
     ]);
   });
 
+  it("shows one offer per brand", () => {
+    const offers = [
+      { ...base, id: "a", venueId: "va", venueName: "Ana Pan Coposu" },
+      { ...base, id: "b", venueId: "vb", venueName: "Ana Pan Știrbei", lat: 44.44 },
+      { ...base, id: "c", venueId: "vc", venueName: "La Mama", lat: 44.43 },
+    ];
+    expect(pickHighlights(offers, now).picks.map((pick) => pick.venueName)).toEqual(["Ana Pan Coposu", "La Mama"]);
+  });
+
   it("caps the list", () => {
-    const offers = Array.from({ length: 9 }, (_, index) => ({ ...base, id: `o${index}`, venueId: `v${index}`, lat: 44.43 + index / 100 }));
+    const offers = Array.from({ length: 9 }, (_, index) => ({ ...base, id: `o${index}`, venueId: `v${index}`, venueName: `Local ${index}`, lat: 44.43 + index / 100 }));
     expect(pickHighlights(offers, now, 3).picks).toHaveLength(3);
   });
 });

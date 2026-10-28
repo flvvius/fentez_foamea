@@ -19,7 +19,8 @@ export function pickHighlights(offers: Offer[], now: Date, limit = PICKS): Highl
   const placed = placeOffers(offers, BUCHAREST_CENTER, now);
   const today = placed.filter((offer) => runsToday(offer, now));
   const worthShowing = today.filter((offer) => !offer.deliveryOnly && offer.price !== null && offer.available !== 0 && hasSaving(offer));
-  const picks = collapseChainCopies(sortOffers(worthShowing, "best")).slice(0, limit);
+  const picks = onePerBrand(collapseChainCopies(sortOffers(worthShowing, "best"))).slice(0, limit);
+  const distinctToday = collapseChainCopies(today);
   return {
     picks: picks.map(toHighlight),
     total: collapseChainCopies(validTodayFirst(placed, now)).length,
@@ -27,9 +28,25 @@ export function pickHighlights(offers: Offer[], now: Date, limit = PICKS): Highl
       slug: landing.slug,
       kind: landing.kind,
       label: landing.nearName,
-      count: today.filter((offer) => offer.kind === landing.kind).length,
+      count: distinctToday.filter((offer) => offer.kind === landing.kind).length,
     })).filter((entry) => entry.count > 0),
   };
+}
+
+function onePerBrand(offers: PlacedOffer[]): PlacedOffer[] {
+  const seen = new Set<string>();
+  return offers.filter((offer) => {
+    const brand = brandKey(offer);
+    if (seen.has(brand)) return false;
+    seen.add(brand);
+    return true;
+  });
+}
+
+function brandKey(offer: PlacedOffer): string {
+  const name = offer.chain ?? offer.venueName ?? offer.id;
+  const words = name.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().match(/[a-z0-9]+/g) ?? [name];
+  return words.slice(0, 2).join(" ");
 }
 
 function runsToday(offer: PlacedOffer, now: Date): boolean {
