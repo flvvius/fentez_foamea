@@ -44,10 +44,10 @@ describe("pickHighlights", () => {
     expect(pickHighlights(offers, now).picks.map((pick) => pick.id)).toEqual(["1"]);
   });
 
-  it("skips menus that are not cheaper than usual and deals that don't run today", () => {
-    const menu = { ...base, id: "menu", kind: "daily_menu" as const, venueId: "v2", originalPrice: null, discountPct: null, pickupStart: null, pickupEnd: null };
-    const notToday = { ...base, id: "monday", kind: "combo" as const, venueId: "v3", daysOfWeek: [1], pickupStart: null, pickupEnd: null };
-    expect(pickHighlights([base, menu, notToday], now).picks.map((pick) => pick.id)).toEqual(["1"]);
+  it("puts bargains before menus that are not cheaper than usual, and skips deals that don't run today", () => {
+    const menu = { ...base, id: "menu", title: "Meniul zilei", kind: "daily_menu" as const, venueId: "v2", venueName: "Bistro Doi", originalPrice: null, discountPct: null, pickupStart: null, pickupEnd: null };
+    const notToday = { ...base, id: "monday", kind: "combo" as const, venueId: "v3", venueName: "Trei", daysOfWeek: [1], pickupStart: null, pickupEnd: null };
+    expect(pickHighlights([menu, base, notToday], now).picks.map((pick) => pick.id)).toEqual(["1", "menu"]);
   });
 
   it("shows one copy of a chain deal and counts today's offers per category", () => {
@@ -69,6 +69,15 @@ describe("pickHighlights", () => {
       { ...base, id: "c", venueId: "vc", venueName: "La Mama", lat: 44.43 },
     ];
     expect(pickHighlights(offers, now).picks.map((pick) => pick.venueName)).toEqual(["Ana Pan Coposu", "La Mama"]);
+  });
+
+  it("leaves out offers too expensive to count as cheap food", () => {
+    expect(pickHighlights([{ ...base, price: 105, originalPrice: 210 }], now).picks).toEqual([]);
+  });
+
+  it("fills the list with priced combos and menus when there are few bargains", () => {
+    const combo = { ...base, id: "combo", title: "Pizza + suc", kind: "combo" as const, venueId: "v2", venueName: "Pizza Hut", originalPrice: null, discountPct: null, pickupStart: null, pickupEnd: null };
+    expect(pickHighlights([base, combo], now).picks.map((pick) => pick.id)).toEqual(["1", "combo"]);
   });
 
   it("caps the list", () => {

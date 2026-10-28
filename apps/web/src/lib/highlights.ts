@@ -14,12 +14,16 @@ export type KindCount = { slug: string; kind: OfferKind; label: string; count: n
 export type Highlights = { picks: Highlight[]; total: number; kinds: KindCount[] };
 
 const PICKS = 5;
+const MAX_PICK_PRICE = 60;
+const FILLER_KINDS: OfferKind[] = ["combo", "daily_menu"];
 
 export function pickHighlights(offers: Offer[], now: Date, limit = PICKS): Highlights {
   const placed = placeOffers(offers, BUCHAREST_CENTER, now);
   const today = placed.filter((offer) => runsToday(offer, now));
-  const worthShowing = today.filter((offer) => !offer.deliveryOnly && offer.price !== null && offer.available !== 0 && hasSaving(offer));
-  const picks = onePerBrand(collapseChainCopies(sortOffers(worthShowing, "best"))).slice(0, limit);
+  const affordable = today.filter((offer) => !offer.deliveryOnly && offer.price !== null && offer.price <= MAX_PICK_PRICE && offer.available !== 0);
+  const bargains = sortOffers(affordable.filter(hasSaving), "best");
+  const fillers = sortOffers(affordable.filter((offer) => !hasSaving(offer) && FILLER_KINDS.includes(offer.kind)), "price");
+  const picks = onePerBrand(collapseChainCopies([...bargains, ...fillers])).slice(0, limit);
   const distinctToday = collapseChainCopies(today);
   return {
     picks: picks.map((offer) => toHighlight(offer, now)),
