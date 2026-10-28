@@ -13,6 +13,7 @@ export function formatPrice(value: number): string {
 }
 
 export function countOffers(count: number): string {
+  if (count === 0) return "nicio ofertă";
   if (count === 1) return "1 ofertă";
   const lastTwo = count % 100;
   return lastTwo === 0 || lastTwo >= 20 ? `${count} de oferte` : `${count} oferte`;

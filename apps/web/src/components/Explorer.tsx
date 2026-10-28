@@ -88,10 +88,6 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     }
     return null;
   }, [ignoreRadius, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, query, withinHourOf, filtered.length]);
-  const nearbyCount = useMemo(
-    () => (center && radiusKm !== null ? applyFilters(placed, { kinds: [], radiusKm, maxPrice: null, includeDelivery: true }).length : null),
-    [center, placed, radiusKm],
-  );
   const kindCounts = useMemo(() => {
     const anyKind = applyFilters(placed, { kinds: [], radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query, withinHourOf });
     return countKinds(collapseChainCopies(sortOffers(anyKind, "distance")));
@@ -174,9 +170,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           <p className="brand">fentez foamea</p>
           <h1 className="headline">{headline}</h1>
           <p className="lede">
-            {nearbyCount === null
-              ? `${countOffers(listed.length)} ${reachLabel(radiusKm, origin.mine, venueId !== null || savedOnly)}`
-              : `${countOffers(nearbyCount)} la cel mult ${radiusKm} km de ${center!.name}`}
+            {`${capitalize(countOffers(listed.length))} ${reachLabel(radiusKm, origin.mine ? "tine" : (center?.name ?? "centru"), venueId !== null || savedOnly)}`}
             {kinds.length === 0 ? ": pachete salvate de la aruncat, meniuri de prânz, reduceri." : "."}
             {snapshot.updatedAt && <> Actualizat {formatRelative(snapshot.updatedAt, now)}.</>}
           </p>
@@ -385,9 +379,13 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
   );
 }
 
-function reachLabel(radiusKm: number | null, fromVisitor: boolean, scoped: boolean): string {
+function capitalize(text: string): string {
+  return text.charAt(0).toLocaleUpperCase("ro") + text.slice(1);
+}
+
+function reachLabel(radiusKm: number | null, from: string, scoped: boolean): string {
   if (scoped || radiusKm === null) return "în tot orașul";
-  return `la cel mult ${radiusKm} km de ${fromVisitor ? "tine" : "centru"}`;
+  return `la cel mult ${radiusKm} km de ${from}`;
 }
 
 function emptyMessage(savedOnly: boolean, savedVenues: number): string {

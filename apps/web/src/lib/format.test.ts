@@ -15,6 +15,7 @@ describe("formatPrice", () => {
 
 describe("countOffers", () => {
   it.each([
+    [0, "nicio ofertă"],
     [1, "1 ofertă"],
     [2, "2 oferte"],
     [19, "19 oferte"],

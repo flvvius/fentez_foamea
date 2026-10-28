@@ -102,3 +102,10 @@ test("the zone picker opens a zone page and goes back to the whole city", async 
   await page.getByLabel("Zonă").selectOption({ label: "Tot Bucureștiul" });
   await expect(page).toHaveURL(/\/harta$/);
 });
+
+test("a zone page's count follows the search box", async ({ page }) => {
+  await page.goto("/zona/titan");
+  await waitForHydration(page);
+  await page.getByRole("searchbox", { name: "Caută" }).fill("pizza");
+  await expect(page.locator(".lede")).toContainText("Nicio ofertă la cel mult 1 km de Titan");
+});
