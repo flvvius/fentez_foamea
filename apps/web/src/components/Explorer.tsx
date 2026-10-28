@@ -95,6 +95,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     const anyKind = applyFilters(placed, { kinds: [], radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query });
     return countKinds(collapseChainCopies(sortOffers(anyKind, "distance")));
   }, [placed, ignoreRadius, radiusKm, maxPrice, includeDelivery, query]);
+  const inKinds = useMemo(() => (kinds.length ? placed.filter((offer) => kinds.includes(offer.kind)).length : placed.length), [placed, kinds]);
   const savedCount = useMemo(() => collapseChainCopies(savedPlaced).length, [savedPlaced]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
 
@@ -174,7 +175,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           <h1 className="headline">{headline}</h1>
           <p className="lede">
             {nearbyCount === null
-              ? `${countOffers(placed.length)} de la restaurante, fast-food-uri și cofetării`
+              ? `${countOffers(inKinds)} de la restaurante, fast-food-uri și cofetării`
               : `${countOffers(nearbyCount)} la cel mult ${radiusKm} km de ${center!.name}`}
             : pachete salvate de la aruncat, meniuri de prânz, reduceri.
             {snapshot.updatedAt && <> Actualizat {formatRelative(snapshot.updatedAt, now)}.</>}
