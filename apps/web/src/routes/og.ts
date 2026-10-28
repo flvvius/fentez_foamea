@@ -1,13 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { findLanding } from "@/lib/landing";
 import { findZone } from "@/lib/zones";
-import { findOfferForImage, findTodaySummary, findVenue, renderOfferImage, renderTodayImage } from "@/server/offer-image";
+import { loadDealById } from "@/server/deals/deal-by-id";
+import { UUID_RE } from "@/server/deals/uuid";
+import { dealCardRow, findOfferForImage, findTodaySummary, findVenue, renderOfferImage, renderTodayImage } from "@/server/offer-image";
 
 export const Route = createFileRoute("/og")({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const params = new URL(request.url).searchParams;
+        const dealId = params.get("deal");
+        if (dealId !== null) {
+          const deal = UUID_RE.test(dealId) ? await loadDealById(dealId.toLowerCase()) : null;
+          if (!deal) return Response.redirect(new URL("/og.png", request.url), 302);
+          return renderOfferImage(dealCardRow(deal));
+        }
         const venueId = params.get("local");
         if (venueId !== null) {
           const venue = await findVenue(venueId);

@@ -1,11 +1,12 @@
 import { Resvg } from "@resvg/resvg-js";
 import satori from "satori";
-import { distanceMeters, OFFER_KIND_LABELS, type OfferKind } from "@fentezfoamea/core";
+import { DEAL_TYPE_LABELS, distanceMeters, OFFER_KIND_LABELS, type OfferKind } from "@fentezfoamea/core";
 import { isStillAvailable, matchesQuery, percentInTitle, priceCapInTitle } from "@/components/explore";
 import { formatPrice, sameBucharestDay } from "@/lib/format";
 import type { Landing } from "@/lib/landing";
 import type { Offer } from "@/lib/offers";
 import { ZONE_RADIUS_KM, type Zone } from "@/lib/zones";
+import type { DealCard } from "./deals/types";
 import { sharedSnapshot } from "./shared-snapshot";
 import interBold from "./fonts/Inter-Bold.woff?inline";
 import interMedium from "./fonts/Inter-Medium.woff?inline";
@@ -19,6 +20,7 @@ type OfferCardRow = {
   delivery_only: boolean;
   venue_name: string | null;
   venue_chain: string | null;
+  kind_label?: string;
 };
 
 const WIDTH = 1200;
@@ -32,6 +34,20 @@ const fonts = [
 export async function findOfferForImage(id: string, now = new Date()): Promise<OfferCardRow | undefined> {
   const offer = (await sharedSnapshot()).offers.find((candidate) => candidate.id === id);
   return offer && isStillAvailable(offer, now) ? toCardRow(offer) : undefined;
+}
+
+export function dealCardRow(deal: DealCard): OfferCardRow {
+  return {
+    title: deal.title,
+    kind: "discount",
+    kind_label: DEAL_TYPE_LABELS[deal.dealType],
+    price_ron: deal.currency === "RON" ? deal.dealPrice : null,
+    original_price_ron: deal.notADiscount || deal.currency !== "RON" ? null : deal.regularPrice,
+    discount_pct: deal.notADiscount ? null : deal.percentOff,
+    delivery_only: deal.channel === "delivery",
+    venue_name: deal.restaurantName,
+    venue_chain: null,
+  };
 }
 
 function toCardRow(offer: Offer): OfferCardRow {
@@ -49,7 +65,7 @@ function toCardRow(offer: Offer): OfferCardRow {
 
 export async function renderOfferImage(offer: OfferCardRow): Promise<Response> {
   const place = offer.venue_name ?? offer.venue_chain;
-  const kind = OFFER_KIND_LABELS[offer.kind] + (offer.delivery_only ? " · doar livrare" : "");
+  const kind = (offer.kind_label ?? OFFER_KIND_LABELS[offer.kind]) + (offer.delivery_only ? " · doar livrare" : "");
   const wasHigher = offer.original_price_ron !== null && offer.price_ron !== null && offer.original_price_ron > offer.price_ron;
   const figure = headlineFigure(offer);
 
@@ -89,7 +105,7 @@ function headlineFigure(offer: OfferCardRow): { text: string; unit?: string; dea
   if (pct !== null) return { text: `−${pct}%`, deal: true };
   const cap = priceCapInTitle(offer.title);
   if (cap !== null) return { text: `sub ${cap}`, unit: "lei" };
-  return { text: OFFER_KIND_LABELS[offer.kind] };
+  return { text: offer.kind_label ?? OFFER_KIND_LABELS[offer.kind] };
 }
 
 export type TodaySummary = { total: number; bags: number; highlights: OfferCardRow[] };

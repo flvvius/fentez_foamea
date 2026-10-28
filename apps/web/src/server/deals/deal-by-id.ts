@@ -88,30 +88,34 @@ export const fetchDealById = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }): Promise<DealCard | null> => {
     try {
-      const sql = getSql();
-      const [row] = await sql<Row[]>`
-        select d.id, d.restaurant_name, d.title, d.description, d.deal_type, d.deal_price,
-               d.regular_price, d.percent_off, d.currency, d.not_a_discount, d.days_of_week,
-               d.time_start::text as time_start, d.time_end::text as time_end,
-               d.valid_from, d.valid_until, d.channel, d.promo_code, d.address,
-               st_y(d.location::geometry) as lat, st_x(d.location::geometry) as lon,
-               d.source_url, d.image_id, d.score, d.created_at,
-               u."name" as submitter_name
-        from deals d
-        left join auth_user u on u.id = d.submitted_by
-        where d.id = ${data.id}::uuid
-          and d.status = 'published'
-          and d.valid_until > ${new Date()}
-          and d.score >= ${getDealsConfig().hideScore}
-      `;
+      const deal = await loadDealById(data.id);
       setResponseHeaders(
         new Headers({
           "cache-control": "public, max-age=30",
           "cdn-cache-control": "public, s-maxage=60, stale-while-revalidate=300",
         }),
       );
-      return row ? toCard(row) : null;
+      return deal;
     } catch (error) {
       return failInternally(error);
     }
   });
+
+export async function loadDealById(id: string): Promise<DealCard | null> {
+  const [row] = await getSql()<Row[]>`
+    select d.id, d.restaurant_name, d.title, d.description, d.deal_type, d.deal_price,
+           d.regular_price, d.percent_off, d.currency, d.not_a_discount, d.days_of_week,
+           d.time_start::text as time_start, d.time_end::text as time_end,
+           d.valid_from, d.valid_until, d.channel, d.promo_code, d.address,
+           st_y(d.location::geometry) as lat, st_x(d.location::geometry) as lon,
+           d.source_url, d.image_id, d.score, d.created_at,
+           u."name" as submitter_name
+    from deals d
+    left join auth_user u on u.id = d.submitted_by
+    where d.id = ${id}::uuid
+      and d.status = 'published'
+      and d.valid_until > ${new Date()}
+      and d.score >= ${getDealsConfig().hideScore}
+  `;
+  return row ? toCard(row) : null;
+}

@@ -3,6 +3,7 @@ import { DealFeed } from "@/components/deals/DealFeed";
 import { HomeHighlights } from "@/components/HomeHighlights";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useSession } from "@/lib/auth-client";
+import { SITE_URL } from "@/lib/site";
 import { fetchDealFeed } from "@/server/deals/feed";
 import { fetchHighlights } from "@/server/highlights";
 import type { FeedSort } from "@/server/deals/feed-select";
@@ -46,6 +47,7 @@ export const Route = createFileRoute("/")({
         content: "Cele mai bune oferte de mâncare din București de azi: pachete anti-risipă, meniuri de prânz, reduceri și oferte postate de comunitate.",
       },
     ],
+    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
   }),
   component: Home,
 });
