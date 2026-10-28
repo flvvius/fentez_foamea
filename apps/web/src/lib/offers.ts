@@ -114,12 +114,18 @@ export function decodeSnapshot(wire: SnapshotWire): OfferSnapshot {
 const AFTER_VENUE_SEPARATOR = /^\s*[•·|:\-–—]\s*/;
 
 export function titleWithoutVenue(title: string, venueName: string): string {
-  if (!title.toLocaleLowerCase("ro").startsWith(venueName.toLocaleLowerCase("ro"))) return title;
-  const rest = title.slice(venueName.length);
+  const name = venueName.normalize("NFC");
+  const text = title.normalize("NFC");
+  if (foldLetters(text.slice(0, name.length)) !== foldLetters(name)) return title;
+  const rest = text.slice(name.length);
   const separator = AFTER_VENUE_SEPARATOR.exec(rest);
   if (!separator) return title;
   const product = rest.slice(separator[0].length);
   return product ? product.charAt(0).toLocaleUpperCase("ro") + product.slice(1) : title;
+}
+
+function foldLetters(text: string): string {
+  return text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("ro");
 }
 
 function toColumns<T, K extends keyof T>(rows: T[], keys: readonly K[]): Columns<Pick<T, K>> {
