@@ -3,6 +3,7 @@ import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { DealRow } from "@/components/deals/DealRow";
 import { useDealVotes } from "@/components/deals/useDealVotes";
 import { SiteHeader } from "@/components/SiteHeader";
+import { dealMeta } from "@/lib/deals/deal-meta";
 import { fetchDealById } from "@/server/deals/deal-by-id";
 import type { DealCard } from "@/server/deals/types";
 import { UUID_RE } from "@/server/deals/uuid";
@@ -21,9 +22,7 @@ export const Route = createFileRoute("/oferta/$id")({
     "cache-control": "public, max-age=0, must-revalidate",
     "cdn-cache-control": "public, s-maxage=60, stale-while-revalidate=300",
   }),
-  head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.title} · ${loaderData.restaurantName} · fentez foamea` : "Oferta nu există · fentez foamea" }],
-  }),
+  head: ({ loaderData }) => (loaderData ? dealMeta(loaderData) : { meta: [{ title: "Oferta nu există · fentez foamea" }] }),
   component: DealPage,
   notFoundComponent: DealNotFound,
 });

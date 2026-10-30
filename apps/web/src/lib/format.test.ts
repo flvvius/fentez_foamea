@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countOffers, formatPrice, formatRelative } from "./format";
+import { countOffers, formatPrice, formatRelative, formatWalk } from "./format";
 
 describe("formatPrice", () => {
   it.each([
@@ -15,6 +15,7 @@ describe("formatPrice", () => {
 
 describe("countOffers", () => {
   it.each([
+    [0, "nicio ofertă"],
     [1, "1 ofertă"],
     [2, "2 oferte"],
     [19, "19 oferte"],
@@ -47,5 +48,13 @@ describe("formatRelative", () => {
     [120 * 24 * 60, "acum 120 de zile"],
   ])("writes %i minutes ago as %s", (minutes, text) => {
     expect(formatRelative(ago(minutes), now)).toBe(text);
+  });
+});
+
+describe("formatWalk", () => {
+  it("allows for streets not running straight and leaves out walks over half an hour", () => {
+    expect(formatWalk(20)).toBe("1 min pe jos");
+    expect(formatWalk(660)).toBe("11 min pe jos");
+    expect(formatWalk(2500)).toBeNull();
   });
 });

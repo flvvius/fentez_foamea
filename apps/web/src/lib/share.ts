@@ -34,6 +34,10 @@ export function shareOffer(offer: Offer): Promise<ShareResult> {
   return shareLink(offerShareText(offer, new Date()), offerLink(window.location.origin, offer.id));
 }
 
+export function shareDeal(deal: { id: string; title: string; restaurantName: string }): Promise<ShareResult> {
+  return shareLink(`${deal.title} la ${deal.restaurantName}`, `${window.location.origin}/oferta/${deal.id}`);
+}
+
 export function shareCurrentView(text: string): Promise<ShareResult> {
   const url = new URL(window.location.href);
   url.searchParams.delete("oferta");

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Offer } from "@/lib/offers";
-import { applyFilters, collapseChainCopies, featuredPinIds, percentInTitle, placeOffers, priceCapInTitle, samePlaceIds, sortOffers, validTodayFirst, venuePins } from "./explore";
+import { applyFilters, availableWithinHour, collapseChainCopies, featuredPinIds, percentInTitle, placeOffers, priceCapInTitle, samePlaceIds, sortOffers, validTodayFirst, venuePins } from "./explore";
 
 const base: Offer = {
   id: "1",
@@ -60,6 +60,21 @@ describe("explore", () => {
     expect(search("ciorba mama")).toEqual(["ciorba"]);
     expect(search("  ")).toEqual(["ciorba", "pizza"]);
     expect(search("burger")).toEqual([]);
+  });
+
+  it("finds other spellings of a dish and offers by their category", () => {
+    const placed = placeOffers(
+      [
+        { ...base, id: "shawarma", title: "Shawarma de pui", venueName: "Dahab" },
+        { ...base, id: "saorma", title: "Șaorma mare", venueName: "Calif" },
+        { ...base, id: "menu", kind: "daily_menu", title: "Ciorbă + fel principal", venueName: "Bistro" },
+      ],
+      origin,
+      now,
+    );
+    const search = (query: string) => applyFilters(placed, { kinds: [], radiusKm: null, maxPrice: null, includeDelivery: true, query }).map((o) => o.id);
+    expect(search("shaorma")).toEqual(["shawarma", "saorma"]);
+    expect(search("meniul zilei")).toEqual(["menu"]);
   });
 
   it("keeps offers within budget and drops ones without a price", () => {
@@ -212,5 +227,26 @@ describe("featuredPinIds", () => {
   it("stops at ten", () => {
     const many = Array.from({ length: 30 }, (_, index) => pin(`p${index}`, 44.3 + index * 0.01, 40));
     expect(featuredPinIds(many, 400).size).toBe(10);
+  });
+});
+
+describe("availableWithinHour", () => {
+  const now = new Date("2026-10-21T10:30:00Z");
+
+  it("keeps bags whose pickup has started or starts within the hour", () => {
+    const bag = { ...base, pickupStart: "2026-10-21T11:00:00Z", pickupEnd: "2026-10-21T13:00:00Z" };
+    expect(availableWithinHour(bag, now)).toBe(true);
+    expect(availableWithinHour({ ...bag, pickupStart: "2026-10-21T12:00:00Z" }, now)).toBe(false);
+    expect(availableWithinHour({ ...bag, pickupStart: "2026-10-21T09:00:00Z", pickupEnd: "2026-10-21T10:00:00Z" }, now)).toBe(false);
+  });
+
+  it("reads deal hours and days in Bucharest time", () => {
+    const deal = { ...base, pickupStart: null, pickupEnd: null, timeStart: "14:00", timeEnd: "16:00", daysOfWeek: null };
+    expect(availableWithinHour(deal, now)).toBe(true);
+    expect(availableWithinHour({ ...deal, timeStart: "15:00" }, now)).toBe(false);
+    expect(availableWithinHour({ ...deal, timeEnd: "13:30", timeStart: "11:00" }, now)).toBe(false);
+    expect(availableWithinHour({ ...deal, daysOfWeek: [1] }, now)).toBe(false);
+    expect(availableWithinHour({ ...deal, timeStart: "22:00", timeEnd: "02:00" }, now)).toBe(false);
+    expect(availableWithinHour({ ...deal, timeStart: "14:00", timeEnd: "02:00" }, now)).toBe(true);
   });
 });

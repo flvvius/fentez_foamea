@@ -1,3 +1,4 @@
+import { appendFileSync } from "node:fs";
 import { SOURCE_IDS } from "@fentezfoamea/core";
 import { connect } from "./db.ts";
 import { checkHealth, type LastRun } from "./health.ts";
@@ -20,12 +21,18 @@ try {
       limit: row.limitHours,
       last: row.lastStatus,
       error: row.lastError?.slice(0, 80) ?? "",
-      stale: row.stale ? "STALE" : "",
+      verdict: row.verdict,
     })),
   );
-  const stale = health.filter((row) => row.stale);
-  if (stale.length) {
-    console.error(`Stale sources: ${stale.map((row) => row.source).join(", ")}`);
+  const sourcesWith = (verdict: string) => health.filter((row) => row.verdict === verdict).map((row) => row.source);
+  const missed = sourcesWith("missed");
+  const running = sourcesWith("running");
+  const broken = sourcesWith("broken");
+  if (missed.length) console.log(`::warning::Scheduled runs missed, catching up: ${missed.join(", ")}`);
+  if (running.length) console.log(`::warning::Stale but a run is in progress: ${running.join(", ")}`);
+  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `catch_up=${missed.join(" ")}\n`);
+  if (broken.length) {
+    console.error(`Stale sources whose last run failed: ${broken.join(", ")}`);
     process.exitCode = 1;
   }
 } finally {

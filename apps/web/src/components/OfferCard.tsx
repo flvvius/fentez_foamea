@@ -1,16 +1,19 @@
 import { OFFER_KIND_LABELS, SOURCE_LABELS, WEEKDAY_SHORT } from "@fentezfoamea/core";
 import { shareOffer } from "@/lib/share";
-import { bucharestClock, bucharestWeekday, formatDistance, formatPickup, formatPrice, formatRelative, minutesUntil } from "@/lib/format";
+import { bucharestClock, bucharestWeekday, formatDistance, formatWalk, formatPickup, formatPrice, formatRelative, minutesUntil } from "@/lib/format";
 import type { PlacedOffer } from "./explore";
 import { ShareButton } from "./ShareButton";
 
 type Props = {
   offer: PlacedOffer;
   now: Date;
+  fromVisitor: boolean;
   onShowVenue: (venueId: string) => void;
+  saved: boolean;
+  onToggleSave: (placeId: string) => void;
 };
 
-export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
+export function OfferCard({ offer, now, fromVisitor, onShowVenue, saved, onToggleSave }: Readonly<Props>) {
   const closesIn = offer.pickupEnd ? minutesUntil(offer.pickupEnd, now) : null;
   const pickupStarted = offer.pickupStart ? new Date(offer.pickupStart) <= now : true;
   const closingSoon = closesIn !== null && closesIn <= 60 && pickupStarted;
@@ -18,7 +21,8 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
   const overForToday = !notToday && offer.timeEnd !== null && bucharestClock(now) >= offer.timeEnd;
   const isNew = offer.firstSeenAt !== null && -minutesUntil(offer.firstSeenAt, now) < NEW_FOR_MINUTES;
   const when = schedule(offer);
-  const place = placeNote(offer);
+  const place = placeNote(offer, fromVisitor);
+  const directions = directionsUrl(offer);
 
   return (
     <article className={`offer ${notToday || overForToday ? "offer-off-day" : ""}`}>
@@ -40,7 +44,17 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
             <span>{offer.chain ?? "În toate locațiile"}</span>
           )}
         </p>
-        {place && <p className="offer-detail muted">{place}</p>}
+        {(place || directions) && (
+          <p className="offer-detail muted">
+            {place}
+            {place && directions && " · "}
+            {directions && (
+              <a className="link-quiet" href={directions} target="_blank" rel="noopener noreferrer">
+                Traseu<span className="sr-only"> până la {offer.venueName ?? "local"} (se deschide într-o filă nouă)</span>
+              </a>
+            )}
+          </p>
+        )}
 
         {when && (
           <p className="offer-detail">
@@ -63,9 +77,14 @@ export function OfferCard({ offer, now, onShowVenue }: Readonly<Props>) {
             <span className={offer.available === 1 ? "urgent" : "muted"}>{offer.available === 1 ? "ultimul" : `mai sunt ${offer.available}`}</span>
           )}
           <span className="offer-actions">
+            {offer.placeId && (
+              <button type="button" className="link-quiet save" aria-pressed={saved} onClick={() => onToggleSave(offer.placeId!)}>
+                {saved ? "Salvat" : "Salvează"}<span className="sr-only"> localul</span>
+              </button>
+            )}
             <ShareButton className="link-quiet share" label="Trimite" share={() => shareOffer(offer)} />
             <a className="offer-link" href={offer.url} target="_blank" rel="noopener noreferrer">
-              Vezi pe {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>
+              {offer.kind === "surplus" ? "Rezervă în" : "Vezi pe"} {SOURCE_LABELS[offer.source]} <span aria-hidden>↗</span>
             </a>
           </span>
         </div>
@@ -111,9 +130,15 @@ function checkedLongAgo(offer: PlacedOffer, now: Date): boolean {
   return offer.checkedAt !== null && -minutesUntil(offer.checkedAt, now) > CHECK_AGE_WORTH_MENTIONING_MIN;
 }
 
-function placeNote(offer: PlacedOffer): string | null {
+function directionsUrl(offer: PlacedOffer): string | null {
+  if (offer.deliveryOnly || offer.lat === null || offer.lon === null) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${offer.lat},${offer.lon}`;
+}
+
+function placeNote(offer: PlacedOffer, fromVisitor: boolean): string | null {
   const parts = [
-    offer.distance === null ? null : formatDistance(offer.distance),
+    offer.distance === null || offer.deliveryOnly ? null : formatDistance(offer.distance),
+    fromVisitor && offer.distance !== null && !offer.deliveryOnly ? formatWalk(offer.distance) : null,
     offer.otherLocations ? otherLocationsLabel(offer.otherLocations) : null,
     offer.alsoSoldAs?.length ? `și ca ${offer.alsoSoldAs.join(", ")}` : null,
   ];

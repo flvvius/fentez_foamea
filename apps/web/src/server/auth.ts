@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { Pool } from "pg";
+import { SITE_URL } from "@/lib/site";
 
 function required(name: string): string {
   const value = process.env[name];
@@ -10,7 +11,7 @@ function required(name: string): string {
 
 function resolveBaseURL() {
   const configured = process.env.BETTER_AUTH_URL || undefined;
-  if (process.env.VERCEL_ENV === "production") return required("BETTER_AUTH_URL");
+  if (process.env.VERCEL_ENV === "production") return configured ?? SITE_URL;
   if (process.env.VERCEL_ENV === "preview") {
     // Each preview deployment has its own *.vercel.app host. List only this deployment's
     // hosts: allowedHosts also become trusted origins, and "*.vercel.app" would trust any
@@ -63,7 +64,12 @@ function buildAuth() {
       googleClientId && googleClientSecret
         ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
         : {},
-    rateLimit: { enabled: true, storage: "database", modelName: "auth_rate_limit" },
+    rateLimit: {
+      enabled: true,
+      storage: "database",
+      modelName: "auth_rate_limit",
+      customRules: { "/get-session": false },
+    },
     advanced: {
       ipAddress: {
         // Only single-value headers are trusted (no trustedProxies: Vercel's proxy IPs are not

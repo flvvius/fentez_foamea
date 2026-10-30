@@ -23,10 +23,29 @@ jobs:
       - run: bun install --frozen-lockfile
 
       - name: Check each source ran recently
+        id: check
         working-directory: packages/scrapers
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: bun run src/health-cli.ts
+
+      - name: Catch up on missed scrapes
+        if: ${{ !cancelled() && steps.check.outputs.catch_up != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CATCH_UP: ${{ steps.check.outputs.catch_up }}
+        run: |
+          others=""
+          for source in $CATCH_UP; do
+            if [ "$source" = bonapp ]; then
+              gh workflow run scrape.yml --repo "${{ github.repository }}" -f sources=bonapp
+            else
+              others="$others $source"
+            fi
+          done
+          if [ -n "$others" ]; then
+            gh workflow run scrape.yml --repo "${{ github.repository }}" -f sources="${others# }"
+          fi
 
   site:
     runs-on: ubuntu-latest

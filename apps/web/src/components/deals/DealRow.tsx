@@ -4,6 +4,8 @@ import { DEAL_CHANNEL_LABELS, DEAL_TYPE_LABELS } from "@fentezfoamea/core";
 import { formatSchedule, formatValidity, priceFigure, sourceHost } from "@/lib/deals/deal-display";
 import { formatOpening, openingStatus } from "@/lib/deals/opening";
 import { formatRelative } from "@/lib/format";
+import { shareDeal } from "@/lib/share";
+import { ShareButton } from "../ShareButton";
 import type { VoteEntry } from "@/lib/deals/vote-state";
 import type { DealCard } from "@/server/deals/types";
 import { VoteControl } from "./VoteControl";
@@ -120,12 +122,15 @@ export function DealRow({ deal, vote, onVote, linkTitle = true, note }: Readonly
 
         <div className="deal-foot">
           <VoteControl title={deal.title} score={vote.score} myVote={vote.myVote} pending={vote.pending} onVote={onVote} />
-          {host && deal.sourceUrl && (
-            <a className="offer-link" href={deal.sourceUrl} target="_blank" rel="nofollow ugc noopener noreferrer">
-              {host} <span aria-hidden>↗</span>
-              <span className="sr-only"> (se deschide într-o filă nouă)</span>
-            </a>
-          )}
+          <span className="offer-actions">
+            <ShareButton className="link-quiet share" label="Trimite" share={() => shareDeal(deal)} />
+            {host && deal.sourceUrl && (
+              <a className="offer-link" href={deal.sourceUrl} target="_blank" rel="nofollow ugc noopener noreferrer">
+                {host} <span aria-hidden>↗</span>
+                <span className="sr-only"> (se deschide într-o filă nouă)</span>
+              </a>
+            )}
+          </span>
         </div>
         {vote.error && (
           <p role="alert" className="vote-error">

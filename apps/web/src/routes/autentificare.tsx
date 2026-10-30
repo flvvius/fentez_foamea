@@ -86,17 +86,22 @@ function AuthPage() {
 
   return (
     <main className="mx-auto w-full max-w-sm px-4 py-12">
-      <a href="/" className="text-[var(--type-small)] text-[var(--muted-foreground)] underline">
+      <a href="/" className="text-[length:var(--type-small)] text-[var(--muted-foreground)] underline">
         Înapoi la oferte
       </a>
-      <h1 className="mt-6 mb-6 text-[var(--type-pageTitle)] font-semibold leading-tight">
+      <h1 className="mt-6 mb-6 text-[length:var(--type-pageTitle)] font-semibold leading-tight">
         {mode === "in" ? "Intră în cont" : "Creează un cont"}
       </h1>
+      {target === "/posteaza" && (
+        <p className="-mt-3 mb-6 text-[length:var(--type-small)] text-[var(--muted-foreground)]">
+          Ca să postezi o ofertă ai nevoie de un cont, ca să putem opri spamul. Ofertele se văd și fără cont.
+        </p>
+      )}
 
       <form onSubmit={onSubmit} className="space-y-4">
         {mode === "up" ? (
           <div>
-            <label htmlFor="name" className="mb-1 block text-[var(--type-small)] font-medium">
+            <label htmlFor="name" className="mb-1 block text-[length:var(--type-small)] font-medium">
               Nume
             </label>
             <input
@@ -110,7 +115,7 @@ function AuthPage() {
           </div>
         ) : null}
         <div>
-          <label htmlFor="email" className="mb-1 block text-[var(--type-small)] font-medium">
+          <label htmlFor="email" className="mb-1 block text-[length:var(--type-small)] font-medium">
             Email
           </label>
           <input
@@ -123,7 +128,7 @@ function AuthPage() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="mb-1 block text-[var(--type-small)] font-medium">
+          <label htmlFor="password" className="mb-1 block text-[length:var(--type-small)] font-medium">
             Parolă
           </label>
           <input
@@ -137,13 +142,13 @@ function AuthPage() {
             className={fieldClass}
           />
           {mode === "up" ? (
-            <p id="password-hint" className="mt-1 text-[var(--type-small)] text-[var(--muted-foreground)]">
+            <p id="password-hint" className="mt-1 text-[length:var(--type-small)] text-[var(--muted-foreground)]">
               Cel puțin 10 caractere.
             </p>
           ) : null}
         </div>
 
-        <p role="alert" className="min-h-6 text-[var(--type-small)] text-[var(--deal)]">
+        <p role="alert" className="min-h-6 text-[length:var(--type-small)] text-[var(--deal)]">
           {error}
         </p>
 
@@ -167,7 +172,7 @@ function AuthPage() {
         </button>
       ) : null}
 
-      <p className="mt-6 text-[var(--type-small)] text-[var(--muted-foreground)]">
+      <p className="mt-6 text-[length:var(--type-small)] text-[var(--muted-foreground)]">
         {mode === "in" ? "Nu ai cont?" : "Ai deja cont?"}{" "}
         <button
           type="button"

@@ -17,9 +17,11 @@ describe("explore search params", () => {
       venueId: "v1",
       offerId: "o1",
       query: "la mama",
+      savedOnly: true,
+      nowOnly: true,
     };
     const search = searchFromState({ ...state, kinds: [...state.kinds] });
-    expect(search).toEqual({ tip: "anti-risipa,meniul-zilei", km: "oras", buget: 25, ordine: "pret", livrare: "nu", local: "v1", oferta: "o1", q: "la mama" });
+    expect(search).toEqual({ tip: "anti-risipa,meniul-zilei", km: "oras", buget: 25, ordine: "pret", livrare: "nu", local: "v1", oferta: "o1", q: "la mama", salvate: "da", acum: "da" });
     expect(stateFromSearch(search)).toEqual({ ...state, kinds: [...state.kinds] });
   });
 

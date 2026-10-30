@@ -8,6 +8,7 @@ import { LANDINGS } from "@/lib/landing";
 import { ZONES } from "@/lib/zones";
 import type { OfferSnapshot } from "@/lib/offers";
 import { BUDGET_OPTIONS, RADIUS_OPTIONS, type ExploreState, type SortKey } from "@/lib/search";
+import { useSavedVenues } from "@/lib/saved-venues";
 import { shareCurrentView } from "@/lib/share";
 import { OfferCard } from "./OfferCard";
 import { ShareButton } from "./ShareButton";
@@ -40,7 +41,8 @@ const FEW_OFFERS = 3;
 const QUERY_DEBOUNCE_MS = 200;
 
 export function Explorer({ snapshot, state, headline = "Mâncare ieftină în București, acum.", center, onChange }: Readonly<Props>) {
-  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query } = state;
+  const { kinds, radiusKm, maxPrice, includeDelivery, sort, venueId, offerId, query, savedOnly, nowOnly } = state;
+  const { ids: savedIds, toggle: toggleSaved } = useSavedVenues();
   const navigate = useNavigate();
   const [draftQuery, setDraftQuery] = useState(query);
   const sentQuery = useRef(query);
@@ -61,10 +63,14 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     return () => clearInterval(timer);
   }, []);
 
-  const placed = useMemo(() => placeOffers(snapshot.offers, origin, now), [snapshot.offers, origin, now]);
+  const allPlaced = useMemo(() => placeOffers(snapshot.offers, origin, now), [snapshot.offers, origin, now]);
+  const savedPlaced = useMemo(() => allPlaced.filter((offer) => offer.placeId !== null && savedIds.includes(offer.placeId)), [allPlaced, savedIds]);
+  const placed = savedOnly ? savedPlaced : allPlaced;
+  const ignoreRadius = Boolean(venueId) || savedOnly;
+  const withinHourOf = nowOnly ? now : null;
   const filtered = useMemo(
-    () => applyFilters(placed, { kinds, radiusKm: venueId ? null : radiusKm, maxPrice, includeDelivery, query }),
-    [placed, kinds, radiusKm, maxPrice, includeDelivery, venueId, query],
+    () => applyFilters(placed, { kinds, radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query, withinHourOf }),
+    [placed, kinds, radiusKm, maxPrice, includeDelivery, ignoreRadius, query, withinHourOf],
   );
   const pins = useMemo(() => venuePins(filtered), [filtered]);
   const shared = offerId ? placed.find((offer) => offer.id === offerId) : undefined;
@@ -74,22 +80,19 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     return validTodayFirst(collapseChainCopies(sortOffers(scoped, sort)), now);
   }, [filtered, scopedPlace, offerId, sort, now]);
   const wider = useMemo(() => {
-    if (venueId || radiusKm === null || listed.length >= FEW_OFFERS) return null;
+    if (ignoreRadius || radiusKm === null || listed.length >= FEW_OFFERS) return null;
     const larger = RADIUS_OPTIONS.slice(RADIUS_OPTIONS.indexOf(radiusKm as (typeof RADIUS_OPTIONS)[number]) + 1);
     for (const km of larger) {
-      const extra = applyFilters(placed, { kinds, radiusKm: km, maxPrice, includeDelivery, query }).length - filtered.length;
+      const extra = applyFilters(placed, { kinds, radiusKm: km, maxPrice, includeDelivery, query, withinHourOf }).length - filtered.length;
       if (extra > 0) return { km, extra };
     }
     return null;
-  }, [venueId, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, query, filtered.length]);
-  const nearbyCount = useMemo(
-    () => (center && radiusKm !== null ? applyFilters(placed, { kinds: [], radiusKm, maxPrice: null, includeDelivery: true }).length : null),
-    [center, placed, radiusKm],
-  );
+  }, [ignoreRadius, radiusKm, listed.length, placed, kinds, maxPrice, includeDelivery, query, withinHourOf, filtered.length]);
   const kindCounts = useMemo(() => {
-    const anyKind = applyFilters(placed, { kinds: [], radiusKm: venueId ? null : radiusKm, maxPrice, includeDelivery, query });
+    const anyKind = applyFilters(placed, { kinds: [], radiusKm: ignoreRadius ? null : radiusKm, maxPrice, includeDelivery, query, withinHourOf });
     return countKinds(collapseChainCopies(sortOffers(anyKind, "distance")));
-  }, [placed, venueId, radiusKm, maxPrice, includeDelivery, query]);
+  }, [placed, ignoreRadius, radiusKm, maxPrice, includeDelivery, query, withinHourOf]);
+  const savedCount = useMemo(() => collapseChainCopies(savedPlaced).length, [savedPlaced]);
   const venueName = venueId ? placed.find((offer) => offer.venueId === venueId)?.venueName : undefined;
 
   const change = (next: Partial<ExploreState>) => {
@@ -150,6 +153,8 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
     }, QUERY_DEBOUNCE_MS);
   };
 
+  const isSaved = (offer: { placeId: string | null }) => offer.placeId !== null && savedIds.includes(offer.placeId);
+
   const toggleKind = (kind: OfferKind) =>
     change({ kinds: kinds.includes(kind) ? kinds.filter((k) => k !== kind) : [...kinds, kind] });
 
@@ -165,12 +170,13 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           <p className="brand">fentez foamea</p>
           <h1 className="headline">{headline}</h1>
           <p className="lede">
-            {nearbyCount === null
-              ? `${countOffers(placed.length)} de la restaurante, fast-food-uri și cofetării`
-              : `${countOffers(nearbyCount)} la cel mult ${radiusKm} km de ${center!.name}`}
-            : pachete salvate de la aruncat, meniuri de prânz, reduceri.
+            {`${capitalize(countOffers(listed.length))} ${reachLabel(radiusKm, origin.mine ? "tine" : (center?.name ?? "centru"), venueId !== null || savedOnly)}`}
+            {kinds.length === 0 ? ": pachete salvate de la aruncat, meniuri de prânz, reduceri." : "."}
             {snapshot.updatedAt && <> Actualizat {formatRelative(snapshot.updatedAt, now)}.</>}
           </p>
+          {kinds.length === 1 && kinds[0] === "surplus" && (
+            <p className="lede-note muted">Rezervi și plătești pachetul în aplicația Bonapp, apoi îl ridici în intervalul afișat. Ce primești afli la ridicare: e mâncarea rămasă în ziua aceea.</p>
+          )}
           <div className="masthead-actions">
             <button type="button" className="locate" onClick={locateMe} disabled={locate === "locating"}>
               {locateLabel(locate, origin.mine)}
@@ -207,7 +213,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             {shared ? (
               <>
                 <p className="shared-note">Ți-a trimis cineva oferta asta</p>
-                <OfferCard offer={shared} now={now} onShowVenue={showVenue} />
+                <OfferCard offer={shared} now={now} fromVisitor={origin.mine} onShowVenue={showVenue} saved={isSaved(shared)} onToggleSave={toggleSaved} />
               </>
             ) : (
               <p className="shared-note">Oferta primită nu mai e disponibilă. Uite ce mai e acum prin oraș.</p>
@@ -231,6 +237,14 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
             onChange={(e) => typeQuery(e.target.value)}
           />
           <div className="chip-row">
+            <button type="button" className="chip" aria-pressed={nowOnly} onClick={() => change({ nowOnly: !nowOnly })}>
+              Acum<span className="sr-only"> sau în următoarea oră</span>
+            </button>
+            {(savedIds.length > 0 || savedOnly) && (
+              <button type="button" className="chip" aria-pressed={savedOnly} onClick={() => change({ savedOnly: !savedOnly })}>
+                Salvate <span className="chip-count">{savedCount}</span>
+              </button>
+            )}
             {OFFER_KINDS.filter((kind) => kindCounts[kind] || kinds.includes(kind)).map((kind) => (
               <button
                 key={kind}
@@ -279,6 +293,7 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
               <input type="checkbox" checked={includeDelivery} onChange={(e) => change({ includeDelivery: e.target.checked })} />
               <span>și livrări</span>
             </label>
+
           </div>
         </fieldset>
 
@@ -295,13 +310,19 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
           )}
           {listed.length === 0 ? (
             <div className="empty">
-              <p>Nicio ofertă cu filtrele astea.</p>
-              <button type="button" className="link-quiet" onClick={() => change({ kinds: [], radiusKm: null, maxPrice: null, venueId: null, query: "" })}>
+              <p>{emptyMessage(savedOnly, savedIds.length)}</p>
+              <button
+                type="button"
+                className="link-quiet"
+                onClick={() => change({ kinds: [], radiusKm: null, maxPrice: null, venueId: null, query: "", savedOnly: false })}
+              >
                 Arată tot orașul
               </button>
             </div>
           ) : (
-            listed.slice(0, visible).map((offer) => <OfferCard key={offer.id} offer={offer} now={now} onShowVenue={showVenue} />)
+            listed.slice(0, visible).map((offer) => (
+              <OfferCard key={offer.id} offer={offer} now={now} fromVisitor={origin.mine} onShowVenue={showVenue} saved={isSaved(offer)} onToggleSave={toggleSaved} />
+            ))
           )}
           {wider && (
             <button type="button" className="more" onClick={() => change({ radiusKm: wider.km })}>
@@ -356,6 +377,21 @@ export function Explorer({ snapshot, state, headline = "Mâncare ieftină în Bu
       </section>
     </main>
   );
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toLocaleUpperCase("ro") + text.slice(1);
+}
+
+function reachLabel(radiusKm: number | null, from: string, scoped: boolean): string {
+  if (scoped || radiusKm === null) return "în tot orașul";
+  return `la cel mult ${radiusKm} km de ${from}`;
+}
+
+function emptyMessage(savedOnly: boolean, savedVenues: number): string {
+  if (!savedOnly) return "Nicio ofertă cu filtrele astea.";
+  if (savedVenues === 0) return "Nu ai salvat niciun local. Apasă „Salvează” la o ofertă și îl găsești aici.";
+  return "Localurile salvate nu au oferte acum.";
 }
 
 function locateLabel(locate: LocateState, hasOwnLocation: boolean): string {

@@ -18,7 +18,7 @@ test.describe("explorer", () => {
   });
 
   test("counts live offers and says when data was refreshed", async ({ page }) => {
-    await expect(page.locator(".lede")).toContainText("14 oferte");
+    await expect(page.locator(".lede")).toContainText("9 oferte la cel mult 3 km de centru");
     await expect(page.locator(".lede")).toContainText(/Actualizat acum 1\d min/);
   });
 
@@ -32,7 +32,16 @@ test.describe("explorer", () => {
     const bag = offerRow(page, "Pachet surpriză patiserie");
     await expect(bag).toContainText(/mai ai (39|40) min/);
     await expect(bag).toContainText("mai sunt 2");
-    await expect(bag.getByRole("link", { name: /Vezi pe Bonapp/ })).toHaveAttribute("href", "https://bonapp.eco/p/bag-1");
+    await expect(bag).not.toContainText("pe jos");
+    await expect(bag.getByRole("link", { name: /Rezervă în Bonapp/ })).toHaveAttribute("href", "https://bonapp.eco/p/bag-1");
+  });
+
+  test("narrows to what you can get within the hour", async ({ page }) => {
+    await expect.poll(() => offerTitles(page)).toContain("Pachet pentru mâine");
+    await page.getByRole("button", { name: "Acum sau în următoarea oră" }).click();
+    await expect(page).toHaveURL(/acum=da/);
+    await expect.poll(() => offerTitles(page)).not.toContain("Pachet pentru mâine");
+    await expect.poll(() => offerTitles(page)).toContain("Pachet surpriză patiserie");
   });
 
   test("marks bags that appeared in the last three hours as new", async ({ page }) => {
@@ -158,6 +167,7 @@ test.describe("near me", () => {
     await expect(page.getByLabel("Ordine")).toHaveValue("best");
     await expect(page).toHaveURL(/\/harta$/);
     await expect.poll(async () => (await offerTitles(page))[0]).toBe("Pachet de seară Titan");
+    await expect(offerRow(page, "Pachet de seară Titan")).toContainText(/\d+ min pe jos/);
   });
 
   test("re-sorts by distance from the visitor", async ({ page }) => {

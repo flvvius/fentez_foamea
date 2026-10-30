@@ -114,12 +114,33 @@ export function decodeSnapshot(wire: SnapshotWire): OfferSnapshot {
 const AFTER_VENUE_SEPARATOR = /^\s*[•·|:\-–—]\s*/;
 
 export function titleWithoutVenue(title: string, venueName: string): string {
-  if (!title.toLocaleLowerCase("ro").startsWith(venueName.toLocaleLowerCase("ro"))) return title;
-  const rest = title.slice(venueName.length);
+  if (!HAS_SEPARATOR.test(title)) return title;
+  const text = title.normalize("NFC");
+  const venuePrefix = venuePrefixPattern(venueName);
+  const match = venuePrefix && venuePrefix.exec(foldLetters(text));
+  if (!match) return title;
+  const rest = text.slice(match[0].length);
   const separator = AFTER_VENUE_SEPARATOR.exec(rest);
   if (!separator) return title;
   const product = rest.slice(separator[0].length);
   return product ? product.charAt(0).toLocaleUpperCase("ro") + product.slice(1) : title;
+}
+
+const HAS_SEPARATOR = /[•·|:\-–—]/;
+const venuePrefixes = new Map<string, RegExp | null>();
+
+function venuePrefixPattern(venueName: string): RegExp | null {
+  let pattern = venuePrefixes.get(venueName);
+  if (pattern === undefined) {
+    const words = foldLetters(venueName.normalize("NFC")).match(/[a-z0-9]+/g);
+    pattern = words ? new RegExp(`^${words.join("[^a-z0-9]+")}[!?.'’]*`) : null;
+    venuePrefixes.set(venueName, pattern);
+  }
+  return pattern;
+}
+
+function foldLetters(text: string): string {
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 function toColumns<T, K extends keyof T>(rows: T[], keys: readonly K[]): Columns<Pick<T, K>> {
