@@ -137,6 +137,7 @@ describe.skipIf(!url)("submit store (database)", () => {
       validFrom: "2026-10-23T08:00:00.000Z",
       validUntil: "2026-11-01T21:59:59.000Z",
       channel: "promo_code",
+      flags: ["student", "in_app"],
       promoCode: "PIZZA2",
       address: "Strada Test 1",
       lat: 44.4268,
@@ -157,7 +158,7 @@ describe.skipIf(!url)("submit store (database)", () => {
           select source_type, status, restaurant_name, title, description, deal_type,
                  deal_price::float8 as deal_price, regular_price::float8 as regular_price, percent_off, currency, not_a_discount,
                  days_of_week, time_start::text as time_start, time_end::text as time_end,
-                 valid_from, valid_until, channel, promo_code, address,
+                 valid_from, valid_until, channel, flags, promo_code, address,
                  st_y(location::geometry) as lat, st_x(location::geometry) as lon, st_srid(location::geometry) as srid,
                  source_url, source_url_normalized, image_id, evidence_snippet, llm_confidence, extraction_source, submitted_by, score
           from deals where id = ${id}`;
@@ -179,6 +180,7 @@ describe.skipIf(!url)("submit store (database)", () => {
         time_start: "22:00:00",
         time_end: "02:30:00",
         channel: "promo_code",
+        flags: ["student", "in_app"],
         promo_code: "PIZZA2",
         address: "Strada Test 1",
         srid: 4326,

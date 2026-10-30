@@ -127,14 +127,14 @@ export async function insertDeal(tx: postgres.TransactionSql, row: NewDealRow): 
       source_type, status, restaurant_name, title, description, deal_type,
       deal_price, regular_price, percent_off, currency, not_a_discount,
       days_of_week, time_start, time_end, valid_from, valid_until, channel,
-      promo_code, address, location, source_url, source_url_normalized, image_id,
+      flags, promo_code, address, location, source_url, source_url_normalized, image_id,
       evidence_snippet, llm_confidence, extraction_source, submitted_by
     ) values (
       ${row.sourceType}, ${row.status}, ${row.restaurantName}, ${row.title}, ${row.description}, ${row.dealType},
       ${row.dealPrice}, ${row.regularPrice}, ${row.percentOff}, ${row.currency}, ${row.notADiscount},
       ${row.daysOfWeek === null ? null : tx.array(row.daysOfWeek)}::smallint[],
       ${row.timeStart}::time, ${row.timeEnd}::time, ${row.validFrom}::timestamptz, ${row.validUntil}::timestamptz,
-      ${row.channel}, ${row.promoCode}, ${row.address}, ${location}, ${row.sourceUrl}, ${row.sourceUrlNormalized},
+      ${row.channel}, ${tx.array(row.flags)}::text[], ${row.promoCode}, ${row.address}, ${location}, ${row.sourceUrl}, ${row.sourceUrlNormalized},
       ${row.imageId}, ${row.evidenceSnippet}, ${row.llmConfidence}, ${row.extractionSource}, ${row.submittedBy}
     )
     returning id

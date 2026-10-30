@@ -363,6 +363,22 @@ body {
   color: var(--muted-foreground);
 }
 
+.deal-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.deal-flag {
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  padding: 1px 8px;
+  font-size: var(--type-small);
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
 .offer-title {
   font-weight: 600;
   font-size: var(--type-rowTitle);
@@ -383,6 +399,17 @@ body {
 
 .offer-detail + .offer-detail {
   margin-top: 2px;
+}
+
+/* When a deal runs: status as words, the running state just in full foreground weight. */
+.deal-opening {
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.deal-opening-now {
+  color: var(--foreground);
+  font-weight: 500;
 }
 
 .offer-conditions {

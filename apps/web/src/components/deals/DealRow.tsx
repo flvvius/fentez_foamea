@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { DEAL_CHANNEL_LABELS, DEAL_TYPE_LABELS } from "@fentezfoamea/core";
+import { DEAL_CHANNEL_LABELS, DEAL_FLAG_LABELS, DEAL_TYPE_LABELS } from "@fentezfoamea/core";
 import { formatSchedule, formatValidity, priceFigure, sourceHost } from "@/lib/deals/deal-display";
+import { formatOpening, openingStatus } from "@/lib/deals/opening";
 import { formatRelative } from "@/lib/format";
 import { shareDeal } from "@/lib/share";
 import { ShareButton } from "../ShareButton";
@@ -51,6 +53,24 @@ function PostedAgo({ iso }: Readonly<{ iso: string }>) {
   );
 }
 
+/**
+ * "Activă acum · până la 15:00" or "Începe peste 3 h". Rendered only in the browser and refreshed
+ * every 30 s: the server's HTML is cached for a minute, so a countdown in it would be stale.
+ */
+function OpeningLine({ deal }: Readonly<{ deal: DealCard }>) {
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+    const timer = window.setInterval(() => setNow(new Date()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  if (!now) return null;
+  const status = openingStatus(deal, now);
+  const text = formatOpening(status, now);
+  if (!text) return null;
+  return <p className={status.kind === "open" ? "offer-detail deal-opening deal-opening-now" : "offer-detail deal-opening"}>{text}</p>;
+}
+
 export function DealRow({ deal, vote, onVote, linkTitle = true, note }: Readonly<Props>) {
   const schedule = formatSchedule(deal);
   const host = sourceHost(deal.sourceUrl);
@@ -87,9 +107,21 @@ export function DealRow({ deal, vote, onVote, linkTitle = true, note }: Readonly
         </p>
         {linkTitle ? <h2 className="offer-title">{Title}</h2> : <h1 className="offer-title">{Title}</h1>}
         <p className="offer-venue">{deal.restaurantName}</p>
+        {deal.flags.length > 0 && (
+          <ul className="deal-flags" aria-label="Condiții">
+            {deal.flags.map((flag) => (
+              <li key={flag} className="deal-flag">
+                {DEAL_FLAG_LABELS[flag]}
+              </li>
+            ))}
+          </ul>
+        )}
         {deal.description && <p className="offer-detail offer-conditions">{deal.description}</p>}
+        <OpeningLine deal={deal} />
         {schedule && <p className="offer-detail">{schedule}</p>}
-        <p className="offer-detail muted">{validity}</p>
+        <p className="offer-detail muted" suppressHydrationWarning>
+          {validity}
+        </p>
         {deal.address && <p className="offer-detail muted">{deal.address}</p>}
         {deal.promoCode && (
           <p className="offer-detail">

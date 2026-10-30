@@ -1,3 +1,6 @@
+import type { DealFlag } from "@fentezfoamea/core";
+
+export type { DealFlag };
 export type DealStatus = "pending" | "published" | "hidden" | "expired";
 export type DealType = "bogo" | "percent_off" | "combo" | "fixed_price" | "happy_hour" | "other";
 export type DealChannel = "in_store" | "app_only" | "delivery" | "promo_code";
@@ -22,6 +25,7 @@ export type DealCard = {
   validFrom: string | null;
   validUntil: string;
   channel: DealChannel;
+  flags: DealFlag[];
   promoCode: string | null;
   address: string | null;
   lat: number | null;

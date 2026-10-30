@@ -13,6 +13,22 @@ export type DealType = (typeof DEAL_TYPES)[number];
 export const DEAL_CHANNELS = ["in_store", "app_only", "delivery", "promo_code"] as const;
 export type DealChannel = (typeof DEAL_CHANNELS)[number];
 
+/**
+ * Conditions a deal can carry on top of its channel, any number at once. `in_app` means the
+ * venue's app or account is needed (a coupon shown at the counter counts); the `app_only`
+ * channel is narrower: the order itself happens in the app.
+ */
+export const DEAL_FLAGS = [
+  "student",
+  "in_app",
+  "first_order",
+  "loyalty_card",
+  "takeaway",
+  "limited_stock",
+  "vegetarian",
+] as const;
+export type DealFlag = (typeof DEAL_FLAGS)[number];
+
 export const DEAL_STATUSES = ["pending", "published", "hidden", "expired"] as const;
 export type DealStatus = (typeof DEAL_STATUSES)[number];
 
@@ -63,6 +79,11 @@ export const dealDraftSchema = z
     validFrom: isoDateTime.nullable().default(null),
     validUntil: isoDateTime.nullable().default(null),
     channel: z.enum(DEAL_CHANNELS),
+    flags: z
+      .array(z.enum(DEAL_FLAGS))
+      .max(DEAL_FLAGS.length)
+      .refine((flags) => new Set(flags).size === flags.length, "Duplicate flags")
+      .default([]),
     promoCode: z.string().trim().max(64).nullable().default(null),
     address: z.string().trim().max(200).nullable().default(null),
     lat: z.number().min(-90).max(90).nullable().default(null),

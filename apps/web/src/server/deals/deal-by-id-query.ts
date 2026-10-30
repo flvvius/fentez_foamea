@@ -1,4 +1,4 @@
-import type { DealChannel, DealType } from "@fentezfoamea/core";
+import type { DealChannel, DealFlag, DealType } from "@fentezfoamea/core";
 import { getSql } from "../db";
 import { getDealsConfig } from "./config";
 import type { DealCard } from "./types";
@@ -23,6 +23,7 @@ type Row = {
   valid_from: Date | null;
   valid_until: Date;
   channel: DealChannel;
+  flags: DealFlag[];
   promo_code: string | null;
   address: string | null;
   lat: number | null;
@@ -55,6 +56,7 @@ function toCard(row: Row): DealCard {
     validFrom: row.valid_from?.toISOString() ?? null,
     validUntil: row.valid_until.toISOString(),
     channel: row.channel,
+    flags: row.flags,
     promoCode: row.promo_code,
     address: row.address,
     lat: row.lat,
@@ -78,7 +80,7 @@ export async function loadDealById(id: string): Promise<DealCard | null> {
     select d.id, d.restaurant_name, d.title, d.description, d.deal_type, d.deal_price,
            d.regular_price, d.percent_off, d.currency, d.not_a_discount, d.days_of_week,
            d.time_start::text as time_start, d.time_end::text as time_end,
-           d.valid_from, d.valid_until, d.channel, d.promo_code, d.address,
+           d.valid_from, d.valid_until, d.channel, d.flags, d.promo_code, d.address,
            st_y(d.location::geometry) as lat, st_x(d.location::geometry) as lon,
            d.source_url, d.image_id, d.score, d.created_at,
            u."name" as submitter_name

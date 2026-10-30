@@ -33,6 +33,9 @@ describe("formatSchedule", () => {
   it("joins a weekday range and a time window", () => {
     expect(formatSchedule({ daysOfWeek: [1, 2, 3, 4, 5], timeStart: "12:00", timeEnd: "15:00" })).toBe("L–V, 12:00–15:00");
   });
+  it("spells out a single weekday", () => {
+    expect(formatSchedule({ daysOfWeek: [4], timeStart: null, timeEnd: null })).toBe("Joi");
+  });
 
   it("lists non-contiguous days", () => {
     expect(formatSchedule({ daysOfWeek: [6, 1, 3], timeStart: null, timeEnd: null })).toBe("L, Mi, S");
@@ -53,15 +56,21 @@ describe("formatSchedule", () => {
 describe("formatValidity", () => {
   const now = new Date("2026-10-22T12:00:00Z");
   it("writes the end date in Bucharest time", () => {
-    expect(formatValidity({ validFrom: null, validUntil: "2026-10-29T20:59:59.000Z" }, now)).toBe("până pe 29 oct.");
+    expect(formatValidity({ validFrom: null, validUntil: "2026-10-29T20:59:59.000Z" }, now)).toBe("Valabilă până pe 29 oct.");
   });
-  it("mentions a start date that is still ahead", () => {
+  it("shows both dates when the deal has a start date, past or future", () => {
     expect(formatValidity({ validFrom: "2026-10-24T21:00:00.000Z", validUntil: "2026-10-29T20:59:59.000Z" }, now)).toBe(
-      "din 25 oct. până pe 29 oct.",
+      "Valabilă 25 oct. – 29 oct.",
+    );
+    expect(formatValidity({ validFrom: "2026-10-01T00:00:00.000Z", validUntil: "2026-10-29T20:59:59.000Z" }, now)).toBe(
+      "Valabilă 1 oct. – 29 oct.",
     );
   });
-  it("ignores a start date in the past", () => {
-    expect(formatValidity({ validFrom: "2026-10-01T00:00:00.000Z", validUntil: "2026-10-29T20:59:59.000Z" }, now)).toBe("până pe 29 oct.");
+  it("adds the year when it is not the current one", () => {
+    expect(formatValidity({ validFrom: "2026-12-20T00:00:00.000Z", validUntil: "2027-01-15T20:00:00.000Z" }, now)).toBe(
+      "Valabilă 20 dec. – 15 ian. 2027",
+    );
+    expect(formatValidity({ validFrom: null, validUntil: "2025-12-31T20:00:00.000Z" }, now)).toBe("Valabilă până pe 31 dec. 2025");
   });
 });
 

@@ -83,6 +83,7 @@ describe("draftFromForm", () => {
       validFrom: null,
       validUntil: null,
       channel: "in_store",
+      flags: [],
       promoCode: null,
       address: null,
       lat: null,
@@ -117,6 +118,10 @@ describe("draftFromForm", () => {
     });
   });
 
+  it("sends flags once each, in the form's order", () => {
+    expect(draftFromForm(filled({ flags: ["takeaway", "student", "takeaway"] })).flags).toEqual(["student", "takeaway"]);
+  });
+
   it("only keeps the promo code for the promo_code channel", () => {
     expect(draftFromForm(filled({ channel: "in_store", promoCode: "X" })).promoCode).toBeNull();
     expect(draftFromForm(filled({ channel: "promo_code", promoCode: " X " })).promoCode).toBe("X");
@@ -139,6 +144,7 @@ describe("formFromDraft", () => {
     validFrom: "2026-07-14T21:00:00.000Z",
     validUntil: "2026-10-25T21:59:59.000Z",
     channel: "promo_code",
+    flags: ["vegetarian", "student"],
     promoCode: "FOAME",
     address: null,
     lat: null,
@@ -156,6 +162,7 @@ describe("formFromDraft", () => {
       percentOff: "34",
       currency: "RON",
       channel: "promo_code",
+      flags: ["student", "vegetarian"],
       promoCode: "FOAME",
       daysOfWeek: [1, 3],
       timeStart: "22:00",
