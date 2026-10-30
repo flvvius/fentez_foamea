@@ -37,6 +37,13 @@ describe("dealDraftSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("defaults flags to none and rejects unknown or repeated ones", () => {
+    expect(dealDraftSchema.parse(valid).flags).toEqual([]);
+    expect(dealDraftSchema.safeParse({ ...valid, flags: ["student", "in_app"] }).success).toBe(true);
+    expect(dealDraftSchema.safeParse({ ...valid, flags: ["vip"] }).success).toBe(false);
+    expect(dealDraftSchema.safeParse({ ...valid, flags: ["student", "student"] }).success).toBe(false);
+  });
+
   it("rejects a malformed time", () => {
     expect(dealDraftSchema.safeParse({ ...valid, timeStart: "25:00" }).success).toBe(false);
     expect(dealDraftSchema.safeParse({ ...valid, timeEnd: "9:30" }).success).toBe(false);

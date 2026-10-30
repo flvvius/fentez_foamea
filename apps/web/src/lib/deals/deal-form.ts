@@ -1,10 +1,12 @@
 import {
   bucharestLocalToIso,
   bucharestToday,
+  DEAL_FLAGS,
   dealDraftSchema,
   type DealChannel,
   type DealDraft,
   type DealDraftInput,
+  type DealFlag,
   type DealType,
   type ExtractionDraft,
 } from "@fentezfoamea/core";
@@ -21,6 +23,8 @@ export type FormState = {
   percentOff: string;
   currency: string;
   channel: DealChannel;
+  /** In DEAL_FLAGS order. */
+  flags: DealFlag[];
   promoCode: string;
   /** ISO weekdays, Monday = 1. */
   daysOfWeek: number[];
@@ -46,6 +50,7 @@ export const FORM_FIELDS: readonly FormField[] = [
   "percentOff",
   "currency",
   "channel",
+  "flags",
   "promoCode",
   "daysOfWeek",
   "timeStart",
@@ -66,6 +71,7 @@ export function emptyForm(): FormState {
     percentOff: "",
     currency: "RON",
     channel: "in_store",
+    flags: [],
     promoCode: "",
     daysOfWeek: [],
     timeStart: "",
@@ -108,6 +114,11 @@ export function bucharestDayEndIso(date: string): string | null {
   return iso === undefined ? null : new Date(Date.parse(iso) + 59_000).toISOString();
 }
 
+/** Without repeats, in the order the form lists them. */
+export function sortFlags(flags: readonly DealFlag[]): DealFlag[] {
+  return DEAL_FLAGS.filter((flag) => flags.includes(flag));
+}
+
 const orNull = (text: string): string | null => (text.trim() === "" ? null : text.trim());
 
 // --- Form <-> draft -------------------------------------------------------------------
@@ -124,6 +135,7 @@ export function formFromDraft(draft: ExtractionDraft): FormState {
     percentOff: numberToInput(draft.percentOff),
     currency: draft.currency || "RON",
     channel: draft.channel,
+    flags: sortFlags(draft.flags ?? []),
     promoCode: draft.promoCode ?? "",
     daysOfWeek: draft.daysOfWeek ? [...new Set(draft.daysOfWeek)].sort((a, b) => a - b) : [],
     timeStart: draft.timeStart ?? "",
@@ -157,6 +169,7 @@ export function draftFromForm(form: FormState): DealDraftInput {
     validFrom: from,
     validUntil: until,
     channel: form.channel,
+    flags: sortFlags(form.flags),
     promoCode: form.channel === "promo_code" ? orNull(form.promoCode) : null,
     address: orNull(form.address),
     lat: null,
@@ -193,6 +206,8 @@ function issueMessage(field: string, issue: Issue): string {
       return "Moneda are 3 litere, de exemplu RON.";
     case "channel":
       return "Alege unde e valabilă oferta.";
+    case "flags":
+      return "Bifează doar condițiile din listă.";
     case "promoCode":
       return "Codul promoțional e prea lung (maxim 64 de caractere).";
     case "daysOfWeek":

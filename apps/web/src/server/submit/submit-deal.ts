@@ -1,4 +1,4 @@
-import { dealDraftSchema, type DealChannel, type DealType } from "@fentezfoamea/core";
+import { dealDraftSchema, type DealChannel, type DealFlag, type DealType } from "@fentezfoamea/core";
 import type { RateLimitResult } from "../deals/rate-limit";
 import { UUID_RE } from "../deals/uuid";
 import { computePriceFields, defaultValidUntil, isPlausibleInstant, latestValidFrom, latestValidUntil } from "./deal-fields";
@@ -41,6 +41,7 @@ export type NewDealRow = {
   validFrom: string | null;
   validUntil: string;
   channel: DealChannel;
+  flags: DealFlag[];
   promoCode: string | null;
   address: string | null;
   lat: number | null;
@@ -153,6 +154,7 @@ export async function submitDealFlow(
     validFrom,
     validUntil,
     channel: draft.channel,
+    flags: draft.flags,
     promoCode: blankToNull(draft.promoCode),
     address: blankToNull(draft.address),
     lat: draft.lat,

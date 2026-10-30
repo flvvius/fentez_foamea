@@ -290,6 +290,12 @@ describe("invalid output", () => {
 });
 
 describe("sloppy model output", () => {
+  it("keeps known flags once each and drops the rest", () => {
+    const result = validateExtraction(raw({ flags: ["IN_APP", "student", "vip", "student"] }), { source: "image", now: NOW });
+    expect(result.draft.flags).toEqual(["student", "in_app"]);
+    expect(validateExtraction(raw({ flags: "student" }), { source: "image", now: NOW }).draft.flags).toEqual([]);
+  });
+
   it("coerces numeric strings and clamps confidence", () => {
     const result = text(
       raw({ deal_price: "49,90 lei", regular_price: "70", percent_off: "29%", confidence: 1.7 }),

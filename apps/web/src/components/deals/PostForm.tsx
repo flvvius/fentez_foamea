@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { DEAL_CHANNELS, DEAL_CHANNEL_LABELS, DEAL_TYPES, DEAL_TYPE_LABELS, type ExtractionResult } from "@fentezfoamea/core";
+import {
+  DEAL_CHANNELS,
+  DEAL_CHANNEL_LABELS,
+  DEAL_FLAGS,
+  DEAL_FLAG_LABELS,
+  DEAL_TYPES,
+  DEAL_TYPE_LABELS,
+  type ExtractionResult,
+} from "@fentezfoamea/core";
 import {
   draftFromForm,
   emptyForm,
@@ -10,6 +18,7 @@ import {
   requiredFieldsFilled,
   serverDraftErrorMessage,
   serverFieldToFormField,
+  sortFlags,
   validateForm,
   type FormErrors,
   type FormField,
@@ -453,6 +462,34 @@ export function PostForm() {
             />
           </Field>
         )}
+
+        <fieldset className="field days" aria-describedby={errors.flags ? "f-flags-hint f-flags-error" : "f-flags-hint"}>
+          <legend>Condiții</legend>
+          <p id="f-flags-hint" className="field-hint">
+            Bifează ce trebuie să ai sau să știi ca să prinzi oferta.
+          </p>
+          <div className="day-row">
+            {DEAL_FLAGS.map((flag, index) => (
+              <label key={flag} className="day">
+                <input
+                  type="checkbox"
+                  checked={form.flags.includes(flag)}
+                  id={index === 0 ? "f-flags" : undefined}
+                  onChange={(e) =>
+                    setField("flags", e.target.checked ? sortFlags([...form.flags, flag]) : form.flags.filter((f) => f !== flag))
+                  }
+                />
+                <span>{DEAL_FLAG_LABELS[flag]}</span>
+              </label>
+            ))}
+          </div>
+          {errors.flags && (
+            <p id="f-flags-error" className="field-error" role="alert">
+              <span className="err-label">Eroare: </span>
+              {errors.flags}
+            </p>
+          )}
+        </fieldset>
 
         <div className="field-row">
           <Field name="dealPrice" label="Preț ofertă" error={errors.dealPrice}>

@@ -1,10 +1,12 @@
 import { z } from "zod";
 import {
   DEAL_CHANNELS,
+  DEAL_FLAGS,
   DEAL_TYPES,
   dealDraftSchema,
   type DealChannel,
   type DealDraftInput,
+  type DealFlag,
   type DealType,
 } from "./deal.ts";
 import { discountPercent, parseRonPrice } from "./price.ts";
@@ -90,6 +92,18 @@ function weekdays(value: unknown): number[] | null {
   return days.size === 0 ? null : [...days].sort((a, b) => a - b);
 }
 
+// Unknown and repeated flags are dropped; anything that is not a list means none.
+function flagList(value: unknown): DealFlag[] {
+  if (!Array.isArray(value)) return [];
+  const pick = oneOf<DealFlag>(DEAL_FLAGS);
+  const flags = new Set<DealFlag>();
+  for (const item of value) {
+    const flag = pick(item);
+    if (flag) flags.add(flag);
+  }
+  return DEAL_FLAGS.filter((flag) => flags.has(flag));
+}
+
 function localTime(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const match = value.trim().match(/^(\d{1,2})[:.hH](\d{2})(?::\d{2})?$/);
@@ -170,6 +184,8 @@ export const extractedDealSchema = z.object({
   valid_from: lenient(isoDate),
   valid_until: lenient(isoDate),
   channel: lenient(oneOf<DealChannel>(DEAL_CHANNELS)),
+  // Optional so output from before flags existed (cached, or a model that skips it) still parses.
+  flags: lenient(flagList).optional(),
   promo_code: lenient(singleLine),
   address: lenient(singleLine),
 });
@@ -210,6 +226,7 @@ export const EXTRACTION_JSON_SCHEMA = {
     "valid_from",
     "valid_until",
     "channel",
+    "flags",
     "promo_code",
     "address",
   ],
@@ -256,6 +273,12 @@ export const EXTRACTION_JSON_SCHEMA = {
       DEAL_CHANNELS,
       "in_store = at the venue; app_only = only through the venue's own app; delivery = through delivery; promo_code = needs a promo code. null if not stated.",
     ),
+    flags: {
+      type: "array",
+      items: { type: "string", enum: [...DEAL_FLAGS] },
+      description:
+        "Conditions the content states, any number, [] for none: student = only for students or with a student card; in_app = needs the venue's app or account, also when redeemed at the counter; first_order = only on a first order or for new customers; loyalty_card = needs a loyalty card or points; takeaway = only for takeaway; limited_stock = while stocks last or a limited number of portions; vegetarian = the deal's food is vegetarian or vegan.",
+    },
     promo_code: nullable("string", "The promo code the customer must enter, if any. null otherwise."),
     address: nullable("string", "Street address of the venue as written in the content. null if not stated."),
   },
@@ -490,6 +513,7 @@ export type ExtractionDraft = Omit<DealDraftInput, "restaurantName" | "title"> &
   timeEnd: string | null;
   validFrom: string | null;
   validUntil: string | null;
+  flags: DealFlag[];
   promoCode: string | null;
   address: string | null;
   lat: number | null;
@@ -571,6 +595,7 @@ function emptyDraft(): ExtractionDraft {
     validFrom: null,
     validUntil: null,
     channel: "in_store",
+    flags: [],
     promoCode: null,
     address: null,
     lat: null,
@@ -596,6 +621,9 @@ function enforceDraftSchema(draft: ExtractionDraft, warn: (code: ExtractionWarni
         break;
       case "currency":
         current.currency = "RON";
+        break;
+      case "flags":
+        current.flags = [];
         break;
       default:
         (current as Record<string, unknown>)[field] = null;
@@ -708,6 +736,7 @@ export function validateExtraction(raw: unknown, ctx: ExtractionContext): Extrac
     promoCode: extracted.promo_code,
     address: extracted.address,
     channel: extracted.channel ?? "in_store",
+    flags: extracted.flags ?? [],
   };
   let confidenceValue = extracted.confidence;
   let priceDiscarded = false;

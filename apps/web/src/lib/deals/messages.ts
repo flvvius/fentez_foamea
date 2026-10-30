@@ -29,6 +29,7 @@ export const FIELD_LABELS: Record<string, string> = {
   validFrom: "valabil de la",
   validUntil: "valabil până la",
   channel: "canal",
+  flags: "condiții",
   promoCode: "cod promoțional",
   address: "adresă",
   lat: "adresă",

@@ -19,6 +19,7 @@ const deal: DealCard = {
   validFrom: null,
   validUntil: "2026-11-01T00:00:00Z",
   channel: "in_store",
+  flags: [],
   promoCode: null,
   address: null,
   lat: null,

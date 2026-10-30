@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { DEAL_CHANNEL_LABELS, DEAL_TYPE_LABELS } from "@fentezfoamea/core";
+import { DEAL_CHANNEL_LABELS, DEAL_FLAG_LABELS, DEAL_TYPE_LABELS } from "@fentezfoamea/core";
 import { formatSchedule, formatValidity, priceFigure, sourceHost } from "@/lib/deals/deal-display";
 import { formatOpening, openingStatus } from "@/lib/deals/opening";
 import { formatRelative } from "@/lib/format";
@@ -107,6 +107,15 @@ export function DealRow({ deal, vote, onVote, linkTitle = true, note }: Readonly
         </p>
         {linkTitle ? <h2 className="offer-title">{Title}</h2> : <h1 className="offer-title">{Title}</h1>}
         <p className="offer-venue">{deal.restaurantName}</p>
+        {deal.flags.length > 0 && (
+          <ul className="deal-flags" aria-label="Condiții">
+            {deal.flags.map((flag) => (
+              <li key={flag} className="deal-flag">
+                {DEAL_FLAG_LABELS[flag]}
+              </li>
+            ))}
+          </ul>
+        )}
         {deal.description && <p className="offer-detail offer-conditions">{deal.description}</p>}
         <OpeningLine deal={deal} />
         {schedule && <p className="offer-detail">{schedule}</p>}

@@ -1,4 +1,4 @@
-import type { DealChannel, DealType } from "./deal.ts";
+import type { DealChannel, DealFlag, DealType } from "./deal.ts";
 import type { OfferKind, SourceId } from "./offer.ts";
 
 export const OFFER_KIND_LABELS: Record<OfferKind, string> = {
@@ -38,4 +38,14 @@ export const DEAL_CHANNEL_LABELS: Record<DealChannel, string> = {
   app_only: "Doar în aplicație",
   delivery: "Livrare",
   promo_code: "Cod promoțional",
+};
+
+export const DEAL_FLAG_LABELS: Record<DealFlag, string> = {
+  student: "Pentru studenți",
+  in_app: "Cu aplicația",
+  first_order: "Prima comandă",
+  loyalty_card: "Cu card de fidelitate",
+  takeaway: "La pachet",
+  limited_stock: "Stoc limitat",
+  vegetarian: "Vegetarian",
 };

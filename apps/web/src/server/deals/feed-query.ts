@@ -7,7 +7,7 @@ import {
   type FeedSort,
 } from "./feed-select";
 import { HOT_DECAY_SECONDS } from "./ranking";
-import type { DealCard, DealChannel, DealType, FeedPage } from "./types";
+import type { DealCard, DealChannel, DealFlag, DealType, FeedPage } from "./types";
 
 type Row = {
   id: string;
@@ -27,6 +27,7 @@ type Row = {
   valid_from: Date | null;
   valid_until: Date;
   channel: DealChannel;
+  flags: DealFlag[];
   promo_code: string | null;
   address: string | null;
   lat: number | null;
@@ -69,6 +70,7 @@ function toCard(row: Row): DealCard {
     validFrom: row.valid_from?.toISOString() ?? null,
     validUntil: row.valid_until.toISOString(),
     channel: row.channel,
+    flags: row.flags,
     promoCode: row.promo_code,
     address: row.address,
     lat: row.lat,
@@ -111,7 +113,7 @@ export async function queryFeed(sql: postgres.Sql, query: FeedQuery): Promise<Fe
     select d.id, d.restaurant_name, d.title, d.description, d.deal_type, d.deal_price,
            d.regular_price, d.percent_off, d.currency, d.not_a_discount, d.days_of_week,
            d.time_start::text as time_start, d.time_end::text as time_end,
-           d.valid_from, d.valid_until, d.channel, d.promo_code, d.address,
+           d.valid_from, d.valid_until, d.channel, d.flags, d.promo_code, d.address,
            st_y(d.location::geometry) as lat, st_x(d.location::geometry) as lon,
            d.source_url, d.image_id, d.score, d.created_at,
            to_char(d.created_at at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as created_at_cursor,
